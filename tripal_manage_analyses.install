@@ -8,14 +8,12 @@ function tripal_manage_analyses_install() {
 }
 
 function migrate_unigene() {
+  //set the analysisprop to unigene or genome_assembly for all analyses
 
   //create Transcriptome and Genome bundles
-
-  // Create the 'Transcriptome' entity type
   $error = '';
-
-  $analysis_type_cvterm_id = 1;
-  
+  $analysis_type_cvterm = tripal_get_cvterm(['id' => 'local:analysis_type']);
+  $analysis_type_cvterm_id = $analysis_type_cvterm->cvterm_id;
   $args_array = [
     [
       'vocabulary' => 'operation',
@@ -29,23 +27,26 @@ function migrate_unigene() {
         'type_id' => $analysis_type_cvterm_id,
       ],
     ],
-    ['vocabulary' => 'operation',
+    [
+      'vocabulary' => 'operation',
       'accession' => '0525',
       'term_name' => 'Genome assembly',
       'storage_args' => [
         'data_table' => 'analysis',
-        'type_value' => 'genome',
+        'type_linker_table' => 'analysisprop',
+        'type_value' => 'genome_assembly',
+        'type_column' => 'type_id',
         'type_id' => $analysis_type_cvterm_id,
-
       ],
-
     ],
   ];
-
   foreach ($args_array as $args) {
+
+    $type_value = $args['storage_args']['type_value'];
+
     $term = tripal_load_term_entity([
-      'vocabulary' => 'data',
-      'accession' => '1274',
+      'vocabulary' => $args["vocabulary"],
+      'accession' => $args["accession"],
     ]);
     if ($term) {
       $bundle = tripal_load_bundle_entity(['term_id' => $term->id]);
@@ -55,23 +56,18 @@ function migrate_unigene() {
         throw new Exception($error['!message']);
       }
     }
-  }
 
-
-  //look up cvterm for analysis_type
-
-  $identifier = [
-    'cv_id' => ['name' => 'tripal'],
-    'name' => 'analysis_type',
-  ];
-
-  $cvterm = tripal_get_cvterm($identifier);
-
-  //Get record ID's for all analyses that will be unigene analyses
-  $sql = "SELECT A.analysis_id FROM {analysis} A
+    //Get record ID's for all analyses that will be unigene analyses
+    $sql = "SELECT A.analysis_id FROM {analysis} A
         INNER JOIN {analysisprop} AP  ON A.analysis_id = AP.analysis_id
         INNER JOIN {cvterm} CVT ON AP.type_id = CVT.cvterm_id
-        WHERE CVT.name = :cvterm_name ";
+        WHERE CVT.cvterm_id = :cvterm_id 
+        AND AP.value = :analysis_prop_value";
+    chado_query($sql, [
+      ":cvterm_id" => $analysis_type_cvterm_id,
+      ":analysis_prop_value" => $type_value,
+    ]);
 
+  }
 
 }
