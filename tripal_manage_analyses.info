@@ -1,0 +1,6 @@
+description = Convert mismigrated analysis entities
+core = 7.x
+package = Tripal Extensions
+files[] = tripal_manage_analyses.module
+version=7.x-3.0
+dependencies[] = tripal
