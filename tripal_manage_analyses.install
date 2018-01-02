@@ -4,11 +4,79 @@
  *  Install module
  */
 function tripal_manage_analyses_install() {
-  migrate_unigene();
+  tripal_manage_analyses_update_unigene_props();
+  tripal_manage_analyses_migrate_unigene();
 }
 
-function migrate_unigene() {
-  //set the analysisprop to unigene or genome_assembly for all analyses
+/**
+ * Find all analyses that are unigene analyses.  Set the analysis_type prop
+ * of each based on their features to either analysis_unigene (for
+ * transcriptome) or to genome_assembly.
+ */
+function tripal_manage_analyses_update_unigene_props() {
+
+  $cvterm = tripal_get_cvterm([
+    'type_name' => 'analysis_unigene_name',
+    'cv_name' => 'tripal',
+  ]);
+  $analysis_unigene_cvt_id = $cvterm->cvterm_id;
+
+  $sql = "SELECT DISTINCT  A.analysis_id, F.type_id  FROM {analysis} A
+        INNER JOIN {analysisprop} AP  ON A.analysis_id = AP.analysis_id
+        INNER JOIN {cvterm} CVT ON AP.type_id = CVT.cvterm_id
+        INNER JOIN {analysisfeature} AF ON A.analysis_id = AF.analysis_id
+        INNER JOIN {feature} F ON AF.feature_id = F.feature_id
+        WHERE CVT.cvterm_id = :cvterm_id ";
+
+  $cvterm = tripal_get_cvterm([
+    'type_name' => 'mRNA_contig',
+    'cv_name' => 'sequence',
+  ]);
+  $mrna_contig_id = $cvterm->cvterm_id;
+  $cvterm = tripal_get_cvterm([
+    'type_name' => 'mRNA',
+    'cv_name' => 'sequence',
+  ]);
+  $mrna_id = $cvterm->cvterm_id;
+
+  $analysis_mappings = [];
+
+  $results = chado_query($sql, [":cvterm_id" => $analysis_unigene_cvt_id]);
+  foreach ($results as $result) {
+    $analysis_id = $analysis_mappings[$result["analysis_id"]];
+
+    if ($result["type_id"] == $mrna_contig_id) {
+      $property_value = 'tripal_analysis_unigene';
+    }
+    if ($result["type_id"] == $mrna_id) {
+      $property_value = 'genome_assembly';
+    }
+
+    if ($property_value) {
+      $record = [
+        'table' => 'analysis',
+        'id' => $analysis_id,
+      ];
+
+      $property = [
+        'type_name' => $analysis_unigene_cvt_id,
+        'cv_name' => 'tripal',
+        'value' => $property_value,
+      ];
+      $options = [
+        'update_if_present' => TRUE,
+      ];
+      chado_update_property($record, $property, $options);
+    }
+  }
+}
+
+/**
+ * @throws \Exception
+ *
+ */
+function tripal_manage_analyses_migrate_unigene() {
+
 
   //create Transcriptome and Genome bundles
   $error = '';
@@ -63,10 +131,14 @@ function migrate_unigene() {
         INNER JOIN {cvterm} CVT ON AP.type_id = CVT.cvterm_id
         WHERE CVT.cvterm_id = :cvterm_id 
         AND AP.value = :analysis_prop_value";
-    chado_query($sql, [
+    $results = chado_query($sql, [
       ":cvterm_id" => $analysis_type_cvterm_id,
       ":analysis_prop_value" => $type_value,
     ]);
+
+    foreach ($results as $result) {
+
+    }
 
   }
 
