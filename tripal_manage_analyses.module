@@ -1,0 +1,18 @@
+<?php
+
+require_once "includes/tripal_manage_analyses_test.admin.inc";
+
+/**
+* Implements hook_menu().
+*/
+function tripal_manage_analyses_menu() {
+
+  $items['admin/tripal/extension/tripal_manage_analyses'] = [
+    'title' => 'Analysis management',
+    'description' => 'Admin.',
+    'page callback' => 'tripal_manage_analyses_test_form',
+    'access arguments' => ['testing'],
+    'type' => MENU_NORMAL_ITEM,
+  ];
+
+}
