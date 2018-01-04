@@ -87,7 +87,6 @@ function tripal_manage_analyses_test_form($form, &$form_state) {
     'accession' => '2945',
   ]);
   $bundle = tripal_load_bundle_entity(['term_id' => $term->id]);
-  dpm($bundle);
   $analysis_bundle_name = 'public.chado_' . $bundle->name;
   //create Transcriptome and Genome bundles
   $error = '';
@@ -154,9 +153,10 @@ function tripal_manage_analyses_test_form($form, &$form_state) {
       }
     }
 
+    $destination_term =  $bundle->term_id;
+
     $destination_table = "public.chado_" . $bundle->name;
 
-    dpm($analysis_bundle_name);
     //  Copy the plain analysis entities to the new bundle type
 
     $sql = "INSERT INTO " . $destination_table . " (entity_id, record_id)
@@ -170,6 +170,25 @@ function tripal_manage_analyses_test_form($form, &$form_state) {
     $results = db_query($sql, [
       ":cvterm_id" => $analysis_type_cvterm_id,
       ":analysis_prop_value" => $type_value,
+    ]);
+
+    //Update the tripal_entity table
+
+    $sql = "UPDATE public.tripal_entity AS TE SET bundle = :destination_bundle, term_id = :destination_term
+    WHERE TE.id IN 
+    (SELECT AB.entity_id AS entity_id FROM chado.analysis A
+        INNER JOIN chado.analysisprop AP  ON A.analysis_id = AP.analysis_id
+        INNER JOIN chado.cvterm CVT ON AP.type_id = CVT.cvterm_id
+        INNER JOIN  " . $analysis_bundle_name . " AB ON A.analysis_id = AB.record_id
+        WHERE CVT.cvterm_id = :cvterm_id
+        AND AP.value = :analysis_prop_value )
+    ";
+
+    $results = db_query($sql, [
+      ":cvterm_id" => $analysis_type_cvterm_id,
+      ":analysis_prop_value" => $type_value,
+      ':destination_term' => $destination_term,
+      ":destination_bundle" => $bundle->name
     ]);
 
     //Delete the old entities, but only if they are present in both the destination table
