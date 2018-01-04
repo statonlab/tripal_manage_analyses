@@ -15,12 +15,12 @@ function tripal_manage_analyses_install() {
  */
 function tripal_manage_analyses_update_unigene_props() {
 
-
   $cvterm = tripal_get_cvterm(
     [
       'name' => 'analysis_unigene_name',
-      'cv_id' => ['name' => 'tripal'],
+      'cv_id' => ['name' => 'analysis_property'],
     ]);
+
 
   $analysis_unigene_cvt_id = $cvterm->cvterm_id;
 
@@ -45,16 +45,18 @@ function tripal_manage_analyses_update_unigene_props() {
   ]);
   $mrna_id = $cvterm->cvterm_id;
 
-  $analysis_mappings = [];
-
   $results = chado_query($sql, [":cvterm_id" => $analysis_unigene_cvt_id]);
   foreach ($results as $result) {
-    $analysis_id = $analysis_mappings[$result["analysis_id"]];
 
-    if ($result["type_id"] == $mrna_contig_id) {
+    $property_value = NULL;
+
+    $analysis_id = $result->analysis_id;
+
+
+    if ($result->type_id == $mrna_contig_id) {
       $property_value = 'tripal_analysis_unigene';
     }
-    if ($result["type_id"] == $mrna_id) {
+    if ($result->type_id == $mrna_id) {
       $property_value = 'genome_assembly';
     }
 
@@ -64,9 +66,24 @@ function tripal_manage_analyses_update_unigene_props() {
         'id' => $analysis_id,
       ];
 
+
+
+      $analysis_type_cvterm = tripal_get_cvterm(['name' => 'analysis_type', 'cv_id' => ['name' => 'tripal_analysis']]);
+
+      if (!$analysis_type_cvterm) {
+        $analysis_type_cvterm = tripal_insert_cvterm(array(
+          'name' => 'analysis_type',
+          'def' => 'The type of analysis was performed. This value is automatically set by each Tripal Analysis module and should be equal to the module name (e.g. tripal_analysis_blast, tripal_analysis_go).',
+          'cv_name' => 'tripal_analysis',
+          'db_name' => 'analysis_type',
+        ));
+      }
+
+
+
       $property = [
-        'type_name' => $analysis_unigene_cvt_id,
-        'cv_name' => 'tripal',
+        'type_name' => $analysis_type_cvterm->name,
+        'cv_name' => 'tripal_analysis',
         'value' => $property_value,
       ];
       $options = [
@@ -75,6 +92,7 @@ function tripal_manage_analyses_update_unigene_props() {
       chado_update_property($record, $property, $options);
     }
   }
+
 }
 
 /**
