@@ -97,17 +97,21 @@ function tripal_manage_analyses_test_form($form, &$form_state) {
   ]);
   $analysis_type_cvterm_id = $analysis_type_cvterm->cvterm_id;
 
-//insert terms
-  tripal_insert_cvterm([ 'name' => 'Transcriptome Assembly',
+  //insert terms
+  tripal_insert_cvterm([
+    'name' => 'Transcriptome Assembly',
     'def' => '',
     'accession' => '3258',
     'cv_name' => 'operation',
-    'db_name' => 'EDAM',]);
-  tripal_insert_cvterm([ 'name' => 'Transcriptome Assembly',
+    'db_name' => 'EDAM',
+  ]);
+  tripal_insert_cvterm([
+    'name' => 'Transcriptome Assembly',
     'def' => '',
     'accession' => '0525',
     'cv_name' => 'operation',
-    'db_name' => 'EDAM',]);
+    'db_name' => 'EDAM',
+  ]);
 
   //define two new bundles, and populate them with *Tripal 3 analyses* That match this type via the analysis_type prop
   $args_array = [
@@ -153,7 +157,7 @@ function tripal_manage_analyses_test_form($form, &$form_state) {
       }
     }
 
-    $destination_term =  $bundle->term_id;
+    $destination_term = $bundle->term_id;
 
     $destination_table = "public.chado_" . $bundle->name;
 
@@ -174,22 +178,38 @@ function tripal_manage_analyses_test_form($form, &$form_state) {
 
     //Update the tripal_entity table
 
-    $sql = "UPDATE public.tripal_entity AS TE SET bundle = :destination_bundle, term_id = :destination_term
-    WHERE TE.id IN 
-    (SELECT AB.entity_id AS entity_id FROM chado.analysis A
-        INNER JOIN chado.analysisprop AP  ON A.analysis_id = AP.analysis_id
+
+    //TODO:  THIS IS NOT WORKING YET!
+    //    $sql = "UPDATE public.tripal_entity AS TE SET bundle = :destination_bundle, term_id = :destination_term
+    //    WHERE TE.id IN
+    //    (SELECT AB.entity_id AS entity_id FROM chado.analysis A
+    //        INNER JOIN chado.analysisprop AP  ON A.analysis_id = AP.analysis_id
+    //        INNER JOIN chado.cvterm CVT ON AP.type_id = CVT.cvterm_id
+    //        INNER JOIN  " . $analysis_bundle_name . " AB ON A.analysis_id = AB.record_id
+    //        WHERE CVT.cvterm_id = :cvterm_id
+    //        AND AP.value = :analysis_prop_value )
+    //    ";
+
+    $sql = "SELECT * FROM public.tripal_entity AS TE
+      WHERE TE.id  IN (SELECT AB.entity_id AS entity_id FROM chado.analysis A
+       INNER JOIN chado.analysisprop AP  ON A.analysis_id = AP.analysis_id
         INNER JOIN chado.cvterm CVT ON AP.type_id = CVT.cvterm_id
         INNER JOIN  " . $analysis_bundle_name . " AB ON A.analysis_id = AB.record_id
         WHERE CVT.cvterm_id = :cvterm_id
-        AND AP.value = :analysis_prop_value )
-    ";
+        AND AP.value = :analysis_prop_value )";
 
-    $results = db_query($sql, [
+    $params = [
       ":cvterm_id" => $analysis_type_cvterm_id,
       ":analysis_prop_value" => $type_value,
-      ':destination_term' => $destination_term,
-      ":destination_bundle" => $bundle->name
-    ]);
+      // ':destination_term' => $destination_term,
+      //  ":destination_bundle" => $bundle->name
+    ];
+    dpm($params);
+
+    $results = db_query($sql, $params);
+    foreach ($results as $result) {
+      dpm($result);
+    }
 
     //Delete the old entities, but only if they are present in both the destination table
 
