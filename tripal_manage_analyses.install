@@ -388,5 +388,3 @@ function tripal_manage_analyses_convert_entity($source_bundle, $destination_bund
     ":descrim_prop_value" => $descriminating_prop_value,
   ]);
 }
-
-

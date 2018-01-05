@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @class
  * Purpose:
@@ -6,7 +7,7 @@
  * Data:
  * Assumptions:
  */
-class operation__analysis extends ChadoField {
+class local__analysis_browser extends ChadoField {
 
   // --------------------------------------------------------------------------
   //                     EDITABLE STATIC CONSTANTS
@@ -20,13 +21,13 @@ class operation__analysis extends ChadoField {
   public static $default_label = 'Analyses';
 
   // The default description for this field.
-  public static $default_description = 'Analyses associated with this entity';
+  public static $default_description = 'Display a set of analyses related to an organism';
 
   // The default widget for this field.
-  public static $default_widget = 'operation__analysis_widget';
+  public static $default_widget = 'local__analysis_browser_widget';
 
   // The default formatter for this field.
-  public static $default_formatter = 'operation__analysis_formatter';
+  public static $default_formatter = 'local__analysis_browser_formatter';
 
   // The module that manages this field.
   public static $module = 'tripal_manage_analyses';
@@ -36,16 +37,16 @@ class operation__analysis extends ChadoField {
   // Drupal will automatically change these settings for all fields.
   // Once instances exist for a field type then these settings cannot be
   // changed.
-  public static $default_settings = array(
+  public static $default_settings = [
     'storage' => 'field_chado_storage',
-     // It is expected that all fields set a 'value' in the load() function.
-     // In many cases, the value may be an associative array of key/value pairs.
-     // In order for Tripal to provide context for all data, the keys should
-     // be a controlled vocabulary term (e.g. rdfs:type). Keys in the load()
-     // function that are supported by the query() function should be
-     // listed here.
-     'searchable_keys' => array(),
-  );
+    // It is expected that all fields set a 'value' in the load() function.
+    // In many cases, the value may be an associative array of key/value pairs.
+    // In order for Tripal to provide context for all data, the keys should
+    // be a controlled vocabulary term (e.g. rdfs:type). Keys in the load()
+    // function that are supported by the query() function should be
+    // listed here.
+    'searchable_keys' => [],
+  ];
 
   // Provide a list of instance specific settings. These can be access within
   // the instanceSettingsForm.  When the instanceSettingsForm is submitted
@@ -54,13 +55,13 @@ class operation__analysis extends ChadoField {
   // If you override this variable in a child class be sure to replicate the
   // term_name, term_vocab, term_accession and term_fixed keys as these are
   // required for all TripalFields.
-  public static $default_instance_settings = array(
+  public static $default_instance_settings = [
     // The DATABASE name, as it appears in chado.db.  This also builds the link-out url.  In most cases this will simply be the CV name.  In some cases (EDAM) this will be the SUBONTOLOGY.
-    'term_vocabulary' => 'operation',
+    'term_vocabulary' => 'local',
     // The name of the term.
-    'term_name' => 'Analysis',
+    'term_name' => 'analysis_browser',
     // The unique ID (i.e. accession) of the term.
-    'term_accession' => '2945',
+    'term_accession' => 'analysis_browser',
     // Set to TRUE if the site admin is not allowed to change the term
     // type, otherwise the admin can change the term mapped to a field.
     'term_fixed' => FALSE,
@@ -71,16 +72,18 @@ class operation__analysis extends ChadoField {
     // attached asynchronously.
     'auto_attach' => FALSE,
     // The table in Chado that the instance maps to.
-    'chado_table' => 'analysis',
+    'chado_table' => 'organism',
+    // The column of the table in Chado where the value of the field comes from.
+    'chado_column' => 'organism_id',
     // The base table.
-    'base_table' => 'analysis',
-  );
+    'base_table' => 'organism',
+  ];
 
   // A boolean specifying that users should not be allowed to create
   // fields and instances of this field type through the UI. Such
   // fields can only be created programmatically with field_create_field()
   // and field_create_instance().
-  public static $no_ui = TRUE;
+  public static $no_ui = FALSE;
 
   // A boolean specifying that the field will not contain any data. This
   // should exclude the field from web services or downloads.  An example
@@ -88,7 +91,7 @@ class operation__analysis extends ChadoField {
   // the user but otherwise provides no data.
   public static $no_data = FALSE;
 
- /**
+  /**
    * Loads the field values from the underlying data store.
    *
    * @param $entity
@@ -116,20 +119,32 @@ class operation__analysis extends ChadoField {
    *
    */
   public function load($entity) {
-    dpm($entity);
 
+    // ChadoFields automatically load the chado column specified in the
+    // default settings above. If that is all you need then you don't even
+    // need to implement this function. However, if you need to add any
+    // additional data to be used in the display, you should add it here.
+    parent::load($entity);
+    $field = get_class($this);
 
-    if ($entity->chado_table =='organism') {
-      $organism_id = $entity->record_id;
+    $sql = "SELECT  A.analysis_id, A.name, A.program, A.timeexecuted
+      FROM {analysis} A
+      JOIN {analysis_organism} AO ON A.analysis_id = AO.analysis_id
+      WHERE AO.organism_id = :organism_id";
 
+    $results = chado_query($sql, [
+      ':organism_id' => $entity->chado_record->organism_id,
+    ]);
 
-
+    $analyses = [];
+    foreach ($results as $analysis) {
+      $analysis->entity_id = tripal_get_chado_entity_id('analysis', $analysis->analysis_id);
+      $analysis->title = db_query('SELECT title FROM {tripal_entity} WHERE id = :id', [
+        ':id' => $analysis->entity_id,
+      ])->fetchField();
+      $analyses[$analysis->analysis_id] = $analysis;
     }
 
-
-
-    $entity->{'operation__analysis'}['und'][0]['value'] = "why you no work";
-    return($entity);
-
+    $entity->{$field}['und'][0]['value'] = $analyses;
   }
 }
