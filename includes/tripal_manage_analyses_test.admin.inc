@@ -1,117 +1,6 @@
 <?php
 
 function tripal_manage_analyses_test_form($form, &$form_state) {
-
-  $sql = "SELECT * FROM {biomaterial}";
-  $results = chado_query($sql);
-  foreach ($results as $result) {
-
-    if ($result->dbxref_id) {
-      $sql = "SELECT DB.name, DBX.accession FROM {dbxref} DBX
-        INNER JOIN {db} DB ON  DBX.db_id = db.db_id
-        WHERE DBX.dbxref_id = :dbxref_id";
-
-      $dbxref = chado_query($sql, [":dbxref_id" => $result->dbxref_id])->fetchObject();
-      if ($dbxref->name == "NCBI BioSample") {
-        $biomaterial_id = $result->biomaterial_id;
-        $ncbi_accession = $dbxref->accession;
-
-        tripal_associate_dbxref('biomaterial', $biomaterial_id, [
-          'accession' => $ncbi_accession,
-          'db_name' => 'NCBI BioSample',
-        ]);
-      }
-    }
-  }
-
-  $cv_ids = [
-    'analysis_property',
-    'tripal',
-    'tripal_analysis',
-  ];
-
-  foreach ($cv_ids as $name) {
-    $cvterm = tripal_get_cvterm(
-      [
-        'name' => 'analysis_unigene_name',
-        'cv_id' => ['name' => $name],
-      ]);
-
-    if ($cvterm) {
-      break;
-    }
-  }
-
-  $analysis_unigene_cvt_id = $cvterm->cvterm_id;
-
-  //select all analysis unigenes, and their feature type IDs
-
-  $sql = "SELECT DISTINCT  A.analysis_id, F.type_id  FROM {analysis} A
-        INNER JOIN {analysisprop} AP  ON A.analysis_id = AP.analysis_id
-        INNER JOIN {cvterm} CVT ON AP.type_id = CVT.cvterm_id
-        INNER JOIN {analysisfeature} AF ON A.analysis_id = AF.analysis_id
-        INNER JOIN {feature} F ON AF.feature_id = F.feature_id
-        WHERE CVT.cvterm_id = :cvterm_id ";
-
-  //Also get the terms for mrna_contig and mrna, to check against the feature types
-  $cvterm = tripal_get_cvterm([
-    'name' => 'mRNA_contig',
-    'cv_id' => ['name' => 'sequence',],
-  ]);
-  $mrna_contig_id = $cvterm->cvterm_id;
-  $cvterm = tripal_get_cvterm([
-    'name' => 'mRNA',
-    'cv_id' => ['name' => 'sequence'],
-  ]);
-  $mrna_id = $cvterm->cvterm_id;
-
-  $results = chado_query($sql, [":cvterm_id" => $analysis_unigene_cvt_id]);
-  foreach ($results as $result) {
-    $property_value = NULL;
-
-    $analysis_id = $result->analysis_id;
-
-    if ($result->type_id == $mrna_contig_id) {
-      $property_value = 'tripal_analysis_unigene';
-    }
-    if ($result->type_id == $mrna_id) {
-      $property_value = 'genome_assembly';
-    }
-
-    $record = [
-      'table' => 'analysis',
-      'id' => $analysis_id,
-    ];
-
-    if ($property_value) {//if we had a mRNA or mRNA_contig, set the analysis type property based on that
-
-      $analysis_type_cvterm = tripal_get_cvterm([
-        'name' => 'analysis_type',
-        'cv_id' => ['name' => 'tripal_analysis'],
-      ]);
-
-      if (!$analysis_type_cvterm) {
-        $analysis_type_cvterm = tripal_insert_cvterm([
-          'name' => 'analysis_type',
-          'def' => 'The type of analysis was performed. This value is automatically set by each Tripal Analysis module and should be equal to the module name (e.g. tripal_analysis_blast, tripal_analysis_go).',
-          'cv_name' => 'tripal_analysis',
-          'db_name' => 'analysis_type',
-        ]);
-      }
-
-      $property = [
-        'type_name' => $analysis_type_cvterm->name,
-        'cv_name' => 'tripal_analysis',
-        'value' => $property_value,
-      ];
-      $options = [
-        'insert_if_missing' => TRUE,
-      ];
-      (chado_update_property($record, $property, $options));
-    }
-  }
-
-
   ///PART 2
 
   //Determine which bio_data table houses analyses
@@ -263,18 +152,8 @@ function tripal_manage_analyses_test_form($form, &$form_state) {
       ":analysis_prop_value" => $type_value,
     ]);
   }
-
-
+  
   test_organism_analysis();
 
-
   return $form;
-}
-
-
-function test_organism_analysis() {
-
-  dpm("yo");
-
-
 }
