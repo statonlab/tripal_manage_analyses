@@ -319,6 +319,8 @@ function tripal_manage_analyses_update_3302() {
 
 function tripal_manage_analyses_convert_entity($source_bundle, $destination_bundle, $descriminating_cvterm, $descriminating_prop_value) {
 
+
+
   $descriminating_type_cvterm_id = $descriminating_cvterm->cvterm_id;
 
   $source_bundle_table = "public.chado_" . $source_bundle->name;
@@ -326,6 +328,8 @@ function tripal_manage_analyses_convert_entity($source_bundle, $destination_bund
   $destination_term = $destination_bundle->term_id;
   $destination_table = "public.chado_" . $destination_bundle->name;
 
+  print ("\nconverting " . $source_bundle_table . "to " . $destination_table . "\n");
+  
   $chado_base_table = "chado." . $source_bundle_table->data_table;
   $chado_prop_table = $chado_base_table . "prop";
   //TODO: THIS FUNCTION IS NOT QUITE REFACTORED: need vairables for the column selection too.  ie analysis_id
