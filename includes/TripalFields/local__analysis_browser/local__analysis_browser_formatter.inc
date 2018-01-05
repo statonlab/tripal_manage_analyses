@@ -90,11 +90,16 @@ class local__analysis_browser_formatter extends ChadoFieldFormatter {
     }
 
     $rows = array_map(function ($analysis) {
-      return [$analysis->name];
+      $date = new DateTime($analysis->timeexecuted);
+      return [
+        l($analysis->name, "bio_data/{$analysis->entity_id}"),
+        $analysis->program,
+        $date->format('M jS, Y')
+      ];
     }, $entity->{$field}['und'][0]['value']);
 
     $output = theme('table', [
-      'header' => ['Analysis Name'],
+      'header' => ['Name', 'Program', 'Date Constructed'],
       'rows' => $rows,
     ]);
 

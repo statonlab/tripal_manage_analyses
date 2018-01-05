@@ -127,9 +127,10 @@ class local__analysis_browser extends ChadoField {
     parent::load($entity);
     $field = get_class($this);
 
-    $sql = "SELECT  A.analysis_id, A.name
+    $sql = "SELECT  A.analysis_id, A.name, A.program, A.timeexecuted
       FROM {analysis} A
-      WHERE A.analysis_id IN (SELECT analysis_id FROM {analysis_organism} WHERE organism_id=:organism_id)";
+      JOIN {analysis_organism} AO ON A.analysis_id = AO.analysis_id
+      WHERE AO.organism_id = :organism_id";
 
     $results = chado_query($sql, [
       ':organism_id' => $entity->chado_record->organism_id,
@@ -137,6 +138,10 @@ class local__analysis_browser extends ChadoField {
 
     $analyses = [];
     foreach ($results as $analysis) {
+      $analysis->entity_id = tripal_get_chado_entity_id('analysis', $analysis->analysis_id);
+      $analysis->title = db_query('SELECT title FROM {tripal_entity} WHERE id = :id', [
+        ':id' => $analysis->entity_id,
+      ])->fetchField();
       $analyses[$analysis->analysis_id] = $analysis;
     }
 
