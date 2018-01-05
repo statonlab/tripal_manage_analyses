@@ -7,13 +7,13 @@
  * Data:
  * Assumptions:
  */
-class operation__analysis_widget extends ChadoFieldWidget {
+class local__analysis_browser_widget extends ChadoFieldWidget {
 
   // The default label for this field.
   public static $default_label = 'Analyses';
 
   // The list of field types for which this formatter is appropriate.
-  public static $field_types = array('operation__analysis');
+  public static $field_types = array('local__analysis_browser');
 
   /**
    * Provides the form for editing of this field.

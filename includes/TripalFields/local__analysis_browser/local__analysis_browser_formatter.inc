@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @class
  * Purpose:
@@ -6,18 +7,18 @@
  * Display:
  * Configuration:
  */
-class operation__analysis_formatter extends ChadoFieldFormatter {
+class local__analysis_browser_formatter extends ChadoFieldFormatter {
 
   // The default label for this field.
   public static $default_label = 'Analyses';
 
   // The list of field types for which this formatter is appropriate.
-  public static $field_types = array('operation__analysis');
+  public static $field_types = ['local__analysis_browser'];
 
   // The list of default settings for this formatter.
-  public static $default_settings = array(
+  public static $default_settings = [
     'setting1' => 'default_value',
-  );
+  ];
 
   /**
    * Provides the field's setting form.
@@ -68,21 +69,39 @@ class operation__analysis_formatter extends ChadoFieldFormatter {
    *  into a CSV file will always be identical.  The view need not show all
    *  of the data in the 'values' array.
    *
-   *  @param $element
-   *  @param $entity_type
-   *  @param $entity
-   *  @param $langcode
-   *  @param $items
-   *  @param $display
+   * @param $element
+   * @param $entity_type
+   * @param $entity
+   * @param $langcode
+   * @param $items
+   * @param $display
    *
-   *  @return
+   * @return
    *    An element array compatible with that returned by the
    *    hook_field_formatter_view() function.
    */
   public function view(&$element, $entity_type, $entity, $langcode, $items, $display) {
-
     // Get the settings
     $settings = $display['settings'];
+    $field = 'local__analysis_browser';
+
+    if (empty($entity->{$field}['und'][0]['value'])) {
+      return;
+    }
+
+    $rows = array_map(function ($analysis) {
+      return [$analysis->name];
+    }, $entity->{$field}['und'][0]['value']);
+
+    $output = theme('table', [
+      'header' => ['Analysis Name'],
+      'rows' => $rows,
+    ]);
+
+    $element[] = [
+      '#type' => 'markup',
+      '#markup' => $output,
+    ];
   }
 
   /**
