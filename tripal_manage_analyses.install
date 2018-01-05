@@ -285,9 +285,12 @@ function tripal_manage_analyses_update_3302() {
 
   $analysis_type_term = tripal_get_cvterm([
     'name' => 'analysis_type',
-    'cv_id' => ['name' => 'tripal'],
+    'cv_id' => ['name' => 'tripal_analysis'],
   ]);
 
+  if (!$analysis_type_term){
+    throw new Exception("Error: analysis_type term not found.\n");
+  }
   $descriminating_value = "genome_assembly";
 
   tripal_manage_analyses_convert_entity($analysis_bundle, $genome_assembly_bundle, $analysis_type_term, $descriminating_value);
