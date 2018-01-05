@@ -330,7 +330,7 @@ function tripal_manage_analyses_convert_entity($source_bundle, $destination_bund
 
   print ("\nconverting " . $source_bundle_table . "to " . $destination_table . "\n");
 
-  $chado_base_table = "chado." . $source_bundle_table->data_table;
+  $chado_base_table = "chado." . $source_bundle->data_table;
   $chado_prop_table = $chado_base_table . "prop";
   //TODO: THIS FUNCTION IS NOT QUITE REFACTORED: need vairables for the column selection too.  ie analysis_id
 
