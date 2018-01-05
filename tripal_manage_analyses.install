@@ -224,7 +224,7 @@ function tripal_manage_analyses_migrate_unigene() {
     dpm('Bundle: ' . $analysis_bundle_name);
 
     $sql = "INSERT INTO " . $destination_table . " (entity_id, record_id)
-        SELECT A.analysis_id AS record_id, AB.entity_id AS entity_id FROM chado.analysis A
+        SELECT AB.entity_id AS entity_id, A.analysis_id AS record_id FROM chado.analysis A
         INNER JOIN chado.analysisprop AP  ON A.analysis_id = AP.analysis_id
         INNER JOIN chado.cvterm CVT ON AP.type_id = CVT.cvterm_id
         INNER JOIN  " . $analysis_bundle_name . " AB ON A.analysis_id = AB.record_id
