@@ -12,7 +12,7 @@ function tripal_manage_analyses_install() {
   tripal_manage_analyses_migrate_unigene();
 }
 
-function   tripal_manage_analyses_update_unigene_props() {
+function tripal_manage_analyses_update_unigene_props() {
 
   /**
    * Find all analyses that are unigene analyses.  Set the analysis_type prop
@@ -121,8 +121,8 @@ function tripal_manage_analyses_migrate_unigene() {
     'vocabulary' => 'operation',
     'accession' => '2945',
   ]);
-  $bundle = tripal_load_bundle_entity(['term_id' => $term->id]);
-  $analysis_bundle_name = 'public.chado_' . $bundle->name;
+  $analysis_bundle = tripal_load_bundle_entity(['term_id' => $term->id]);
+  $analysis_bundle_name = 'public.chado_' . $analysis_bundle->name;
   //create Transcriptome and Genome bundles
   $error = '';
 
@@ -193,7 +193,10 @@ function tripal_manage_analyses_migrate_unigene() {
       }
     }
 
-    tripal_manage_analyses_convert_entity($source_bundle, $destination_bundle, $descriminating_cvterm, $descriminating_prop_value);
+    $destination_bundle = $bundle;
+    tripal_manage_analyses_convert_entity($analysis_bundle, $destination_bundle, $analysis_type_cvterm_id, $type_value);
+  }
+
 }
 
 function tripal_manage_analyses_set_biomaterial_properties() {
