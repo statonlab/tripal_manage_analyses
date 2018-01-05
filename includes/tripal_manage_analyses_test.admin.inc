@@ -2,6 +2,28 @@
 
 function tripal_manage_analyses_test_form($form, &$form_state) {
 
+  $sql = "SELECT * FROM {biomaterial}";
+  $results = chado_query($sql);
+  foreach($results as $result) {
+
+    if ($result->dbxref_id) {
+      $sql = "SELECT DB.name, DBX.accession FROM {dbxref} DBX
+        INNER JOIN {db} DB ON  DBX.db_id = db.db_id
+        WHERE DBX.dbxref_id = :dbxref_id";
+
+      $dbxref = chado_query($sql, [":dbxref_id" => $result->dbxref_id])->fetchObject();
+      if ($dbxref->name == "NCBI BioSample") {
+        $biomaterial_id = $result->biomaterial_id;
+        $ncbi_accession = $dbxref->accession;
+
+        tripal_associate_dbxref('biomaterial', $biomaterial_id, [
+          'accession' => $ncbi_accession,
+          'db_name' => 'NCBI BioSample'
+        ]);
+      }
+    }
+  }
+
 
   $cvterm = tripal_get_cvterm(
     [
@@ -204,11 +226,9 @@ function tripal_manage_analyses_test_form($form, &$form_state) {
       // ':destination_term' => $destination_term,
       //  ":destination_bundle" => $bundle->name
     ];
-    dpm($params);
 
     $results = db_query($sql, $params);
     foreach ($results as $result) {
-      dpm($result);
     }
 
     //Delete the old entities, but only if they are present in both the destination table
@@ -231,5 +251,18 @@ function tripal_manage_analyses_test_form($form, &$form_state) {
 
   }
 
+
+  test_organism_analysis();
+
+
   return $form;
+}
+
+
+function test_organism_analysis(){
+
+  dpm("yo");
+
+
+
 }

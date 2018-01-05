@@ -41,7 +41,7 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
     // First add my term.
     tripal_insert_cvterm(array(
       'id' => 'operation:2945',
-      'name' => 'analysis',
+      'name' => 'Analysis',
       'cv_name' => 'EDAM',
       'definition' => 'Analyses associated with this entity',
     ));

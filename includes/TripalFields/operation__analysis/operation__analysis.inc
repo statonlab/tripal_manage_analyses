@@ -58,7 +58,7 @@ class operation__analysis extends ChadoField {
     // The DATABASE name, as it appears in chado.db.  This also builds the link-out url.  In most cases this will simply be the CV name.  In some cases (EDAM) this will be the SUBONTOLOGY.
     'term_vocabulary' => 'operation',
     // The name of the term.
-    'term_name' => 'analysis',
+    'term_name' => 'Analysis',
     // The unique ID (i.e. accession) of the term.
     'term_accession' => '2945',
     // Set to TRUE if the site admin is not allowed to change the term
@@ -80,7 +80,7 @@ class operation__analysis extends ChadoField {
   // fields and instances of this field type through the UI. Such
   // fields can only be created programmatically with field_create_field()
   // and field_create_instance().
-  public static $no_ui = FALSE;
+  public static $no_ui = TRUE;
 
   // A boolean specifying that the field will not contain any data. This
   // should exclude the field from web services or downloads.  An example
@@ -116,14 +116,20 @@ class operation__analysis extends ChadoField {
    *
    */
   public function load($entity) {
+    dpm($entity);
 
-    // ChadoFields automatically load the chado column specified in the
-    // default settings above. If that is all you need then you don't even
-    // need to implement this function. However, if you need to add any
-    // additional data to be used in the display, you should add it here.
-    parent::load($entity);
 
-    
+    if ($entity->chado_table =='organism') {
+      $organism_id = $entity->record_id;
+
+
+
+    }
+
+
+
+    $entity->{'operation__analysis'}['und'][0]['value'] = "why you no work";
+    return($entity);
 
   }
 }

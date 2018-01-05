@@ -4,8 +4,12 @@
  *  Install module
  */
 function tripal_manage_analyses_install() {
-  tripal_manage_analyses_update_unigene_props();
-  tripal_manage_analyses_migrate_unigene();
+
+  //Once these methods work run them below.  Testing happens in the admin menu /test area.
+
+  
+//  tripal_manage_analyses_update_unigene_props();
+//  tripal_manage_analyses_migrate_unigene();
 }
 
 /**
