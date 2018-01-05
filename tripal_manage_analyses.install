@@ -142,7 +142,7 @@ function tripal_manage_analyses_migrate_unigene() {
     'db_name' => 'EDAM',
   ]);
   tripal_insert_cvterm([
-    'name' => 'Transcriptome Assembly',
+    'name' => 'Genome Assembly',
     'def' => '',
     'accession' => '0525',
     'cv_name' => 'operation',
