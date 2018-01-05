@@ -76,7 +76,7 @@ class local__analysis_browser_formatter extends ChadoFieldFormatter {
    * @param $items
    * @param $display
    *
-   * @return
+   * @return void
    *    An element array compatible with that returned by the
    *    hook_field_formatter_view() function.
    */
@@ -94,7 +94,7 @@ class local__analysis_browser_formatter extends ChadoFieldFormatter {
       return [
         l($analysis->name, "bio_data/{$analysis->entity_id}"),
         $analysis->program,
-        $date->format('M jS, Y')
+        $date->format('M jS, Y'),
       ];
     }, $entity->{$field}['und'][0]['value']);
 
