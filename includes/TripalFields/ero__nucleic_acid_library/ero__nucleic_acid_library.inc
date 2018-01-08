@@ -153,9 +153,10 @@ class ero__nucleic_acid_library extends ChadoField {
           "library_type" => $library_type->name
         ];
       }
-      $entity->{$field_name}['und'][0]['value'] = $entity_id;
-      $entity->{$field_name}['und'][0]['info'] = $output;
-
+      if ($results) {
+        $entity->{$field_name}['und'][0]['value'] = '1';
+        $entity->{$field_name}['und'][0]['info'] = $output;
+      }
     }
   }
 }
