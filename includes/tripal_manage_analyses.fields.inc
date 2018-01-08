@@ -61,8 +61,11 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
         'type' => 'field_chado_storage',
       ],
     ];
+
+
+
     tripal_insert_cvterm([
-      'id' => 'ero:analysis_browser',
+      'id' => 'ero:0000160',
       'name' => 'nucleic_acid_library',
       'cv_name' => 'ero',
       'definition' => 'Reagent library that is a collection of DNA fragments that is stored and propagated in a population of micro-organisms through the process of molecular cloning.',
