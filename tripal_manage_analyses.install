@@ -194,7 +194,7 @@ function tripal_manage_analyses_migrate_unigene() {
     }
 
     $destination_bundle = $bundle;
-    tripal_manage_analyses_convert_entity($analysis_bundle, $destination_bundle, $analysis_type_cvterm_id, $type_value);
+    tripal_manage_analyses_convert_entity($analysis_bundle, $destination_bundle, $analysis_type_cvterm, $type_value);
   }
 
 }
@@ -332,7 +332,7 @@ function tripal_manage_analyses_convert_blast_and_interpro() {
     'def' => 'A type of pairwise sequence alignment evidence obtained with basic local alignment search tool (BLAST).',
     'accession' => '0000206',
     'cv_name' => 'eco',
-    'db_name' => 'ECO',
+    'db_name' => 'eco',
   ]);
   tripal_insert_cvterm([
     'name' => 'match to InterPro member signature evidence',
@@ -359,7 +359,7 @@ function tripal_manage_analyses_convert_blast_and_interpro() {
     [
       'vocabulary' => 'eco',
       'accession' => '0000029',
-      'term_name' => 'match to InterPro member signature evidence',
+      'term_name' => 'Match to InterPro member signature evidence',
       'storage_args' => [
         'data_table' => 'analysis',
         'type_linker_table' => 'analysisprop',
@@ -387,7 +387,7 @@ function tripal_manage_analyses_convert_blast_and_interpro() {
     }
 
     $destination_bundle = $bundle;
-    tripal_manage_analyses_convert_entity($analysis_bundle, $destination_bundle, $analysis_type_cvterm_id, $type_value);
+    tripal_manage_analyses_convert_entity($analysis_bundle, $destination_bundle, $analysis_type_cvterm, $type_value);
 
   }
 
@@ -433,7 +433,7 @@ function tripal_manage_analyses_convert_blast_and_interpro() {
     }
 
     $destination_bundle = $bundle;
-    tripal_manage_analyses_convert_entity($analysis_bundle, $destination_bundle, $analysis_type_cvterm_id, $type_value);
+    tripal_manage_analyses_convert_entity($analysis_bundle, $destination_bundle, $analysis_type_cvterm, $type_value);
 
   }
 
