@@ -194,7 +194,7 @@ function tripal_manage_analyses_migrate_unigene() {
     }
 
     $destination_bundle = $bundle;
-    tripal_manage_analyses_convert_entity($analysis_bundle, $destination_bundle, $analysis_type_cvterm_id, $type_value);
+    tripal_manage_analyses_convert_entity($analysis_bundle, $destination_bundle, $analysis_type_cvterm, $type_value);
   }
 
 }
@@ -288,12 +288,155 @@ function tripal_manage_analyses_update_3302() {
     'cv_id' => ['name' => 'tripal_analysis'],
   ]);
 
-  if (!$analysis_type_term){
+  if (!$analysis_type_term) {
     throw new Exception("Error: analysis_type term not found.\n");
   }
   $descriminating_value = "genome_assembly";
 
   tripal_manage_analyses_convert_entity($analysis_bundle, $genome_assembly_bundle, $analysis_type_term, $descriminating_value);
+
+}
+
+
+function tripal_manage_analyses_update_7300(){
+  tripal_manage_analyses_convert_blast_and_interpro();
+}
+
+/**
+ * Create bundles for analysis interpro and analysis blast.
+ *
+ * @throws \Exception
+ */
+
+function tripal_manage_analyses_convert_blast_and_interpro() {
+
+  //get analysis and analysis type info
+  $term = tripal_load_term_entity([
+    'vocabulary' => 'operation',
+    'accession' => '2945',
+  ]);
+  $analysis_bundle = tripal_load_bundle_entity(['term_id' => $term->id]);
+  $analysis_bundle_name = 'public.chado_' . $analysis_bundle->name;
+  $error = '';
+
+  $analysis_type_cvterm = tripal_get_cvterm([
+    'name' => 'Analysis Type',
+    'cv_id' => ['name' => 'analysis_property'],
+  ]);
+
+  $analysis_type_cvterm_id = $analysis_type_cvterm->cvterm_id;
+
+//create blast nad interpro analysis bundles
+    tripal_insert_cvterm([
+    'name' => 'BLAST evidence',
+    'def' => 'A type of pairwise sequence alignment evidence obtained with basic local alignment search tool (BLAST).',
+    'accession' => '0000206',
+    'cv_name' => 'eco',
+    'db_name' => 'eco',
+  ]);
+  tripal_insert_cvterm([
+    'name' => 'match to InterPro member signature evidence',
+    'def' => 'A type of match to sequence model evidence resulting from a positive match of a protein, or set of proteins to a predictive model (signature) in the InterPro database',
+    'accession' => '0000029',
+    'cv_name' => 'eco',
+    'db_name' => 'ECO',
+  ]);
+
+  //define two new bundles, and populate them with *Tripal 3 analyses* That match this type via the analysis_type prop
+  $args_array = [
+    [
+      'vocabulary' => 'eco',
+      'accession' => '0000206',
+      'term_name' => 'BLAST evidence',
+      'storage_args' => [
+        'data_table' => 'analysis',
+        'type_linker_table' => 'analysisprop',
+        'type_value' => 'blast_analysis', //sometimes its also blast_analysis
+        'type_column' => 'type_id',
+        'type_id' => $analysis_type_cvterm_id,
+      ],
+    ],
+    [
+      'vocabulary' => 'eco',
+      'accession' => '0000029',
+      'term_name' => 'Match to InterPro member signature evidence',
+      'storage_args' => [
+        'data_table' => 'analysis',
+        'type_linker_table' => 'analysisprop',
+        'type_value' => 'interpro_analysis',
+        'type_column' => 'type_id',
+        'type_id' => $analysis_type_cvterm_id,
+      ],
+    ],
+  ];
+  foreach ($args_array as $args) {
+
+    $type_value = $args['storage_args']['type_value'];
+
+    $term = tripal_load_term_entity([
+      'vocabulary' => $args["vocabulary"],
+      'accession' => $args["accession"],
+    ]);
+    if ($term) {
+      $bundle = tripal_load_bundle_entity(['term_id' => $term->id]);
+    }
+    if (!$term or !$bundle) {
+      if (!tripal_create_bundle($args, $error)) {
+        throw new Exception($error['!message']);
+      }
+    }
+
+    $destination_bundle = $bundle;
+    tripal_manage_analyses_convert_entity($analysis_bundle, $destination_bundle, $analysis_type_cvterm, $type_value);
+
+  }
+
+  //Now, convert blast analyses that used the *other* cvterm
+
+  $analysis_type_cvterm = tripal_get_cvterm([
+    'name' => 'analysis_type',
+    'cv_id' => ['name' => 'tripal_analysis'],
+  ]);
+
+  $analysis_type_cvterm_id = $analysis_type_cvterm->cvterm_id;
+
+  $args_array = [
+    [
+      'vocabulary' => 'eco',
+      'accession' => '0000206',
+      'term_name' => 'BLAST evidence',
+      'storage_args' => [
+        'data_table' => 'analysis',
+        'type_linker_table' => 'analysisprop',
+        'type_value' => 'tripal_analysis_blast',
+        //sometimes its also blast_analysis
+        'type_column' => 'type_id',
+        'type_id' => $analysis_type_cvterm_id,
+      ],
+    ],
+  ];
+  foreach ($args_array as $args) {
+
+    $type_value = $args['storage_args']['type_value'];
+
+    $term = tripal_load_term_entity([
+      'vocabulary' => $args["vocabulary"],
+      'accession' => $args["accession"],
+    ]);
+    if ($term) {
+      $bundle = tripal_load_bundle_entity(['term_id' => $term->id]);
+    }
+    if (!$term or !$bundle) {
+      if (!tripal_create_bundle($args, $error)) {
+        throw new Exception($error['!message']);
+      }
+    }
+
+    $destination_bundle = $bundle;
+    tripal_manage_analyses_convert_entity($analysis_bundle, $destination_bundle, $analysis_type_cvterm, $type_value);
+
+  }
+
 
 }
 
@@ -323,7 +466,6 @@ function tripal_manage_analyses_update_3302() {
 function tripal_manage_analyses_convert_entity($source_bundle, $destination_bundle, $descriminating_cvterm, $descriminating_prop_value) {
 
 
-
   $descriminating_type_cvterm_id = $descriminating_cvterm->cvterm_id;
 
   $source_bundle_table = "public.chado_" . $source_bundle->name;
@@ -342,7 +484,7 @@ function tripal_manage_analyses_convert_entity($source_bundle, $destination_bund
 
   $sql = "INSERT INTO " . $destination_table . " (entity_id, record_id)
         SELECT AB.entity_id AS entity_id, A.analysis_id AS record_id FROM " . $chado_base_table . "  A
-        INNER JOIN  " . $chado_prop_table .  " AP  ON A.analysis_id = AP.analysis_id
+        INNER JOIN  " . $chado_prop_table . " AP  ON A.analysis_id = AP.analysis_id
         INNER JOIN chado.cvterm CVT ON AP.type_id = CVT.cvterm_id
         INNER JOIN  " . $source_bundle_table . " AB ON A.analysis_id = AB.record_id
         WHERE CVT.cvterm_id = :cvterm_id
@@ -357,7 +499,7 @@ function tripal_manage_analyses_convert_entity($source_bundle, $destination_bund
 
   $sql = "UPDATE public.tripal_entity AS TE SET bundle = :destination_bundle, term_id = :destination_term
       WHERE TE.id  IN (SELECT AB.entity_id AS entity_id FROM chado.analysis A
-       INNER JOIN " . $chado_prop_table .  " AP  ON A.analysis_id = AP.analysis_id
+       INNER JOIN " . $chado_prop_table . " AP  ON A.analysis_id = AP.analysis_id
         INNER JOIN chado.cvterm CVT ON AP.type_id = CVT.cvterm_id
         INNER JOIN  " . $source_bundle_table . " AB ON A.analysis_id = AB.record_id
         WHERE CVT.cvterm_id = :cvterm_id
@@ -377,7 +519,7 @@ function tripal_manage_analyses_convert_entity($source_bundle, $destination_bund
     WHERE AB.record_id IN
     (SELECT A.analysis_id AS record_id
     FROM chado.analysis A
-    INNER JOIN " . $chado_prop_table .  " AP  ON A.analysis_id = AP.analysis_id
+    INNER JOIN " . $chado_prop_table . " AP  ON A.analysis_id = AP.analysis_id
     INNER JOIN chado.cvterm CVT ON AP.type_id = CVT.cvterm_id
     INNER JOIN " . $destination_table . " AS DT ON AB.record_id = DT.record_id
     WHERE CVT.cvterm_id = :cvterm_id
