@@ -61,6 +61,29 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
         'type' => 'field_chado_storage',
       ],
     ];
+    tripal_insert_cvterm([
+      'id' => 'ERO:analysis_browser',
+      'name' => 'nucleic_acid_library',
+      'cv_name' => 'ERO',
+      'definition' => 'Reagent library that is a collection of DNA fragments that is stored and propagated in a population of micro-organisms through the process of molecular cloning.',
+    ]);
+
+    // Then describe the field defined by that term.
+    $field_name = 'ero__nucleic_acid_library';
+    $field_type = 'ero__nucleic_acid_library';
+    $fields[$field_name] = [
+      'field_name' => $field_name,
+      'type' => $field_type,
+      'cardinality' => 1,
+      'locked' => FALSE,
+      'storage' => [
+        'type' => 'field_chado_storage',
+      ],
+    ];
+
+
+
+
   }
 
   return $fields;
@@ -123,6 +146,37 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
         ],
       ],
     ];
+
+    $field_name = 'ero__nucleic_acid_library';
+    $field_type = 'ero__nucleic_acid_library';
+    $instances[$field_name] = [
+      'field_name' => $field_name,
+      'entity_type' => $entity_type,
+      'bundle' => $bundle->name,
+      'label' => 'Libraries',
+      'description' => 'Displays libraries (BAC, YAC etc) associated with this entity.',
+      'required' => FALSE,
+      'settings' => [
+        'auto_attach' => FALSE,
+        'chado_table' => $bundle->data_table,
+        'chado_column' => 'organism_id',
+        'base_table' => $bundle->data_table,
+      ],
+      'widget' => [
+        'type' => 'ero__nucleic_acid_library',
+        'settings' => [],
+      ],
+      'display' => [
+        'default' => [
+          'label' => 'hidden',
+          'type' => 'ero__nucleic_acid_library',
+          'settings' => [],
+        ],
+      ],
+    ];
+
+
+
   }
 
   return $instances;
