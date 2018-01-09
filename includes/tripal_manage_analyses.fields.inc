@@ -85,9 +85,47 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
     ];
 
 
+    tripal_insert_cvterm(array(
+      'id' => 'local:transcriptome_viewer',
+      'name' => 'transcriptome_viewer',
+      'cv_name' => 'local',
+      'definition' => 'The transcriptome associated with this entity',
+    ));
 
+    // Then describe the field defined by that term.
+    $field_name = 'local__transcriptome_viewer';
+    $field_type = 'local__transcriptome_viewer';
+    $fields[$field_name] = array(
+      'field_name' => $field_name,
+      'type' => $field_type,
+      'cardinality' => 1,
+      'locked' => FALSE,
+      'storage' => array(
+        'type' => 'field_chado_storage',
+      ),
+    );
 
-  }
+    tripal_insert_cvterm(array(
+      'id' => 'local:genome_browser',
+      'name' => 'genome_browser',
+      'cv_name' => 'local',
+      'definition' => 'List the genomes for an organism',
+    ));
+
+    // Then describe the field defined by that term.
+    $field_name = 'local__genome_browser';
+    $field_type = 'local__genome_browser';
+    $fields[$field_name] = array(
+      'field_name' => $field_name,
+      'type' => $field_type,
+      'cardinality' => 1,
+      'locked' => FALSE,
+      'storage' => array(
+        'type' => 'field_chado_storage',
+      ),
+    );
+
+}
 
   return $fields;
 }
@@ -177,6 +215,63 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
         ],
       ],
     ];
+
+    $field_name = 'local__transcriptome_viewer';
+    $field_type = 'local__transcriptome_viewer';
+    $instances[$field_name] =  array(
+      'field_name' => $field_name,
+      'entity_type' => $entity_type,
+      'bundle' => $bundle->name,
+      'label' => 'Transcriptome',
+      'description' => 'The transcriptome associated with this entity',
+      'required' => FALSE,
+      'settings' => array(
+        'auto_attach' => FALSE,
+        'chado_table' => $bundle->data_table,
+        'chado_column' => 'organism_id',
+        'base_table' => $bundle->data_table,
+      ),
+      'widget' => array(
+        'type' => 'local__transcriptome_viewer_widget',
+        'settings' => array(),
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'local__transcriptome_viewer_formatter',
+          'settings' => array(),
+        ),
+      ),
+    );
+
+
+    $field_name = 'local__genome_browser';
+    $field_type = 'local__genome_browser';
+    $instances[$field_name] =  array(
+      'field_name' => $field_name,
+      'entity_type' => $entity_type,
+      'bundle' => $bundle->name,
+      'label' => 'Genome Browser',
+      'description' => 'List the genomes for an organism',
+      'required' => FALSE,
+      'settings' => array(
+        'auto_attach' => FALSE,
+        'chado_table' => $bundle->data_table,
+        'chado_column' => 'organism_id',
+        'base_table' => $bundle->data_table,
+      ),
+      'widget' => array(
+        'type' => 'local__genome_browser_widget',
+        'settings' => array(),
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'local__genome_browser_formatter',
+          'settings' => array(),
+        ),
+      ),
+    );
 
 
 
