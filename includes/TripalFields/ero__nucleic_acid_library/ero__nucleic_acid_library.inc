@@ -30,7 +30,7 @@ class ero__nucleic_acid_library extends ChadoField {
   public static $default_formatter = 'ero__nucleic_acid_library_formatter';
 
   // The module that manages this field.
-  public static $module = 'none';
+  public static $module = 'tripal_chado';
 
   // A list of global settings. These can be accessed within the
   // globalSettingsForm.  When the globalSettingsForm is submitted then
@@ -112,6 +112,7 @@ class ero__nucleic_acid_library extends ChadoField {
    *
    */
   public function load($entity) {
+    //TODO:  THIS FIELD ONLY CARES ABOUT ATTACHING TO ORGANISM RIGHT NOW.  If it were to function as a proper linker field, it should load appropriately.
 
     // ChadoFields automatically load the chado column specified in the
     // default settings above. If that is all you need then you don't even
@@ -120,6 +121,8 @@ class ero__nucleic_acid_library extends ChadoField {
     parent::load($entity);
 
     if ($entity->chado_table == 'organism') {
+      //If its an organism, we dont have an organism_library linker table but an organism_id column in library.
+
       $field_name = $this->field['field_name'];
       $organism = $entity->chado_record;
       $organism_id = $organism->organism_id;
@@ -136,6 +139,8 @@ class ero__nucleic_acid_library extends ChadoField {
 
       //go through the results and lookup the entity id of each
       $output = [];
+      $entity->{$field_name}['und'][0]['value'] = null;
+
       foreach ($results as $result) {
 
         $library_id = $result->library_id;
