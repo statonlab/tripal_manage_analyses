@@ -138,7 +138,7 @@ class local__analysis_browser extends ChadoField {
 
     $analyses = [];
     foreach ($results as $analysis) {
-      $analysis->entity_id = tripal_get_chado_entity_id('analysis', $analysis->analysis_id);
+      $analysis->entity_id = chado_get_record_entity_by_table('analysis', $analysis->analysis_id);
       $analysis->title = db_query('SELECT title FROM {tripal_entity} WHERE id = :id', [
         ':id' => $analysis->entity_id,
       ])->fetchField();

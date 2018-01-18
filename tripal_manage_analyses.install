@@ -339,7 +339,7 @@ function tripal_manage_analyses_convert_blast_and_interpro() {
     'def' => 'A type of match to sequence model evidence resulting from a positive match of a protein, or set of proteins to a predictive model (signature) in the InterPro database',
     'accession' => '0000029',
     'cv_name' => 'eco',
-    'db_name' => 'ECO',
+    'db_name' => 'eco',
   ]);
 
   //define two new bundles, and populate them with *Tripal 3 analyses* That match this type via the analysis_type prop
@@ -437,8 +437,60 @@ function tripal_manage_analyses_convert_blast_and_interpro() {
 
   }
 
+}
+
+/**
+ * Migrate interpro analyses from blast
+ * @throws \Exception
+ */
+function tripal_manage_analyses_update_7301(){
+
+
+  $error = '';
+
+  $analysis_type_cvterm = tripal_get_cvterm([
+    'name' => 'Analysis Type',
+    'cv_id' => ['name' => 'analysis_property'],
+  ]);
+
+
+  //destination bundle is interpro_analysis
+    $type_value = "interpro_analysis";
+
+    $term = tripal_load_term_entity([
+      'vocabulary' => 'eco',
+      'accession' => '0000029',
+    ]);
+
+    $destination_bundle = tripal_load_bundle_entity(['term_id' => $term->id]);
+
+
+  //source bundle is interpro_blast
+
+  $term = tripal_load_term_entity([
+      'vocabulary' => 'eco',
+      'accession' => '0000206',]);
+
+    $source_bundle  =  tripal_load_bundle_entity(['term_id' => $term->id]);
+
+
+
+  $descriminating_type_cvterm_id = $analysis_type_cvterm->cvterm_id;
+
+  $source_bundle_table = "public.chado_" . $source_bundle->name;
+
+  $destination_term = $destination_bundle->term_id;
+  $destination_table = "public.chado_" . $destination_bundle->name;
+
+  print ("\nconverting " . $source_bundle_table . "to " . $destination_table . "\n");
+
+  $chado_base_table = "chado." . $source_bundle->data_table;
+  $chado_prop_table = $chado_base_table . "prop";
+  //TODO: THIS FUNCTION IS NOT QUITE REFACTORED: need vairables for the column selection too.  ie analysis_id
 
 }
+
+
 
 
 /**
