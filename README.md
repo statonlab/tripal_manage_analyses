@@ -1,5 +1,5 @@
+This module is no longer necessary.
 
-This module is under development.  It's aim is to manage the analysis entity type.  In particular, it will convert already migrated analysis entities.
+Fields can be added via the libraries folder if the module is set to 'tripal_chado'.
 
-In the future, it might include administrative pages.  Currently, it is just an install script hack.
-
+Splitting of analyses is now handled via [Tripal Alchemist](https://github.com/statonlab/tripal_alchemist/)
