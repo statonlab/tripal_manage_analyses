@@ -86,9 +86,10 @@ class ero__nucleic_acid_library_formatter extends ChadoFieldFormatter {
     if (!$items) {
       return NULL;
     }
-    if (!$items[0]["info"]){
+    if (!isset($items[0]["info"][0])){ //this is to fix an error when the field is empty.  it shouldnt be necessary, we are missing something....
       return null;
     }
+
     $rows = [];
     $header = ["Name", "Type", "Status"];
 
