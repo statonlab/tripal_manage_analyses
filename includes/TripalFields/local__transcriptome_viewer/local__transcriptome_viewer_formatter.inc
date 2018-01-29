@@ -85,16 +85,12 @@ class local__transcriptome_viewer_formatter extends ChadoFieldFormatter {
     // Get the settings
     $settings = $display['settings'];
 
-    $field = 'local__transcriptome_browser';
-
-
-    if (empty($entity->{$field}['und'][0]['value'])) {
-      return;
-    }
+    $field = 'local__transcriptome_viewer';
 
     $rows = [];
 
-    foreach($items as $analysis){
+    foreach($items as $item){
+      $analysis = $item["value"][0];
       $date = new DateTime($analysis->timeexecuted);
 
       $row = [
@@ -114,7 +110,6 @@ class local__transcriptome_viewer_formatter extends ChadoFieldFormatter {
       'header' => ['Name', 'Program', 'Date Constructed'],
       'rows' => $rows,
     ]);
-    dpm($output);
 
     $element[] = [
       '#type' => 'markup',

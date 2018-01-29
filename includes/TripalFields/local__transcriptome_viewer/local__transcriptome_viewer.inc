@@ -160,7 +160,7 @@ class local__transcriptome_viewer extends ChadoField {
 
 
       $entity->{$field}['und'][$i]['value'] = [
-        'analysis' => $analysis,
+	$analysis
       ];
 
     }
