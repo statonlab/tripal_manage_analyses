@@ -76,7 +76,7 @@ class obi__organism_linker extends ChadoField {
     // attached asynchronously.
     'auto_attach' => FALSE,
     // The table in Chado that the instance maps to.
-    'chado_table' => 'analysis_organism',
+    'chado_table' => 'organism_analysis',
     // The column of the table in Chado where the value of the field comes from.
     'chado_column' => 'organism_id',
     // The base table.
@@ -140,89 +140,34 @@ class obi__organism_linker extends ChadoField {
     $base_table = $this->instance['settings']['base_table'];
     //
 
-    $linker_table = $base_table . '_organism';
-
-
-    $record = "not yet";
-
-
-    $sql = "SELECT DISTINCT O.organism_id, O.common_name, O.abbreviation FROM {chado.analysis_organism} AO
+    $sql = "SELECT DISTINCT O.organism_id, O.common_name, O.abbreviation FROM {chado.organism_analysis} AO
       INNER JOIN {chado.organism} O  ON AO.organism_id = O.organism_id
       WHERE AO.analysis_id = :analysis_id";
-   $results =  db_query($sql, [':analysis_id' => $entity_record->analysis_id])->FetchAll();
+    $results = db_query($sql, [':analysis_id' => $entity_record->analysis_id])->FetchAll();
 
 
-   $i = 0;
+    $i = 0;
 
     foreach ($results as $result) {
       $organism_abbreviation = $result->abbreviation;
       $organism_common_name = $result->common_name;
-        $organism_record_id = $result->organism_id;
+      $organism_record_id = $result->organism_id;
 
-        $organism_entity_id = chado_get_record_entity_by_table("organism", $organism_record_id);
+      $organism_entity_id = chado_get_record_entity_by_table("organism", $organism_record_id);
 
       $entity->{$field_name}['und'][$i] = [
         'value' =>
-          ['entity_id' =>  $organism_entity_id,
+          [
+            'entity_id' => $organism_entity_id,
             'common_name' => $organism_common_name,
-            'abbreviation' => $organism_abbreviation],
-      ];
-
-      $entity->{$field_name}['und'][$i]["testing"] = [
-        'field_name' => $field_name,
-        'field_type' => $field_type,
-        'field_column' => $field_column,
-        'base_table' => $base_table,
-        'instance' => $this->instance,
-        'entity_record' => $entity_record,
+            'abbreviation' => $organism_abbreviation,
+            'organism_record_id' => $organism_record_id
+          ],
       ];
 
       ++$i;
 
     }
-
-
-
-
-    //    $organism_id = $this->instance["id"];
-    //
-    //    if ($base_table == 'analysis'){
-    //
-    //      $entity->{$field_name}['und'][0] = array(
-    //        'value' => array(),
-    //        'chado-' . $field_table . '__' . 'organism_entity_id' => $this->instance["id"],
-    //      );
-
-    //  }
-    //
-
-    //    $type_term = tripal_get_chado_semweb_term('contact', 'type_id');
-    //    $name_term = tripal_get_chado_semweb_term('contact', 'name');
-    //    $description_term = tripal_get_chado_semweb_term('contact', 'description');
-    //
-    //    // Get the FK that links to the base record.
-    //    $schema = chado_get_schema($field_table);
-    //
-    //    $fkey_lcolumn = key($schema['foreign keys'][$base_table]['columns']);
-    //    $fkey_rcolumn = $schema['foreign keys'][$base_table]['columns'][$fkey_lcolumn];
-    //
-    //    // Set some defaults for the empty record.
-    //    $entity->{$field_name}['und'][0] = array(
-    //      'value' => array(),
-    //      'chado-' . $field_table . '__' . $fkey_lcolumn => $record->$fkey_lcolumn,
-    //      'chado-' . $field_table . '__' . 'contact_id' => '',
-    //    );
-    //
-    //    dpm([
-    //      'field_name' => $field_name,
-    //      'field_type' => $field_type,
-    //      'field_column' => $field_column,
-    //      'base_table' => $base_table,
-    //      'fkey_l' => $fkey_lcolumn,
-    //      'fkey_r' => $fkey_rcolumn,
-    //      'schema' => $schema
-    //    ]);
-    //
 
   }
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @class
  * Purpose:
@@ -13,7 +14,7 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
   public static $default_label = 'Organism';
 
   // The list of field types for which this formatter is appropriate.
-  public static $field_types = array('obi__organism_linker');
+  public static $field_types = ['obi__organism_linker'];
 
   /**
    * Provides the form for editing of this field.
@@ -72,6 +73,41 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
    */
   public function form(&$widget, &$form, &$form_state, $langcode, $items, $delta, $element) {
     parent::form($widget, $form, $form_state, $langcode, $items, $delta, $element);
+
+    //todo: if previous set, reset via $items
+
+    $settings = $this->field['settings'];
+    $field_name = $this->field['field_name'];
+    $field_type = $this->field['type'];
+    $field_table = $this->instance['settings']['chado_table'];
+    $field_column = $this->instance['settings']['chado_column'];
+
+    $linker_field = 'chado-' . $field_table . '__organism_id';
+
+    $organism_id = 0;
+
+    if (count($items) > 0 and array_key_exists('organism_record_id', $items[0]['value'])) {
+      $organism_id = $items[0]['value']['organism_record_id'];
+    }
+
+
+    $widget['value'] = [
+      '#type' => 'value',
+      '#value' => array_key_exists($delta, $items) ? $items[$delta]['value'] : '',
+    ];
+    $options = tripal_get_organism_select_options(FALSE);
+
+    $widget['value'] = [
+      '#type' => 'select',
+      '#title' => $element['#title'],
+      '#description' => $element['#description'],
+      '#options' => $options,
+      '#default_value' => $organism_id,
+      '#required' => $element['#required'],
+      '#weight' => isset($element['#weight']) ? $element['#weight'] : 0,
+      '#delta' => $delta,//delta is its order in an array of subelements
+    ];
+
   }
 
   /**
@@ -84,7 +120,37 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
    * fields must be used to set the 'value' field.
    */
   public function validate($element, $form, &$form_state, $langcode, $delta) {
+    $field_name = $this->field['field_name'];
+    $field_type = $this->field['type'];
+    $base_table = $this->instance['settings']['base_table'];
+    $field_table = $this->instance['settings']['chado_table'];
+    $chado_column = $this->instance['settings']['chado_column'];
+    $instance = $this->instance;
+
+    //todo: un-hardcode ths based on contact field
+    // Get information about this contact linker table.
+    $schema = chado_get_schema($field_table);
+    $pkey = 'organism_analysis_id';
+
+    $lfkey_field = key($schema['foreign keys'][$base_table]['columns']);
+
+    // Get the name from the form state.
+    $organism_id = $form_state['values'][$field_name]['und'][$delta]['value'];
+
+    // If the user provided a name then we want to set the foreign key
+    // value to be the chado_record_id
+    if ($organism_id) {
+      $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__organism_id'] = $organism_id;
+      $form_state['values'][$field_name]['und'][$delta]['chado-' . $base_table . '__analysis_id'] = $organism_id;
+
+    }
+    // If no name is provided then we want to set the field for deletion.
+    else {
+      $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__' . $lfkey_field] = '';
+      $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__organism_id'] = '';
+    }
   }
+
 
   /**
    * Performs extra commands when the entity form is submitted.
