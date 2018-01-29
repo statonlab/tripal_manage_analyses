@@ -582,3 +582,57 @@
 //    ":descrim_prop_value" => $descriminating_prop_value,
 //  ]);
 //}
+
+//define the organism_analysis mview table
+
+/*
+ * install organism analysis table
+ */
+function tripal_manage_analyses_update_7305() {
+
+  $schema = [
+    'table' => 'organism_analysis',
+    'fields' => [
+      'organism_analysis_id' => ['type' => 'serial', 'not null' => TRUE],
+      'organism_id' => ['type' => 'int', 'not null' => TRUE],
+      'analysis_id' => ['type' => 'int', 'not null' => TRUE],
+    ],
+    'primary key' => ['organism_analysis_id'],
+    'foreign keys' => [
+      'organism' => [
+        'table' => 'organism',
+        'columns' => [
+          'organism_id' => 'organism_id',
+        ],
+      ],
+      'analysis' => [
+        'table' => 'analysis',
+        'columns' => [
+          'analysis_id' => 'analysis_id',
+        ],
+      ],
+    ],
+    'indexes' => [
+      'organism_analysis_idx1' => ['organism_id'],
+      'organism_analysis_idx2' => ['analysis_id'],
+
+    ],
+    'unique keys' => [
+      'organism_analysis_unique_uq1' => ['organism_id', 'analysis_id'],
+    ],
+  ];
+  chado_create_custom_table('organism_analysis', $schema);
+
+  //Now, migrate existing analysis_organism records to the proper linker table.
+
+  $aos = chado_db_select("analysis_organism", "ao")
+    ->fields('ao', array('analysis_id', 'organism_id'))
+    ->execute();
+
+  foreach($aos as $ao){
+    $analysis_id = $ao->analysis_id;
+    $organism_id = $ao->organism_id;
+    chado_insert_record("organism_analysis", ['analysis_id' => $analysis_id, 'organism_id' => $organism_id]);
+  }
+
+}

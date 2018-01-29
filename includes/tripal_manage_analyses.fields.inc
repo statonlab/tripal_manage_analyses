@@ -21,7 +21,7 @@
  * @param $entity_type
  *   This should be 'TripalEntity' for all Tripal Content.
  * @param $bundle
- *   This object describes the Type of Tripal Entity (e.g. Organism or Gene)
+ *   This object describes the Type of Tripal Entity (e.g. organism or Gene)
  *   this hook is being called for. However, since this hook creates field
  *   types (by definition not tied to a specific Tripal Content Type (bundle))
  *   and since a field type will only be created if it doesn't already exist,
@@ -37,10 +37,22 @@
 function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
   $fields = [];
 
-  // Because we are expecting data housed in Chado we can use the 'data_table'
-  // property of the bundle to determine if this bundle is really the one
-  // we want the field to be associated with.
-  if (isset($bundle->data_table) AND ($bundle->data_table == 'organism')) {
+  //organism linker on analysis
+  if (isset($bundle->data_table) AND ($bundle->data_table == 'analysis')) {
+    $field_name = 'obi__organism_linker';
+    $field_type = 'obi__organism_linker';
+    $fields[$field_name] = array(
+      'field_name' => $field_name,
+      'type' => $field_type,
+      'cardinality' => 1,
+      'locked' => FALSE,
+      'storage' => array(
+        'type' => 'field_chado_storage',
+      ),
+    );
+
+  }
+    if (isset($bundle->data_table) AND ($bundle->data_table == 'organism')) {
     // First add my term.
     tripal_insert_cvterm([
       'id' => 'local:analysis_browser',
@@ -141,11 +153,11 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
  * @param $entity_type
  *   This should be 'TripalEntity' for all Tripal Content.
  * @param $bundle
- *   This object describes the Type of Tripal Entity (e.g. Organism or Gene)
+ *   This object describes the Type of Tripal Entity (e.g. organism or Gene)
  *   the field instances are being created for. Thus this hook is called once
  *   per Tripal Content Type on your site. The name of the bundle is the
  *   machine name of the type (e.g. bio_data_1) and the label of the bundle
- *   (e.g. Organism) is what you see in the interface. Since the label can be
+ *   (e.g. organism) is what you see in the interface. Since the label can be
  *   changed by site admin, we suggest checking the data_table to determine if
  *   this is the entity you want to add field instances to.
  *
@@ -157,7 +169,39 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
 function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
   $instances = [];
 
-  // ORGANISM.
+  if (isset($bundle->data_table) AND ($bundle->data_table == 'analysis')) {
+
+    $field_name = 'obi__organism_linker';
+    $field_type = 'obi__organism_linker';
+    $instances[$field_name] =  array(
+      'field_name' => $field_name,
+      'entity_type' => $entity_type,
+      'bundle' => $bundle->name,
+      'label' => 'organism',
+      'description' => 'organism associated with this entity',
+      'required' => FALSE,
+      'settings' => array(
+        'auto_attach' => FALSE,
+        'chado_table' => 'organism_analysis',//chado table is what its inserting into
+        'chado_column' => 'organism_id', //this is probably right
+        'base_table' => 'analysis', //the bundle's base table i think?
+      ),
+      'widget' => array(
+        'type' => 'obi__organism_linker_widget',
+        'settings' => array(),
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'obi__organism_linker_formatter',
+          'settings' => array(),
+        ),
+      ),
+    );
+  
+  }
+
+    // ORGANISM.
   //===============
   if (isset($bundle->data_table) AND ($bundle->data_table == 'organism')) {
     $field_name = 'local__analysis_browser';
