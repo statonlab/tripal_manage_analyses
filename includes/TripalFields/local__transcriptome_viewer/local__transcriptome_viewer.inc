@@ -119,19 +119,13 @@ class local__transcriptome_viewer extends ChadoField {
    *
    */
   public function load($entity) {
+ //   parent::load($entity);
+    $field = get_class($this);
+    $entity->{$field}['und'][0]['value'] = null;
 
     if ($entity->chado_table != 'organism') {
-      $entity->{$field}['und'][0]['value'] = NULL;
       return;
     }
-
-    // ChadoFields automatically load the chado column specified in the
-    // default settings above. If that is all you need then you don't even
-    // need to implement this function. However, if you need to add any
-    // additional data to be used in the display, you should add it here.
-    parent::load($entity);
-
-    $field = get_class($this);
 
     $transcriptome_term = tripal_load_term_entity([
       'vocabulary' => 'operation',
@@ -155,11 +149,14 @@ class local__transcriptome_viewer extends ChadoField {
     $i = 0;
     $analyses = [];
     foreach ($results as $analysis) {
+
+
       $analysis->title = db_query('SELECT title FROM {tripal_entity} WHERE id = :id', [
         ':id' => $analysis->entity_id,
       ])->fetchField();
-      $entity->{$field}['und'][$i]['value'] = [
-        [
+
+      $entity->{$field}['und'][$i] = [
+      'value' =>  [
           "record_id" => $analysis->analysis_id,
           "name" => $analysis->name,
           "entity_id" => $analysis->entity_id,
@@ -168,6 +165,7 @@ class local__transcriptome_viewer extends ChadoField {
           "title" => $analysis->title,
         ],
       ];
+      $i++;
     }
   }
 }

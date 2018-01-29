@@ -85,26 +85,23 @@ class local__transcriptome_viewer_formatter extends ChadoFieldFormatter {
     // Get the settings
     $settings = $display['settings'];
 
+
     $field = 'local__transcriptome_viewer';
     if (empty($entity->{$field}['und'][0]['value'])) {
       return;
     }
     $rows = [];
     foreach($items as $item){
-      $analysis = $item["value"][0];
-      $date = new DateTime($analysis->timeexecuted);
+      $analysis = $item["value"];
+      $date = new DateTime($analysis["time_executed"]);
 
       $row = [
-      l($analysis->name, "bio_data/{$analysis->entity_id}"),
-        $analysis->program,
+      l($analysis["name"], "bio_data/{$analysis["entity_id"]}"),
+        $analysis["program"],
         $date->format('M jS, Y'),
         ];
       $rows[] = $row;
     }
-
-
-
-
 
 
     $output = theme('table', [
