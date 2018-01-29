@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @class
  * Purpose:
@@ -36,16 +37,16 @@ class local__transcriptome_viewer extends ChadoField {
   // Drupal will automatically change these settings for all fields.
   // Once instances exist for a field type then these settings cannot be
   // changed.
-  public static $default_settings = array(
+  public static $default_settings = [
     'storage' => 'field_chado_storage',
-     // It is expected that all fields set a 'value' in the load() function.
-     // In many cases, the value may be an associative array of key/value pairs.
-     // In order for Tripal to provide context for all data, the keys should
-     // be a controlled vocabulary term (e.g. rdfs:type). Keys in the load()
-     // function that are supported by the query() function should be
-     // listed here.
-     'searchable_keys' => array(),
-  );
+    // It is expected that all fields set a 'value' in the load() function.
+    // In many cases, the value may be an associative array of key/value pairs.
+    // In order for Tripal to provide context for all data, the keys should
+    // be a controlled vocabulary term (e.g. rdfs:type). Keys in the load()
+    // function that are supported by the query() function should be
+    // listed here.
+    'searchable_keys' => [],
+  ];
 
   // Provide a list of instance specific settings. These can be access within
   // the instanceSettingsForm.  When the instanceSettingsForm is submitted
@@ -54,7 +55,7 @@ class local__transcriptome_viewer extends ChadoField {
   // If you override this variable in a child class be sure to replicate the
   // term_name, term_vocab, term_accession and term_fixed keys as these are
   // required for all TripalFields.
-  public static $default_instance_settings = array(
+  public static $default_instance_settings = [
     // The DATABASE name, as it appears in chado.db.  This also builds the link-out url.  In most cases this will simply be the CV name.  In some cases (EDAM) this will be the SUBONTOLOGY.
     'term_vocabulary' => 'local',
     // The name of the term.
@@ -76,7 +77,7 @@ class local__transcriptome_viewer extends ChadoField {
     'chado_column' => 'organism_id',
     // The base table.
     'base_table' => 'organism',
-  );
+  ];
 
   // A boolean specifying that users should not be allowed to create
   // fields and instances of this field type through the UI. Such
@@ -90,7 +91,7 @@ class local__transcriptome_viewer extends ChadoField {
   // the user but otherwise provides no data.
   public static $no_data = FALSE;
 
- /**
+  /**
    * Loads the field values from the underlying data store.
    *
    * @param $entity
@@ -120,7 +121,7 @@ class local__transcriptome_viewer extends ChadoField {
   public function load($entity) {
 
     if ($entity->chado_table != 'organism') {
-      $entity->{$field}['und'][0]['value'] = null;
+      $entity->{$field}['und'][0]['value'] = NULL;
       return;
     }
 
@@ -157,12 +158,16 @@ class local__transcriptome_viewer extends ChadoField {
       $analysis->title = db_query('SELECT title FROM {tripal_entity} WHERE id = :id', [
         ':id' => $analysis->entity_id,
       ])->fetchField();
-
-
       $entity->{$field}['und'][$i]['value'] = [
-        'analysis' => $analysis,
+        [
+          "record_id" => $analysis->analysis_id,
+          "name" => $analysis->name,
+          "entity_id" => $analysis->entity_id,
+          "program" => $analysis->program,
+          "time_executed" => $analysis->timeexecuted,
+          "title" => $analysis->title,
+        ],
       ];
-
     }
   }
 }

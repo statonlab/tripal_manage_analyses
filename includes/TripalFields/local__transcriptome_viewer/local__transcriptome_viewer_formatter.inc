@@ -85,9 +85,7 @@ class local__transcriptome_viewer_formatter extends ChadoFieldFormatter {
     // Get the settings
     $settings = $display['settings'];
 
-    $field = 'local__transcriptome_browser';
-
-
+    $field = 'local__transcriptome_viewer';
     if (empty($entity->{$field}['und'][0]['value'])) {
       return;
     }
