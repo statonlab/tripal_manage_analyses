@@ -92,15 +92,23 @@ class local__transcriptome_viewer_formatter extends ChadoFieldFormatter {
       return;
     }
 
-    $rows = array_map(function ($analysis) {
+    $rows = [];
+
+    foreach($items as $analysis){
       $date = new DateTime($analysis->timeexecuted);
-      return [
-        l($analysis->name, "bio_data/{$analysis->entity_id}"),
+
+      $row = [
+      l($analysis->name, "bio_data/{$analysis->entity_id}"),
         $analysis->program,
         $date->format('M jS, Y'),
-      ];
+        ];
+      $rows[] = $row;
+    }
 
-    }, $entity->{$field}['und'][0]['value']);
+
+
+
+
 
     $output = theme('table', [
       'header' => ['Name', 'Program', 'Date Constructed'],
