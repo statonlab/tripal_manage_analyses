@@ -125,7 +125,7 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
     $base_table = $this->instance['settings']['base_table'];
     $field_table = $this->instance['settings']['chado_table'];
     $chado_column = $this->instance['settings']['chado_column'];
-    $instance = $this->instance;
+
 
     //todo: un-hardcode ths based on contact field
     // Get information about this contact linker table.
@@ -134,11 +134,18 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
 
     $lfkey_field = key($schema['foreign keys'][$base_table]['columns']);
 
-    // Get the name from the form state.
+    // Get the organism_id from the form state.
     $organism_id = $form_state['values'][$field_name]['und'][$delta]['value'];
+    // Get the analysis_id
+    $analysis_id = $form["#entity"]->chado_record_id;
 
-    // If the user provided a name then we want to set the foreign key
-    // value to be the chado_record_id
+    //First, delete any existing entry.
+    //note this lmits the field to one organism per analysis!
+   $result =  chado_delete_record("organism_analysis", [
+        'analysis_id' => $analysis_id
+        ]
+      );
+
     if ($organism_id) {
       $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__organism_id'] = $organism_id;
       $form_state['values'][$field_name]['und'][$delta]['chado-' . $base_table . '__analysis_id'] = $organism_id;
