@@ -87,21 +87,24 @@ class obi__organism_linker_formatter extends ChadoFieldFormatter {
 
     $rows = [];
     foreach ($items as $item) {
-     $organism = $item["value"];
 
-      $rows[] = [
-        l("{$organism["abbreviation"]} ({$organism["common_name"]})", "bio_data/{$organism["entity_id"]}"),
+      if (isset($item["value"])) {
+        $organism = $item["value"];
+
+        $rows[] = [
+          l("{$organism["abbreviation"]} ({$organism["common_name"]})", "bio_data/{$organism["entity_id"]}"),
+        ];
+      }
+
+      $output = theme('table', [
+        'rows' => $rows,
+      ]);
+
+      $element[] = [
+        '#type' => 'markup',
+        '#markup' => $output,
       ];
     }
-
-    $output = theme('table', [
-      'rows' => $rows,
-    ]);
-
-    $element[] = [
-      '#type' => 'markup',
-      '#markup' => $output,
-    ];
   }
 
 
