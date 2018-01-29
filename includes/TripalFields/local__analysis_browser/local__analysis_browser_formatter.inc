@@ -91,10 +91,14 @@ class local__analysis_browser_formatter extends ChadoFieldFormatter {
 
     $rows = array_map(function ($analysis) {
       $date = new DateTime($analysis->timeexecuted);
+      $date_formatted = $date->format('M jS, Y');
+      if ($date_formatted === "Jan 1st, 1900"){
+        $date_formatted = "Unknown";
+      }
       return [
         l($analysis->name, "bio_data/{$analysis->entity_id}"),
         $analysis->program,
-        $date->format('M jS, Y'),
+        $date_formatted,
       ];
     }, $entity->{$field}['und'][0]['value']);
 
