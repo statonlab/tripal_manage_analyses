@@ -88,7 +88,7 @@ class obi__organism_linker_formatter extends ChadoFieldFormatter {
     $rows = [];
     foreach ($items as $item) {
 
-      if (isset($item["value"])) {
+      if (isset($item["value"]["entity_id"])) {
         $organism = $item["value"];
 
         $rows[] = [
