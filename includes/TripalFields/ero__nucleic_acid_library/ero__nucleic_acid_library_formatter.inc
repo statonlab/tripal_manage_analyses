@@ -91,7 +91,7 @@ class ero__nucleic_acid_library_formatter extends ChadoFieldFormatter {
     $header = ["Name", "Type", "Status"];
 
     foreach ($items as $item) {
-      $library = $item;
+      $library = $item['value'];
       $obsolete = "current";
 
       if ($library["is_obsolete"]) {
