@@ -72,11 +72,11 @@ class ero__nucleic_acid_library extends ChadoField {
     // attached asynchronously.
 
       // The table in Chado that the instance maps to.
-        'chado_table' => 'organism',
+        'chado_table' => 'library',
         // The column of the table in Chado where the value of the field comes from.
-        'chado_column' => 'organism_id',
+        'chado_column' => 'library_id',
         // The base table.
-        'base_table' => 'organism',
+        'base_table' => 'library',
   ];
 
   // A boolean specifying that users should not be allowed to create
@@ -148,6 +148,7 @@ class ero__nucleic_acid_library extends ChadoField {
       $output = [];
       $entity->{$field_name}['und'][0]['value'] = null;
 
+      $i = 0;
       foreach ($results as $result) {
 
         $library_id = $result->library_id;
@@ -157,17 +158,15 @@ class ero__nucleic_acid_library extends ChadoField {
         //convert type into the cvterm value
         $library_type = tripal_get_cvterm(["cvterm_id" => $result->type_id]);
 
-        $output[] = [
+        $output = [
           "entity_id" => $entity_id,
           "name" => $result->name,
           "is_obsolete" => $result->is_obsolete,
           "type_id" => $result->type_id,
           "library_type" => $library_type->name
         ];
-      }
-      if ($results) {
-        $entity->{$field_name}['und'][0]['value'] = '1';
-        $entity->{$field_name}['und'][0]['info'] = $output;
+        $entity->{$field_name}['und'][$i]['value'] = $output;
+        $i++;
       }
     }
   }
