@@ -86,13 +86,12 @@ class ero__nucleic_acid_library_formatter extends ChadoFieldFormatter {
     if (!$items) {
       return NULL;
     }
-
     $rows = [];
     $header = ["Name", "Type", "Status"];
 
     foreach ($items as $item) {
       $library = $item['value'];
-      $obsolete = "current";
+	$obsolete = "current";
 
       if ($library["is_obsolete"]) {
         $obsolete = "obsolete";
@@ -108,10 +107,10 @@ class ero__nucleic_acid_library_formatter extends ChadoFieldFormatter {
       'rows' => $rows,
     ]);
 
-    $element[] = [
-      '#markup' => $output,
+    $element[0] = [
+	'type' => 'markup',      
+'#markup' => $output,
     ];
-
   }
 
 
