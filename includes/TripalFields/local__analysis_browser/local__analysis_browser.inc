@@ -145,6 +145,18 @@ class local__analysis_browser extends ChadoField {
       $analyses[$analysis->analysis_id] = $analysis;
     }
 
+    // Push any entries containing the word archived to the back of the array
+    foreach ($results as $key => $analysis) {
+      if (strpos($analysis->name, 'archived') !== FALSE) {
+        // Store the analysis
+        $value = $analysis;
+        // Remove the entry from the array
+        unset($analyses[$key]);
+        // Add the stored analysis to the back of the array
+        $analyses[] = $value;
+      }
+    }
+
     $entity->{$field}['und'][0]['value'] = $analyses;
   }
 }
