@@ -146,7 +146,7 @@ class local__analysis_browser extends ChadoField {
     }
 
     // Push any entries containing the word archived to the back of the array
-    foreach ($results as $key => $analysis) {
+    foreach ($analyses as $key => $analysis) {
       if (strpos($analysis->name, 'archived') !== FALSE) {
         // Store the analysis
         $value = $analysis;
