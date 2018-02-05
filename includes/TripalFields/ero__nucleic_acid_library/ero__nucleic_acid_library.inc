@@ -125,8 +125,6 @@ class ero__nucleic_acid_library extends ChadoField {
     // default settings above. If that is all you need then you don't even
     // need to implement this function. However, if you need to add any
     // additional data to be used in the display, you should add it here.
-    parent::load($entity);
-
     if ($entity->chado_table == 'organism') {
       //If its an organism, we dont have an organism_library linker table but an organism_id column in library.
 
