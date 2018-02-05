@@ -157,7 +157,6 @@ class ero__nucleic_acid_library extends ChadoField {
 
         //convert type into the cvterm value
         $library_type = tripal_get_cvterm(["cvterm_id" => $result->type_id]);
-
         $output = [
           "entity_id" => $entity_id,
           "name" => $result->name,
