@@ -81,7 +81,7 @@ class ero__nucleic_acid_library_formatter extends ChadoFieldFormatter {
    *    hook_field_formatter_view() function.
    */
   public function view(&$element, $entity_type, $entity, $langcode, $items, $display) {
-
+    
     //build a table of the libraries associated with this organism
     if (!$items) {
       return NULL;
@@ -90,27 +90,30 @@ class ero__nucleic_acid_library_formatter extends ChadoFieldFormatter {
     $header = ["Name", "Type", "Status"];
 
     foreach ($items as $item) {
-      $library = $item['value'];
-	$obsolete = "current";
+      if (isset($item['value'])) {
 
-      if ($library["is_obsolete"]) {
-        $obsolete = "obsolete";
+        $library = $item['value'];
+        $obsolete = "current";
+
+        if ($library["is_obsolete"]) {
+          $obsolete = "obsolete";
+        }
+        $link = l($library["name"], "/bio_data/" . $library["entity_id"]);
+
+        $value = [$link, $library["library_type"], $obsolete];
+        $rows[] = $value;
       }
-      $link = l($library["name"], "/bio_data/" . $library["entity_id"]);
 
-      $value = [$link, $library["library_type"], $obsolete];
-      $rows[] = $value;
+      $output = theme('table', [
+        'header' => $header,
+        'rows' => $rows,
+      ]);
+
+      $element[0] = [
+        'type' => 'markup',
+        '#markup' => $output,
+      ];
     }
-
-    $output = theme('table', [
-      'header' => $header,
-      'rows' => $rows,
-    ]);
-
-    $element[0] = [
-	'type' => 'markup',      
-'#markup' => $output,
-    ];
   }
 
 
