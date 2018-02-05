@@ -81,7 +81,6 @@ class ero__nucleic_acid_library_formatter extends ChadoFieldFormatter {
    *    hook_field_formatter_view() function.
    */
   public function view(&$element, $entity_type, $entity, $langcode, $items, $display) {
-
     //build a table of the libraries associated with this organism
     if (!$items) {
       return NULL;
@@ -103,6 +102,10 @@ class ero__nucleic_acid_library_formatter extends ChadoFieldFormatter {
         $value = [$link, $library["library_type"], $obsolete];
         $rows[] = $value;
       }
+
+if (empty($rows)){
+return NULL;
+}
 
       $output = theme('table', [
         'header' => $header,
