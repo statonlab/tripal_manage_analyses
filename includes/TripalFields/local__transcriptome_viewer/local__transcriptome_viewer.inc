@@ -146,26 +146,25 @@ class local__transcriptome_viewer extends ChadoField {
       ':organism_id' => $entity->chado_record->organism_id,
     ]);
 
-    $i = 0;
     $analyses = [];
     foreach ($results as $analysis) {
-
-
       $analysis->title = db_query('SELECT title FROM {tripal_entity} WHERE id = :id', [
         ':id' => $analysis->entity_id,
       ])->fetchField();
-
-      $entity->{$field}['und'][$i] = [
-      'value' =>  [
-          "record_id" => $analysis->analysis_id,
-          "name" => $analysis->name,
-          "entity_id" => $analysis->entity_id,
-          "program" => $analysis->program,
-          "time_executed" => $analysis->timeexecuted,
-          "title" => $analysis->title,
-        ],
-      ];
-      $i++;
+      $analyses[$analysis->analysis_id] = $analysis;
     }
+    // Push any entries containing the word archived to the back of the array
+    foreach ($analyses as $key => $analysis) {
+      if (stripos($analysis->name, 'archived') !== FALSE) {
+        // Store the analysis
+        $value = $analysis;
+        // Remove the entry from the array
+        unset($analyses[$key]);
+        // Add the stored analysis to the back of the array
+        $analyses[] = $value;
+      }
+    }
+
+    $entity->{$field}['und'][0]['value'] = $analyses;
   }
 }
