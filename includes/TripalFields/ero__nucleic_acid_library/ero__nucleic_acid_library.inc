@@ -147,6 +147,7 @@ class ero__nucleic_acid_library extends ChadoField {
       $entity->{$field_name}['und'][0]['value'] = null;
 
       $i = 0;
+
       foreach ($results as $result) {
 
         $library_id = $result->library_id;

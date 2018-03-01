@@ -83,7 +83,7 @@ class ero__nucleic_acid_library_formatter extends ChadoFieldFormatter {
   public function view(&$element, $entity_type, $entity, $langcode, $items, $display) {
 
     //build a table of the libraries associated with this organism
-    if (!$items) {
+    if (!$items[0]['value']) {
       return NULL;
     }
     $rows = [];
