@@ -3,7 +3,15 @@
 ///**
 // *  Install module
 // */
-//function tripal_manage_analyses_install() {
+function tripal_manage_analyses_install() {
+
+
+  $schema = tripal_manage_analyses_organism_analysis_linker_schema();
+
+  chado_create_custom_table('organism_analysis', $schema);
+
+
+}
 //
 //  //Update the analysis type prop for unigenes.
 //  tripal_manage_analyses_update_unigene_props();
@@ -585,10 +593,11 @@
 
 //define the organism_analysis mview table
 
-/*
- * install organism analysis table
+/**
+ *
  */
-function tripal_manage_analyses_update_7305() {
+function tripal_manage_analyses_organism_analysis_linker_schema(){
+
 
   $schema = [
     'table' => 'organism_analysis',
@@ -621,6 +630,16 @@ function tripal_manage_analyses_update_7305() {
       'organism_analysis_unique_uq1' => ['organism_id', 'analysis_id'],
     ],
   ];
+
+}
+
+/*
+ * install organism analysis table
+ */
+function tripal_manage_analyses_update_7305() {
+
+  $schema = tripal_manage_analyses_organism_analysis_linker_schema();
+
   chado_create_custom_table('organism_analysis', $schema);
 
   //Now, migrate existing analysis_organism records to the proper linker table.
@@ -636,3 +655,5 @@ function tripal_manage_analyses_update_7305() {
   }
 
 }
+
+
