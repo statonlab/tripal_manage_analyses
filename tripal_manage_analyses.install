@@ -4,14 +4,9 @@
 // *  Install module
 // */
 function tripal_manage_analyses_install() {
-
-
-  $schema = tripal_manage_analyses_organism_analysis_linker_schema();
-
-  chado_create_custom_table('organism_analysis', $schema);
-
-
+  create_organism_analysis_table();
 }
+
 //
 //  //Update the analysis type prop for unigenes.
 //  tripal_manage_analyses_update_unigene_props();
@@ -596,11 +591,8 @@ function tripal_manage_analyses_install() {
 /**
  *
  */
-function tripal_manage_analyses_organism_analysis_linker_schema(){
-
-
-  $schema = [
-    'table' => 'organism_analysis',
+function tripal_manage_analyses_organism_analysis_linker_schema() {
+  $schema['organism_analysis'] = [
     'fields' => [
       'organism_analysis_id' => ['type' => 'serial', 'not null' => TRUE],
       'organism_id' => ['type' => 'int', 'not null' => TRUE],
@@ -631,29 +623,39 @@ function tripal_manage_analyses_organism_analysis_linker_schema(){
     ],
   ];
 
+  return $schema;
+}
+
+function create_organism_analysis_table() {
+  $schema = tripal_manage_analyses_organism_analysis_linker_schema();
+
+  chado_create_custom_table('organism_analysis', $schema['organism_analysis'], TRUE, NULL, FALSE);
+
+  //Now, migrate existing analysis_organism records to the proper linker table.
+
+  if (!db_table_exists('analysis_organism')) {
+    return;
+  }
+
+  $aos = chado_db_select("analysis_organism", "ao")
+    ->fields('ao', ['analysis_id', 'organism_id'])
+    ->execute();
+
+  foreach ($aos as $ao) {
+    $analysis_id = $ao->analysis_id;
+    $organism_id = $ao->organism_id;
+    chado_insert_record("organism_analysis", [
+      'analysis_id' => $analysis_id,
+      'organism_id' => $organism_id,
+    ]);
+  }
 }
 
 /*
  * install organism analysis table
  */
 function tripal_manage_analyses_update_7305() {
-
-  $schema = tripal_manage_analyses_organism_analysis_linker_schema();
-
-  chado_create_custom_table('organism_analysis', $schema);
-
-  //Now, migrate existing analysis_organism records to the proper linker table.
-
-  $aos = chado_db_select("analysis_organism", "ao")
-    ->fields('ao', array('analysis_id', 'organism_id'))
-    ->execute();
-
-  foreach($aos as $ao){
-    $analysis_id = $ao->analysis_id;
-    $organism_id = $ao->organism_id;
-    chado_insert_record("organism_analysis", ['analysis_id' => $analysis_id, 'organism_id' => $organism_id]);
-  }
-
+  create_organism_analysis_table();
 }
 
 
