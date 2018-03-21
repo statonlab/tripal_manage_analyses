@@ -121,7 +121,7 @@ class local__transcriptome_viewer extends ChadoField {
     $transcriptome_table = 'public.chado_' . $transcriptome_bundle->name;
     $sql = "SELECT  A.analysis_id, A.name, A.program, A.timeexecuted, TT.entity_id
       FROM {chado.analysis} A
-      JOIN {chado.analysis_organism} AO ON A.analysis_id = AO.analysis_id
+      JOIN {chado.organism_analysis} AO ON A.analysis_id = AO.analysis_id
       INNER JOIN {" . db_escape_table($transcriptome_table) . "} TT ON A.analysis_id = TT.record_id
       WHERE AO.organism_id = :organism_id";
     $results = db_query($sql, [
@@ -130,24 +130,23 @@ class local__transcriptome_viewer extends ChadoField {
     $i = 0;
     $analyses = [];
 
-    foreach($results as $analysis) {
-      $analysis->title = db_query('SELECT title FROM {tripal_entity} WHERE id = :id', [
-        ':id' => $analysis->entity_id,
-      ])->fetchField();
-    }
-    // Sort results
-    foreach ($results as $analysis) {
+    // Convert results to an array
+    foreach ($results as $analysis)
+      $analyses[$analysis->analysis_id] = $analysis;
+
+    // Sort the analyses array
+    foreach ($analyses as $key => $analysis) {
       if (stripos($analysis->name, 'archived') !== FALSE) {
         // Store the analysis
         $value = $analysis;
         // Remove the entry from the array
-        unset($results[$key]);
+        unset($analyses[$key]);
         // Add the stored analysis to the back of the array
-        $results[] = $value;
+        $analyses[] = $value;
       }
     }
 
-    foreach($results as $analysis) {
+    foreach($analyses as $analysis) {
       $entity->{$field}['und'][$i] = [
         'value' =>  [
           "record_id" => $analysis->analysis_id,
