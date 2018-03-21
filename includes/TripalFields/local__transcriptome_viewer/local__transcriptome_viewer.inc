@@ -147,6 +147,11 @@ class local__transcriptome_viewer extends ChadoField {
     }
 
     foreach($analyses as $analysis) {
+
+      $analysis->title = db_query('SELECT title FROM {tripal_entity} WHERE id = :id', [
+        ':id' => $analysis->entity_id,
+      ])->fetchField();
+
       $entity->{$field}['und'][$i] = [
         'value' =>  [
           "record_id" => $analysis->analysis_id,
