@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @class
  * Purpose:
@@ -8,7 +7,6 @@
  * Assumptions:
  */
 class local__transcriptome_viewer extends ChadoField {
-
   // --------------------------------------------------------------------------
   //                     EDITABLE STATIC CONSTANTS
   //
@@ -16,22 +14,16 @@ class local__transcriptome_viewer extends ChadoField {
   // used by the static functions to provide information to Drupal about
   // the field and it's default widget and formatter.
   // --------------------------------------------------------------------------
-
   // The default label for this field.
   public static $default_label = 'Transcriptome';
-
   // The default description for this field.
   public static $default_description = 'Displays The transcriptomes associated with this entity.';
-
   // The default widget for this field.
   public static $default_widget = 'local__transcriptome_viewer_widget';
-
   // The default formatter for this field.
   public static $default_formatter = 'local__transcriptome_viewer_formatter';
-
   // The module that manages this field.
   public static $module = 'na';
-
   // A list of global settings. These can be accessed within the
   // globalSettingsForm.  When the globalSettingsForm is submitted then
   // Drupal will automatically change these settings for all fields.
@@ -47,7 +39,6 @@ class local__transcriptome_viewer extends ChadoField {
     // listed here.
     'searchable_keys' => [],
   ];
-
   // Provide a list of instance specific settings. These can be access within
   // the instanceSettingsForm.  When the instanceSettingsForm is submitted
   // then Drupal with automatically change these settings for the instance.
@@ -78,19 +69,16 @@ class local__transcriptome_viewer extends ChadoField {
     // The base table.
     'base_table' => 'organism',
   ];
-
   // A boolean specifying that users should not be allowed to create
   // fields and instances of this field type through the UI. Such
   // fields can only be created programmatically with field_create_field()
   // and field_create_instance().
   public static $no_ui = FALSE;
-
   // A boolean specifying that the field will not contain any data. This
   // should exclude the field from web services or downloads.  An example
   // could be a quick search field that appears on the page that redirects
   // the user but otherwise provides no data.
   public static $no_data = FALSE;
-
   /**
    * Loads the field values from the underlying data store.
    *
@@ -119,44 +107,49 @@ class local__transcriptome_viewer extends ChadoField {
    *
    */
   public function load($entity) {
- //   parent::load($entity);
+    //   parent::load($entity);
     $field = get_class($this);
     $entity->{$field}['und'][0]['value'] = null;
-
     if ($entity->chado_table != 'organism') {
       return;
     }
-
     $transcriptome_term = tripal_load_term_entity([
       'vocabulary' => 'operation',
       'accession' => '3258',
     ]);
-
     $transcriptome_bundle = tripal_load_bundle_entity(['term_id' => $transcriptome_term->id]);
-
     $transcriptome_table = 'public.chado_' . $transcriptome_bundle->name;
-
     $sql = "SELECT  A.analysis_id, A.name, A.program, A.timeexecuted, TT.entity_id
       FROM {chado.analysis} A
       JOIN {chado.analysis_organism} AO ON A.analysis_id = AO.analysis_id
       INNER JOIN {" . db_escape_table($transcriptome_table) . "} TT ON A.analysis_id = TT.record_id
       WHERE AO.organism_id = :organism_id";
-
     $results = db_query($sql, [
       ':organism_id' => $entity->chado_record->organism_id,
     ]);
-
     $i = 0;
     $analyses = [];
-    foreach ($results as $analysis) {
 
-
+    foreach($results as $analysis) {
       $analysis->title = db_query('SELECT title FROM {tripal_entity} WHERE id = :id', [
         ':id' => $analysis->entity_id,
       ])->fetchField();
+    }
+    // Sort results
+    foreach ($results as $analysis) {
+      if (stripos($analysis->name, 'archived') !== FALSE) {
+        // Store the analysis
+        $value = $analysis;
+        // Remove the entry from the array
+        unset($results[$key]);
+        // Add the stored analysis to the back of the array
+        $results[] = $value;
+      }
+    }
 
+    foreach($results as $analysis) {
       $entity->{$field}['und'][$i] = [
-      'value' =>  [
+        'value' =>  [
           "record_id" => $analysis->analysis_id,
           "name" => $analysis->name,
           "entity_id" => $analysis->entity_id,
