@@ -148,8 +148,7 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
 
     if ($organism_id) {
       $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__organism_id'] = $organism_id;
-      $form_state['values'][$field_name]['und'][$delta]['chado-' . $base_table . '__analysis_id'] = $organism_id;
-
+      $form_state['values'][$field_name]['und'][$delta]['chado-' . $base_table . '__analysis_id'] = $analysis_id;
     }
     // If no name is provided then we want to set the field for deletion.
     else {
