@@ -129,7 +129,7 @@ class local__analysis_browser extends ChadoField {
 
     $sql = "SELECT  A.analysis_id, A.name, A.program, A.timeexecuted
       FROM {analysis} A
-      JOIN {analysis_organism} AO ON A.analysis_id = AO.analysis_id
+      JOIN {organism_analysis} AO ON A.analysis_id = AO.analysis_id
       WHERE AO.organism_id = :organism_id";
 
     $results = chado_query($sql, [
