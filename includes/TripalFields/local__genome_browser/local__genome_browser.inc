@@ -143,7 +143,7 @@ class local__genome_browser extends ChadoField {
 
     $sql = "SELECT  A.analysis_id, A.name, A.program, A.timeexecuted, GT.entity_id
       FROM {chado.analysis} A
-      JOIN {chado.analysis_organism} AO ON A.analysis_id = AO.analysis_id
+      JOIN {chado.organism_analysis} AO ON A.analysis_id = AO.analysis_id
       INNER JOIN {" . db_escape_table($genome_table) . "} GT ON A.analysis_id = GT.record_id
       WHERE AO.organism_id = :organism_id";
 
