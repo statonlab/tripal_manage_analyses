@@ -1,12 +1,6 @@
-
 # Tripal Manage Analyses
 
-This module is for implementation of custom fields etc for the Staton lab HWG.
-
-
-This module creates a custom table, `organism_analysis`.  It populates this custom table with entries from the `analysis_organism` **mview**, if it exists.  We do this for sites that previously had an `analysis_organism` mview that linked analyses to organisms via their features. However, you may have analyses on your site that do not have features.
-
-We provide a new linker field to populate the `organism_analysis` table: the `obi__organism_linker` field.
+This module creates browseable analysis and library lists for organisms.
 
 ## Viewer fields
 
@@ -15,7 +9,7 @@ We provide a new linker field to populate the `organism_analysis` table: the `ob
 * local__genome_browser
 * local__transcriptome_viewer
 
-These fields are for listing **analysis** entities associated with an organism.  Because HWG uses different bundles for different analysis types, we have unique fields for the bundles we want to showcase: transcriptome or genome assemblies.
+These fields are for listing **analysis** entities associated with an organism.  There are unique fields for the transcriptome and genome assembly bundles, so that the user can quickly find these analyses and hte corresponding data.
 
 To use the above fields, you also need the field for linking analysis to organism:
 
@@ -27,6 +21,11 @@ To use the above fields, you also need the field for linking analysis to organis
 This field is for listing **library** entities associated with an organism.
 
 # Set Up
+## Installation
+
+This module creates a custom table, `organism_analysis`.  It populates this custom table with entries from the `analysis_organism` **mview**, if it exists.  We do this for sites that previously had an `analysis_organism` mview that linked analyses to organisms via their features. However, you may have analyses on your site that do not have features.
+
+We provide a new linker field to populate the `organism_analysis` table: the `obi__organism_linker` field.
 
 ### Adding the fields
 
@@ -36,7 +35,7 @@ Most fields in this repository are intended to attach to the organism bundle.  M
 
 ![Check for new fields](docs/add_field_message.png)
 
-We also need to enable the `organism_analysis` linker field, `obi__organism_linker`.  This is the field that will let us link an analysis to an organism when we create a new analysis.  Perform the above steps on the `analysis` bundle(s).  On HWG, we enable this field on all analysis bundle types we create: Transcriptome Assembly, Genome Assembly, Annotation Analysis, etc.
+We also need to enable the `organism_analysis` linker field, `obi__organism_linker`.  This is the field that will let us link an analysis to an organism when we create a new analysis.  Perform the above steps on the `analysis` bundle(s).  You may have multiple analysis bundle types: enable the field on each.
 
 ![analysis linker field](docs/analysis_linker_add.png)
 
