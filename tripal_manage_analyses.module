@@ -1,6 +1,5 @@
 <?php
 
-require_once "includes/tripal_manage_analyses_test.admin.inc";
 require_once "includes/tripal_manage_analyses.fields.inc";
 
 /**
