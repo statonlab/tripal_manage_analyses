@@ -15,9 +15,16 @@ We provide a new linker field to populate the `organism_analysis` table: the `ob
 * local__genome_browser
 * local__transcriptome_viewer
 
-### other
+These fields are for listing **analysis** entities associated with an organism.  Because HWG uses different bundles for different analysis types, we have unique fields for the bundles we want to showcase: transcriptome or genome assemblies.
+
+To use the above fields, you also need the field for linking analysis to organism:
 
 * ero__nucleic_acid_library
+
+### Other
+* ero__nucleic_acid_library
+
+This field is for listing **library** entities associated with an organism.
 
 # Set Up
 
@@ -28,8 +35,6 @@ After enabling the module, you will need to enable the fields you would like to 
 Most fields in this repository are intended to attach to the organism bundle.  Manage the fields for your organism bundle at `admin/structure/bio_data/manage/`.  After pressing the **Check for New Fields** button, you should see the following message:
 
 ![Check for new fields](docs/add_field_message.png)
-
-
 
 We also need to enable the `organism_analysis` linker field, `obi__organism_linker`.  This is the field that will let us link an analysis to an organism when we create a new analysis.  Perform the above steps on the `analysis` bundle(s).  On HWG, we enable this field on all analysis bundle types we create: Transcriptome Assembly, Genome Assembly, Annotation Analysis, etc.
 
