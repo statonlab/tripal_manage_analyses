@@ -46,6 +46,13 @@ Next, you need to enable the fields.  Press the **Manage Display** tab in the up
 
 ![enabling a field and creating a group](docs/analysis_group.png)  
 
+You must also enable the organism linker field on your analysis bundles.
+
+![enable analysis organism linker](docs/enable_organism_linker.png)
+
+### The transcriptome and genome fields
+
+These fields are looking for bundles that are analyses associated with a specific cvterm.  For genome assembly that is operation:0525, and operation:3258 for transcriptome.  If you don't have bundles with those terms, the fields will not work.
 
 # Usage
 
@@ -53,6 +60,13 @@ The display fields provide no widgets: once they are enabled, they will display 
 
 The organism linker field will insert organism - analysis entry links when attached to analysis bundles.
 
+If you previously used the `analysis_organism` mview, then your entries were added to the `organism_analysis` linker table when the module was installed.  If not, you'll need to use the linker field (or SQL) to link your analyses with organisms so they appear in the browser fields.
+
+![The analysis organism linker dropdown box](docs/analysis_organism_linker_box.png)
+
+Your analysis will now appear in the `local__analysis_browser` field for that organism.  You can use this field combined with the `local__genome_browser` and `local__transcriptome_viewer` fields to list all analyses associated with an organism, while emphasizing the reference assembly analyses.  HardwoodGenomics uses this strategy to make assembly and annotation download links easier to find.
+
+![HWG using linker fields](docs/hwg_linker.png)
 
 ### Splitting Analyses
 
