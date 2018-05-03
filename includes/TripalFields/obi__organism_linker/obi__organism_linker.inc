@@ -21,6 +21,7 @@ class obi__organism_linker extends ChadoField {
 
   // The default label for this field.
   public static $default_label = 'Organism';
+
   // The default description for this field.
   public static $default_description = 'Organism associated with this entity';
 
@@ -74,12 +75,6 @@ class obi__organism_linker extends ChadoField {
     // should have auto_attach set to FALSE so tha their values can be
     // attached asynchronously.
     'auto_attach' => FALSE,
-    // The table in Chado that the instance maps to.
-    'chado_table' => 'organism_analysis',
-    // The column of the table in Chado where the value of the field comes from.
-    'chado_column' => 'organism_id',
-    // The base table.
-    'base_table' => 'organism',
     // Indicates the download formats for this field.  The list must be the
     // name of a child class of the TripalFieldDownloader.
     'download_formatters' => [
@@ -137,12 +132,33 @@ class obi__organism_linker extends ChadoField {
     $field_table = $this->instance['settings']['chado_table'];
     $field_column = $this->instance['settings']['chado_column'];
     $base_table = $this->instance['settings']['base_table'];
-    //
+    $key = $base_table . '_id';
 
-    $sql = "SELECT DISTINCT O.organism_id, O.common_name, O.abbreviation FROM {chado.organism_analysis} AO
-      INNER JOIN {chado.organism} O  ON AO.organism_id = O.organism_id
-      WHERE AO.analysis_id = :analysis_id";
-    $results = db_query($sql, [':analysis_id' => $entity_record->analysis_id])->FetchAll();
+    $linker = 'chado. ' . $base_table . '_organism';
+
+    if ($base_table === 'analysis') {
+      $linker = 'chado . organism_' . $base_table;
+    }
+
+    $record_id = $entity_record->$key;
+    $sql = db_select('chado . organism', 'CO');
+    $sql->fields('CO', ['organism_id', 'common_name', 'abbreviation']);
+    $sql->join($linker, 'CL', 'CL . organism_id = CO . organism_id');
+    $sql->condition('CL . ' . $field_column, $record_id);
+
+    $results = $sql->execute()->fetchAll();
+
+    dpm($field_column);
+    dpm($record_id);
+    dpm($linker);
+
+    dpm($results);
+    //
+    //
+    //    $sql = "SELECT DISTINCT O.organism_id, O.common_name, O.abbreviation FROM {chado.organism_analysis} AO
+    //      INNER JOIN {chado.organism} O  ON AO.organism_id = O.organism_id
+    //      WHERE AO.analysis_id = :analysis_id";
+    //    $results = db_query($sql, [':analysis_id' => $entity_record->analysis_id])->FetchAll();
 
 
     $i = 0;
@@ -160,7 +176,7 @@ class obi__organism_linker extends ChadoField {
             'entity_id' => $organism_entity_id,
             'common_name' => $organism_common_name,
             'abbreviation' => $organism_abbreviation,
-            'organism_record_id' => $organism_record_id
+            'organism_record_id' => $organism_record_id,
           ],
       ];
 
@@ -239,7 +255,7 @@ class obi__organism_linker extends ChadoField {
    * The value of this top-level key is an array with the following keys:
    *   -name: this key is not actually used but is availble to improve
    *     readability of the array.  Because the key is a vocabulary term
-   *     conaining only the accession it's not always clear what it means.
+   *     conaining only the accession it's not always clear what it means .
    *     Providing a 'name' key helps other's know what the term is.
    *   -searchable:  TRUE if the element can be used for filtering the content
    *     type to which tis field is attached.  FALSE if not.
@@ -249,8 +265,9 @@ class obi__organism_linker extends ChadoField {
    *     'contains', and 'starts'.  These operations are applicable for numeric
    *     values: 'gt', 'lt', 'gte', 'lte'.
    *   -label: The label (if applicable) to appear for the elmeent. The default
-   *     is to use the term's name.
-   *   -help: Help text (if applicable) to appear for the element. The default
+   *     is to use the term's name .
+   *   -help: Help text(if applicable)
+   * to appear for the element . The default
    *     is to use the term's definition.
    *   -type: The data type: e.g. 'string' or 'numeric'. Default is 'string'.
    *   -sortable: TRUE if the element can be sorted.  FALSE if not.
@@ -270,7 +287,7 @@ class obi__organism_linker extends ChadoField {
    * all of these.
    *
    * @code
-  $field_term = $this->getFieldTermID();
+   * $field_term = $this->getFieldTermID();
    * return array(
    * $field_term => array(
    * 'operations' => array('eq', 'contains', 'starts'),

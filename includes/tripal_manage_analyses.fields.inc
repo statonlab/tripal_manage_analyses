@@ -44,7 +44,7 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
     $fields[$field_name] = array(
       'field_name' => $field_name,
       'type' => $field_type,
-      'cardinality' => 1,
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
       'locked' => FALSE,
       'storage' => array(
         'type' => 'field_chado_storage',
@@ -52,6 +52,24 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
     );
 
   }
+
+
+  //organism linker on map
+  if (isset($bundle->data_table) AND ($bundle->data_table == 'featuremap')) {
+
+    $field_name = 'obi__organism_linker';
+    $field_type = 'obi__organism_linker';
+    $fields[$field_name] = array(
+      'field_name' => $field_name,
+      'type' => $field_type,
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+      'locked' => FALSE,
+      'storage' => array(
+        'type' => 'field_chado_storage',
+      ),
+    );
+  }
+
     if (isset($bundle->data_table) AND ($bundle->data_table == 'organism')) {
     // First add my term.
     tripal_insert_cvterm([
@@ -181,7 +199,7 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
       'settings' => array(
         'auto_attach' => FALSE,
         'chado_table' => 'organism_analysis',//chado table is what its inserting into
-        'chado_column' => 'organism_id', //this is probably right
+        'chado_column' => 'analysis_id', //organism_id is a constant.   what changes is the record linker id, which is what this is.
         'base_table' => 'analysis', //the bundle's base table i think?
       ),
       'widget' => array(
@@ -199,7 +217,40 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
   
   }
 
-    // ORGANISM.
+  // FEATUREMAPS
+  //==============
+  if (isset($bundle->data_table) AND ($bundle->data_table == 'featuremap')) {
+
+    $field_name = 'obi__organism_linker';
+    $field_type = 'obi__organism_linker';
+    $instances[$field_name] =  array(
+      'field_name' => $field_name,
+      'entity_type' => $entity_type,
+      'bundle' => $bundle->name,
+      'label' => 'Organism',
+      'description' => 'Organism associated with this map.',
+      'required' => FALSE,
+      'settings' => array(
+        'auto_attach' => FALSE,
+        'chado_table' => 'featuremap_organism',//chado table is what its inserting into
+        'chado_column' => 'organism_id', //this is probably right
+        'base_table' => 'featuremap', //the bundle's base table i think?
+      ),
+      'widget' => array(
+        'type' => 'obi__organism_linker_widget',
+        'settings' => array(),
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'obi__organism_linker_formatter',
+          'settings' => array(),
+        ),
+      ),
+    );
+  }
+
+  // ORGANISM.
   //===============
   if (isset($bundle->data_table) AND ($bundle->data_table == 'organism')) {
     $field_name = 'local__analysis_browser';
