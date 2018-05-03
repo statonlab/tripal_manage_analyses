@@ -125,9 +125,9 @@ class local__genome_browser extends ChadoField {
     // need to implement this function. However, if you need to add any
     // additional data to be used in the display, you should add it here.
     parent::load($entity);
+    $entity->{$field}['und'][0]['value'] = NULL;
 
     if ($entity->chado_table != 'organism') {
-      $entity->{$field}['und'][0]['value'] = null;
       return;
     }
 
@@ -139,6 +139,9 @@ class local__genome_browser extends ChadoField {
     ]);
     $genome_bundle = tripal_load_bundle_entity(['term_id' => $genome_term->id]);
 
+    if (!$genome_bundle) {
+      return;
+    }
     $genome_table = 'public.chado_' . $genome_bundle->name;
 
     $sql = "SELECT  A.analysis_id, A.name, A.program, A.timeexecuted, GT.entity_id
