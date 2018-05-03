@@ -90,8 +90,7 @@ class obi__organism_linker_formatter extends ChadoFieldFormatter {
       return;
     }
     //don't use a list if there's only 1 item
-
-    if (count($items === 1 && isset ($item["value"]["entity_id"]))) {
+    if (count($items === 1) && isset ($items[0]["value"]["entity_id"])) {
       $organism = $items[0]["value"];
       $output = l("{$organism["abbreviation"]} ({$organism["common_name"]})", "bio_data/{$organism["entity_id"]}");
       $element[] = [

@@ -74,8 +74,6 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
   public function form(&$widget, &$form, &$form_state, $langcode, $items, $delta, $element) {
     parent::form($widget, $form, $form_state, $langcode, $items, $delta, $element);
 
-    //todo: if previous set, reset via $items
-
     $settings = $this->field['settings'];
     $field_name = $this->field['field_name'];
     $field_type = $this->field['type'];
@@ -86,10 +84,12 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
 
     $organism_id = 0;
 
-    if (count($items) > 0 and array_key_exists('organism_record_id', $items[0]['value'])) {
-      $organism_id = $items[0]['value']['organism_record_id'];
-    }
+    //get default for this delta if its set
 
+    if (count($items > 0) && isset($items[$delta]) && isset($items[$delta]['value']) && isset($items[$delta]['value']['organism_id'])){
+          $organism_id = $items[$delta]['value']['organism_record_id'];
+
+    }
 
     $widget['value'] = [
       '#type' => 'value',
@@ -127,24 +127,29 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
     $chado_column = $this->instance['settings']['chado_column'];
 
 
-    //todo: un-hardcode ths based on contact field
-    // Get information about this contact linker table.
+    // Get information about this organism linker table.
     $schema = chado_get_schema($field_table);
-    $pkey = 'organism_analysis_id';
+
+    $pkey = $schema['primary key'][0];
 
     $lfkey_field = key($schema['foreign keys'][$base_table]['columns']);
 
     // Get the organism_id from the form state.
     $organism_id = $form_state['values'][$field_name]['und'][$delta]['value'];
-    // Get the analysis_id
-    $analysis_id = $form["#entity"]->chado_record_id;
+    // Get the linked record id
+    $record_id = $form["#entity"]->chado_record_id;
 
-    //First, delete any existing entry.
+    //First, delete any existing entries.
+    $result = chado_delete_record($field_table, [
+        $chado_column => $record_id,
+      ]
+    );
+
     //note this lmits the field to one organism per analysis!
-   $result =  chado_delete_record("organism_analysis", [
-        'analysis_id' => $analysis_id
-        ]
-      );
+    $result = chado_delete_record("organism_analysis", [
+        $chado_column => $record_id,
+      ]
+    );
 
     if ($organism_id) {
       $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__organism_id'] = $organism_id;
