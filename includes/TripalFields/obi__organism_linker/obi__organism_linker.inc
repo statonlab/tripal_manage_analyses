@@ -21,7 +21,6 @@ class obi__organism_linker extends ChadoField {
 
   // The default label for this field.
   public static $default_label = 'Organism';
-
   // The default description for this field.
   public static $default_description = 'Organism associated with this entity';
 
