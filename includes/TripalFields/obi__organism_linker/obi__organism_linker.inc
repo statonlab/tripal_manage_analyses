@@ -134,10 +134,10 @@ class obi__organism_linker extends ChadoField {
     $base_table = $this->instance['settings']['base_table'];
     $key = $base_table . '_id';
 
-    $linker = 'chado. ' . $base_table . '_organism';
+    $linker = 'chado.' . $base_table . '_organism';
 
     if ($base_table === 'analysis') {
-      $linker = 'chado . organism_' . $base_table;
+      $linker = 'chado.organism_' . $base_table;
     }
 
     $record_id = $entity_record->$key;
@@ -147,20 +147,7 @@ class obi__organism_linker extends ChadoField {
     $sql->condition('CL . ' . $field_column, $record_id);
 
     $results = $sql->execute()->fetchAll();
-
-    dpm($field_column);
-    dpm($record_id);
-    dpm($linker);
-
-    dpm($results);
-    //
-    //
-    //    $sql = "SELECT DISTINCT O.organism_id, O.common_name, O.abbreviation FROM {chado.organism_analysis} AO
-    //      INNER JOIN {chado.organism} O  ON AO.organism_id = O.organism_id
-    //      WHERE AO.analysis_id = :analysis_id";
-    //    $results = db_query($sql, [':analysis_id' => $entity_record->analysis_id])->FetchAll();
-
-
+    
     $i = 0;
 
     foreach ($results as $result) {

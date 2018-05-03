@@ -233,7 +233,7 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
       'settings' => array(
         'auto_attach' => FALSE,
         'chado_table' => 'featuremap_organism',//chado table is what its inserting into
-        'chado_column' => 'organism_id', //this is probably right
+        'chado_column' => 'featuremap_id',
         'base_table' => 'featuremap', //the bundle's base table i think?
       ),
       'widget' => array(

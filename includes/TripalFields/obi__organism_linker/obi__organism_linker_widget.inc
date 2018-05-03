@@ -2,11 +2,7 @@
 
 /**
  * @class
- * Purpose:
- *
- * Allowing edit?
- * Data:
- * Assumptions:
+ * Purpose: Insert into Organism linker fields, such as featuremap_organism.
  */
 class obi__organism_linker_widget extends ChadoFieldWidget {
 
@@ -86,7 +82,7 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
 
     //get default for this delta if its set
 
-    if (count($items > 0) && isset($items[$delta]) && isset($items[$delta]['value']) && isset($items[$delta]['value']['organism_id'])){
+    if (count($items > 0) && isset($items[$delta]) && isset($items[$delta]['value']) && isset($items[$delta]['value']['organism_record_id'])){
           $organism_id = $items[$delta]['value']['organism_record_id'];
 
     }
@@ -130,35 +126,26 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
     // Get information about this organism linker table.
     $schema = chado_get_schema($field_table);
 
-    $pkey = $schema['primary key'][0];
+    $pkey = $schema['primary key'][0];//ie featuremap_organism_id
 
     $lfkey_field = key($schema['foreign keys'][$base_table]['columns']);
 
     // Get the organism_id from the form state.
     $organism_id = $form_state['values'][$field_name]['und'][$delta]['value'];
+
     // Get the linked record id
     $record_id = $form["#entity"]->chado_record_id;
 
-    //First, delete any existing entries.
-    $result = chado_delete_record($field_table, [
-        $chado_column => $record_id,
-      ]
-    );
-
-    //note this lmits the field to one organism per analysis!
-    $result = chado_delete_record("organism_analysis", [
-        $chado_column => $record_id,
-      ]
-    );
-
     if ($organism_id) {
+      dpm($organism_id);
+
       $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__organism_id'] = $organism_id;
-      $form_state['values'][$field_name]['und'][$delta]['chado-' . $base_table . '__analysis_id'] = $analysis_id;
+      $form_state['values'][$field_name]['und'][$delta]['chado-' . $base_table . '__' . $lfkey_field] = $record_id;
     }
     // If no name is provided then we want to set the field for deletion.
     else {
-      $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__' . $lfkey_field] = '';
       $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__organism_id'] = '';
+      $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__' . $lfkey_field] = '';
     }
   }
 
