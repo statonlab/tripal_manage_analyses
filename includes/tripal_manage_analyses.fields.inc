@@ -74,8 +74,6 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
       ],
     ];
 
-
-
     tripal_insert_cvterm([
       'id' => 'ero:0000160',
       'name' => 'nucleic_acid_library',
@@ -177,8 +175,8 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
       'field_name' => $field_name,
       'entity_type' => $entity_type,
       'bundle' => $bundle->name,
-      'label' => 'organism',
-      'description' => 'organism associated with this entity',
+      'label' => 'Organism',
+      'description' => 'Organism associated with this entity',
       'required' => FALSE,
       'settings' => array(
         'auto_attach' => FALSE,

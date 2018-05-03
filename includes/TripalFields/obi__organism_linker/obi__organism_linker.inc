@@ -21,7 +21,6 @@ class obi__organism_linker extends ChadoField {
 
   // The default label for this field.
   public static $default_label = 'Organism';
-
   // The default description for this field.
   public static $default_description = 'Organism associated with this entity';
 
@@ -63,7 +62,7 @@ class obi__organism_linker extends ChadoField {
     // The DATABASE name, as it appears in chado.db.  This also builds the link-out url.  In most cases this will simply be the CV name.  In some cases (EDAM) this will be the SUBONTOLOGY.
     'term_vocabulary' => 'OBI',
     // The name of the term.
-    'term_name' => 'organism',
+    'term_name' => 'Organism',
     // The unique ID (i.e. accession) of the term.
     'term_accession' => '0100026',
     // Set to TRUE if the site admin is not allowed to change the term
