@@ -71,12 +71,12 @@ class ero__nucleic_acid_library extends ChadoField {
     // should have auto_attach set to FALSE so tha their values can be
     // attached asynchronously.
 
-      // The table in Chado that the instance maps to.
-        'chado_table' => 'library',
-        // The column of the table in Chado where the value of the field comes from.
-        'chado_column' => 'library_id',
-        // The base table.
-        'base_table' => 'library',
+    // The table in Chado that the instance maps to.
+    'chado_table' => 'library',
+    // The column of the table in Chado where the value of the field comes from.
+    'chado_column' => 'library_id',
+    // The base table.
+    'base_table' => 'library',
   ];
 
   // A boolean specifying that users should not be allowed to create
@@ -119,12 +119,7 @@ class ero__nucleic_acid_library extends ChadoField {
    *
    */
   public function load($entity) {
-    //TODO:  THIS FIELD ONLY CARES ABOUT ATTACHING TO ORGANISM RIGHT NOW.  If it were to function as a proper linker field, it should load appropriately.
 
-    // ChadoFields automatically load the chado column specified in the
-    // default settings above. If that is all you need then you don't even
-    // need to implement this function. However, if you need to add any
-    // additional data to be used in the display, you should add it here.
     if ($entity->chado_table == 'organism') {
       //If its an organism, we dont have an organism_library linker table but an organism_id column in library.
 
@@ -144,7 +139,7 @@ class ero__nucleic_acid_library extends ChadoField {
 
       //go through the results and lookup the entity id of each
       $output = [];
-      $entity->{$field_name}['und'][0]['value'] = null;
+      $entity->{$field_name}['und'][0]['value'] = NULL;
       $i = 0;
 
       foreach ($results as $result) {
@@ -160,7 +155,7 @@ class ero__nucleic_acid_library extends ChadoField {
           "name" => $result->name,
           "is_obsolete" => $result->is_obsolete,
           "type_id" => $result->type_id,
-          "library_type" => $library_type->name
+          "library_type" => $library_type->name,
         ];
         $entity->{$field_name}['und'][$i]['value'] = $output;
         $i++;
