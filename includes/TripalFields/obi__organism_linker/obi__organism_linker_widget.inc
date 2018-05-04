@@ -97,24 +97,14 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
     $fk_value = (array_key_exists('#entity', $element) and $element['#entity']) ? $element['#entity']->chado_record_id : NULL;
 
 
-    dpm($items);
     // If the field already has a value then it will come through the $items
     // array.  This happens when editing an existing record.
     if (count($items) > 0 and array_key_exists($delta, $items)) {
-      dpm($field_table);
-      dpm($fkey_lcolumn);
-
-      dpm($pkey);
 
      $fk_value = tripal_get_field_item_keyval($items, $delta, 'chado-' . $field_table . '__' . $fkey_lcolumn, $fk_value); //ie analysis_id
-      $record_id = tripal_get_field_item_keyval($items, $delta, 'chado-' . $field_table . '__' . $pkey, $record_id); //ie organism_analysis_id
+      $record_id = tripal_get_field_item_keyval($items, $delta, 'chado-' . $field_table . '__' . $pkey, $record_id);
+     //ie organism_analysis_id
       $organism_id = tripal_get_field_item_keyval($items, $delta, 'chado-' . $field_table . '__organism_id', $organism_id); //organism_id
-      dpm($fk_value);
-
-      dpm($record_id);
-
-      dpm($organism_id);
-
     }
 
     $widget['value'] = [
@@ -136,8 +126,6 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
       '#type' => 'value',
       '#default_value' => $organism_id,
     );
-
-    dpm($widget);
 
     $widget['value'] = [
       '#type' => 'select',
@@ -184,8 +172,9 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
     // If no organism is provided then we want to set the field for deletion.
     else {
       $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__organism_id'] = '';
-      $form_state['values'][$field_name]['und'][$delta]['value'] = '';
+      $form_state['values'][$field_name]['und'][$delta]['value'] = 'delete me';
       $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__' . $lfkey_field] = '';
     }
   }
+
 }
