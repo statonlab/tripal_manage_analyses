@@ -75,15 +75,45 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
     $field_type = $this->field['type'];
     $field_table = $this->instance['settings']['chado_table'];
     $field_column = $this->instance['settings']['chado_column'];
+    $base_table = $this->instance['settings']['base_table'];
+
+
+    // Get information about this organism linker table.
+    $schema = chado_get_schema($field_table);
+    $pkey = $schema['primary key'][0];//ie featuremap_organism_id
+    $lfkey_field = key($schema['foreign keys'][$base_table]['columns']);
 
     $linker_field = 'chado-' . $field_table . '__organism_id';
 
+    $fkey_lcolumn = key($schema['foreign keys'][$base_table]['columns']);
+    //    $fkey_lcolumn = key($schema['foreign keys']['protocol']['columns']);
+
+    $fkey_rcolumn = $schema['foreign keys'][$base_table]['columns'][$fkey_lcolumn];
+
+    $record_id = '';
+
     $organism_id = 0;
+    //duh where do we get organism id...
+    $fk_value = (array_key_exists('#entity', $element) and $element['#entity']) ? $element['#entity']->chado_record_id : NULL;
 
-    //get default for this delta if its set
 
-    if (count($items > 0) && isset($items[$delta]) && isset($items[$delta]['value']) && isset($items[$delta]['value']['organism_record_id'])) {
-      $organism_id = $items[$delta]['value']['organism_record_id'];
+    dpm($items);
+    // If the field already has a value then it will come through the $items
+    // array.  This happens when editing an existing record.
+    if (count($items) > 0 and array_key_exists($delta, $items)) {
+      dpm($field_table);
+      dpm($fkey_lcolumn);
+
+      dpm($pkey);
+
+     $fk_value = tripal_get_field_item_keyval($items, $delta, 'chado-' . $field_table . '__' . $fkey_lcolumn, $fk_value); //ie analysis_id
+      $record_id = tripal_get_field_item_keyval($items, $delta, 'chado-' . $field_table . '__' . $pkey, $record_id); //ie organism_analysis_id
+      $organism_id = tripal_get_field_item_keyval($items, $delta, 'chado-' . $field_table . '__organism_id', $organism_id); //organism_id
+      dpm($fk_value);
+
+      dpm($record_id);
+
+      dpm($organism_id);
 
     }
 
@@ -92,6 +122,22 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
       '#value' => array_key_exists($delta, $items) ? $items[$delta]['value'] : '',
     ];
     $options = tripal_get_organism_select_options(FALSE);
+
+
+    $widget['chado-' . $field_table . '__' . $pkey] = array(
+      '#type' => 'value',
+      '#default_value' => $record_id,
+    );
+    $widget['chado-' . $field_table . '__' . $fkey_lcolumn] = array(
+      '#type' => 'value',
+      '#default_value' => $fk_value,
+    );
+    $widget['chado-' . $field_table . '__organism_id'] = array(
+      '#type' => 'value',
+      '#default_value' => $organism_id,
+    );
+
+    dpm($widget);
 
     $widget['value'] = [
       '#type' => 'select',
@@ -130,13 +176,15 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
     // Get the organism_id from the form state.
     $organism_id = $form_state['values'][$field_name]['und'][$delta]['value'];
 
+
     if ($organism_id) {
             $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__organism_id'] = $organism_id;
-      $form_state['values'][$field_name]['und'][$delta]['value'] = $organism_id;
     }
-    // If no name is provided then we want to set the field for deletion.
+
+    // If no organism is provided then we want to set the field for deletion.
     else {
       $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__organism_id'] = '';
+      $form_state['values'][$field_name]['und'][$delta]['value'] = '';
       $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__' . $lfkey_field] = '';
     }
   }

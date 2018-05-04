@@ -134,26 +134,36 @@ class obi__organism_linker extends ChadoField {
     $base_table = $this->instance['settings']['base_table'];
     $key = $base_table . '_id';
 
+    $schema = chado_get_schema($field_table);
+    $pkey = $schema['primary key'][0];
+
     $linker = 'chado.' . $base_table . '_organism';
+    $linker_key = $base_table . '_organism_id';
+    $fkey_lcolumn = key($schema['foreign keys'][$base_table]['columns']);
+    $fkey_rcolumn = $schema['foreign keys'][$base_table]['columns'][$fkey_lcolumn];
 
     if ($base_table === 'analysis') {
       $linker = 'chado.organism_' . $base_table;
+      $linker_key = 'organism_' . $base_table . '_id';
+
     }
 
     $record_id = $entity_record->$key;
     $sql = db_select('chado . organism', 'CO');
     $sql->fields('CO', ['organism_id', 'common_name', 'abbreviation']);
-    $sql->join($linker, 'CL', 'CL . organism_id = CO . organism_id');
-    $sql->condition('CL . ' . $field_column, $record_id);
+    $sql->join($linker, 'CL', 'CL.organism_id = CO.organism_id');
+    $sql->fields('CL', [$linker_key]);
+    $sql->condition('CL.' . $field_column, $record_id);
 
     $results = $sql->execute()->fetchAll();
-    
+
     $i = 0;
 
     foreach ($results as $result) {
       $organism_abbreviation = $result->abbreviation;
       $organism_common_name = $result->common_name;
       $organism_record_id = $result->organism_id;
+      $linker_record_id = $result->$linker_key;
 
       $organism_entity_id = chado_get_record_entity_by_table("organism", $organism_record_id);
 
@@ -163,8 +173,13 @@ class obi__organism_linker extends ChadoField {
             'entity_id' => $organism_entity_id,
             'common_name' => $organism_common_name,
             'abbreviation' => $organism_abbreviation,
-            'organism_record_id' => $organism_record_id,
+            'organism_id' => $organism_record_id,
+            'linker_record_id' => $linker_record_id,
           ],
+        'chado-' . $field_table . '__' . $pkey => $linker_record_id,
+        'chado-' . $field_table . '__' . 'organism_id' => $organism_record_id,
+        'chado-' . $field_table . '__' . $fkey_lcolumn => $record_id,
+
       ];
 
       ++$i;
