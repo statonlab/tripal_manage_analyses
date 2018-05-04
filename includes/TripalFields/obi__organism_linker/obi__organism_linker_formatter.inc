@@ -82,18 +82,17 @@ class obi__organism_linker_formatter extends ChadoFieldFormatter {
    */
   public function view(&$element, $entity_type, $entity, $langcode, $items, $display) {
 
+    $output = NULL;
     // Get the settings
     $settings = $display['settings'];
-  //  $output = '<ul>';
+    //  $output = '<ul>';
 
     if (count($items) === 0) {
       return;
     }
 
-    dpm($items);
-
     //don't use a list if there's only 1 item
-    if (count($items) === 1 && isset($items[0]["value"]["entity_id"])) {
+    if (isset($items[0]["value"]["entity_id"])) {
       $organism = $items[0]["value"];
       $output = l("{$organism["abbreviation"]} ({$organism["common_name"]})", "bio_data/{$organism["entity_id"]}");
       $element[] = [
@@ -102,21 +101,10 @@ class obi__organism_linker_formatter extends ChadoFieldFormatter {
       ];
       return;
     }
-
-
-    foreach ($items as $item) {
-      if (isset($item["value"]["entity_id"])) {
-        $organism = $item["value"];
-     //   $output .= '<li>';
-        $output = l("{$organism["abbreviation"]} ({$organism["common_name"]})", "bio_data/{$organism["entity_id"]}");
-      //  $output .= '</li>';
-      }
-   //   $output .= '</ul>';
-      $element[] = [
-        '#type' => 'markup',
-        '#markup' => $output,
-      ];
-    }
+    $element[] = [
+      '#type' => 'markup',
+      '#markup' => $output,
+    ];
   }
 
 

@@ -82,8 +82,8 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
 
     //get default for this delta if its set
 
-    if (count($items > 0) && isset($items[$delta]) && isset($items[$delta]['value']) && isset($items[$delta]['value']['organism_record_id'])){
-          $organism_id = $items[$delta]['value']['organism_record_id'];
+    if (count($items > 0) && isset($items[$delta]) && isset($items[$delta]['value']) && isset($items[$delta]['value']['organism_record_id'])) {
+      $organism_id = $items[$delta]['value']['organism_record_id'];
 
     }
 
@@ -122,25 +122,17 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
     $field_table = $this->instance['settings']['chado_table'];
     $chado_column = $this->instance['settings']['chado_column'];
 
-
     // Get information about this organism linker table.
     $schema = chado_get_schema($field_table);
-
     $pkey = $schema['primary key'][0];//ie featuremap_organism_id
-
     $lfkey_field = key($schema['foreign keys'][$base_table]['columns']);
 
     // Get the organism_id from the form state.
     $organism_id = $form_state['values'][$field_name]['und'][$delta]['value'];
 
-    // Get the linked record id
-    $record_id = $form["#entity"]->chado_record_id;
-
     if ($organism_id) {
-      dpm($organism_id);
-
-      $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__organism_id'] = $organism_id;
-      $form_state['values'][$field_name]['und'][$delta]['chado-' . $base_table . '__' . $lfkey_field] = $record_id;
+            $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__organism_id'] = $organism_id;
+      $form_state['values'][$field_name]['und'][$delta]['value'] = $organism_id;
     }
     // If no name is provided then we want to set the field for deletion.
     else {
@@ -148,39 +140,4 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
       $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__' . $lfkey_field] = '';
     }
   }
-
-
-  /**
-   * Performs extra commands when the entity form is submitted.
-   *
-   * Drupal typically does not provide a submit hook for fields.  The
-   * TripalField provides one to allow for behind-the-scenes actions to
-   * occur.   This function should never be used for updates, deletes or
-   * inserts for the Chado table associated with the field.  Rather, the
-   * storage backend should be allowed to handle inserts, updates deletes.
-   * However, it is permissible to perform inserts, updates or deletions within
-   * Chado using this function.  Those operations can be performed if needed but
-   * on other tables not directly associated with the field.
-   *
-   * An example is the chado.feature_synonym table.  The chado_linker__synonym
-   * field allows the user to provide a brand new synonynm and it must add it
-   * to the chado.synonym table prior to the record in the
-   * chado.feature_synonym table.  This insert occurs in the widgetFormSubmit
-   * function.
-   *
-   * @param $form
-   *    The submitted form array.
-   * @param $form_state .
-   *    The form state array.
-   * @param $entity_type
-   *    The type of $entity.
-   * @param $entity
-   *    The entity for the operation.
-   * @param $langcode
-   *    The language associated with $items.
-   * @param $delta
-   */
-  public function submit($form, &$form_state, $entity_type, $entity, $langcode, $delta) {
-  }
-
 }
