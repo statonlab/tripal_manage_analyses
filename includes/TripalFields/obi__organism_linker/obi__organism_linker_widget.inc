@@ -2,11 +2,7 @@
 
 /**
  * @class
- * Purpose:
- *
- * Allowing edit?
- * Data:
- * Assumptions:
+ * Purpose: Insert into Organism linker fields, such as featuremap_organism.
  */
 class obi__organism_linker_widget extends ChadoFieldWidget {
 
@@ -74,28 +70,62 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
   public function form(&$widget, &$form, &$form_state, $langcode, $items, $delta, $element) {
     parent::form($widget, $form, $form_state, $langcode, $items, $delta, $element);
 
-    //todo: if previous set, reset via $items
-
     $settings = $this->field['settings'];
     $field_name = $this->field['field_name'];
     $field_type = $this->field['type'];
     $field_table = $this->instance['settings']['chado_table'];
     $field_column = $this->instance['settings']['chado_column'];
+    $base_table = $this->instance['settings']['base_table'];
+
+
+    // Get information about this organism linker table.
+    $schema = chado_get_schema($field_table);
+    $pkey = $schema['primary key'][0];//ie featuremap_organism_id
+    $lfkey_field = key($schema['foreign keys'][$base_table]['columns']);
 
     $linker_field = 'chado-' . $field_table . '__organism_id';
 
+    $fkey_lcolumn = key($schema['foreign keys'][$base_table]['columns']);
+    //    $fkey_lcolumn = key($schema['foreign keys']['protocol']['columns']);
+
+    $fkey_rcolumn = $schema['foreign keys'][$base_table]['columns'][$fkey_lcolumn];
+
+    $record_id = '';
+
     $organism_id = 0;
+    //duh where do we get organism id...
+    $fk_value = (array_key_exists('#entity', $element) and $element['#entity']) ? $element['#entity']->chado_record_id : NULL;
 
-    if (count($items) > 0 and array_key_exists('organism_record_id', $items[0]['value'])) {
-      $organism_id = $items[0]['value']['organism_record_id'];
+
+    // If the field already has a value then it will come through the $items
+    // array.  This happens when editing an existing record.
+    if (count($items) > 0 and array_key_exists($delta, $items)) {
+
+     $fk_value = tripal_get_field_item_keyval($items, $delta, 'chado-' . $field_table . '__' . $fkey_lcolumn, $fk_value); //ie analysis_id
+      $record_id = tripal_get_field_item_keyval($items, $delta, 'chado-' . $field_table . '__' . $pkey, $record_id);
+     //ie organism_analysis_id
+      $organism_id = tripal_get_field_item_keyval($items, $delta, 'chado-' . $field_table . '__organism_id', $organism_id); //organism_id
     }
-
 
     $widget['value'] = [
       '#type' => 'value',
       '#value' => array_key_exists($delta, $items) ? $items[$delta]['value'] : '',
     ];
     $options = tripal_get_organism_select_options(FALSE);
+
+
+    $widget['chado-' . $field_table . '__' . $pkey] = array(
+      '#type' => 'value',
+      '#default_value' => $record_id,
+    );
+    $widget['chado-' . $field_table . '__' . $fkey_lcolumn] = array(
+      '#type' => 'value',
+      '#default_value' => $fk_value,
+    );
+    $widget['chado-' . $field_table . '__organism_id'] = array(
+      '#type' => 'value',
+      '#default_value' => $organism_id,
+    );
 
     $widget['value'] = [
       '#type' => 'select',
@@ -126,69 +156,25 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
     $field_table = $this->instance['settings']['chado_table'];
     $chado_column = $this->instance['settings']['chado_column'];
 
-
-    //todo: un-hardcode ths based on contact field
-    // Get information about this contact linker table.
+    // Get information about this organism linker table.
     $schema = chado_get_schema($field_table);
-    $pkey = 'organism_analysis_id';
-
+    $pkey = $schema['primary key'][0];//ie featuremap_organism_id
     $lfkey_field = key($schema['foreign keys'][$base_table]['columns']);
 
     // Get the organism_id from the form state.
     $organism_id = $form_state['values'][$field_name]['und'][$delta]['value'];
-    // Get the analysis_id
-    $analysis_id = $form["#entity"]->chado_record_id;
 
-    //First, delete any existing entry.
-    //note this lmits the field to one organism per analysis!
-   $result =  chado_delete_record("organism_analysis", [
-        'analysis_id' => $analysis_id
-        ]
-      );
 
     if ($organism_id) {
-      $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__organism_id'] = $organism_id;
-      $form_state['values'][$field_name]['und'][$delta]['chado-' . $base_table . '__analysis_id'] = $analysis_id;
+            $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__organism_id'] = $organism_id;
     }
-    // If no name is provided then we want to set the field for deletion.
+
+    // If no organism is provided then we want to set the field for deletion.
     else {
-      $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__' . $lfkey_field] = '';
       $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__organism_id'] = '';
+      $form_state['values'][$field_name]['und'][$delta]['value'] = 'delete me';
+      $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__' . $lfkey_field] = '';
     }
-  }
-
-
-  /**
-   * Performs extra commands when the entity form is submitted.
-   *
-   * Drupal typically does not provide a submit hook for fields.  The
-   * TripalField provides one to allow for behind-the-scenes actions to
-   * occur.   This function should never be used for updates, deletes or
-   * inserts for the Chado table associated with the field.  Rather, the
-   * storage backend should be allowed to handle inserts, updates deletes.
-   * However, it is permissible to perform inserts, updates or deletions within
-   * Chado using this function.  Those operations can be performed if needed but
-   * on other tables not directly associated with the field.
-   *
-   * An example is the chado.feature_synonym table.  The chado_linker__synonym
-   * field allows the user to provide a brand new synonynm and it must add it
-   * to the chado.synonym table prior to the record in the
-   * chado.feature_synonym table.  This insert occurs in the widgetFormSubmit
-   * function.
-   *
-   * @param $form
-   *    The submitted form array.
-   * @param $form_state .
-   *    The form state array.
-   * @param $entity_type
-   *    The type of $entity.
-   * @param $entity
-   *    The entity for the operation.
-   * @param $langcode
-   *    The language associated with $items.
-   * @param $delta
-   */
-  public function submit($form, &$form_state, $entity_type, $entity, $langcode, $delta) {
   }
 
 }
