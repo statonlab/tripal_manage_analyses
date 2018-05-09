@@ -125,7 +125,7 @@ class local__genome_browser extends ChadoField {
     // need to implement this function. However, if you need to add any
     // additional data to be used in the display, you should add it here.
     parent::load($entity);
-    $entity->{$field}['und'][0]['value'] = NULL;
+    $entity->{$this->field}['und'][0]['value'] = NULL;
 
     if ($entity->chado_table != 'organism') {
       return;
