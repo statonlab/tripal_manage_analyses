@@ -81,7 +81,7 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
     // Get information about this organism linker table.
     $schema = chado_get_schema($field_table);
     if (!$schema){
-      return;
+      drupal_set_message(t('The organism linker field for '. $field_table .  ' is not present in the chado database!'));
     }
     $pkey = $schema['primary key'][0];//ie featuremap_organism_id
     $lfkey_field = key($schema['foreign keys'][$base_table]['columns']);

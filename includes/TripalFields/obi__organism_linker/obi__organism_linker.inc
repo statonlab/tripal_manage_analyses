@@ -136,7 +136,7 @@ class obi__organism_linker extends ChadoField {
 
     $schema = chado_get_schema($field_table);
     if (!$schema){
-      return;
+      drupal_set_message(t('The organism linker field for '. $field_table .  ' is not present in the chado database!'));
     }
     $pkey = $schema['primary key'][0];
 
