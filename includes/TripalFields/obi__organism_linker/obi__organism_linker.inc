@@ -135,6 +135,9 @@ class obi__organism_linker extends ChadoField {
     $key = $base_table . '_id';
 
     $schema = chado_get_schema($field_table);
+    if (!$schema){
+      return;
+    }
     $pkey = $schema['primary key'][0];
 
     $linker = 'chado.' . $base_table . '_organism';
