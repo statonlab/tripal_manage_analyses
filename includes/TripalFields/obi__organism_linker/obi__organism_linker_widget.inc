@@ -80,6 +80,9 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
 
     // Get information about this organism linker table.
     $schema = chado_get_schema($field_table);
+    if (!$schema){
+      return;
+    }
     $pkey = $schema['primary key'][0];//ie featuremap_organism_id
     $lfkey_field = key($schema['foreign keys'][$base_table]['columns']);
 
@@ -111,7 +114,7 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
       '#type' => 'value',
       '#value' => array_key_exists($delta, $items) ? $items[$delta]['value'] : '',
     ];
-    $options = tripal_get_organism_select_options(FALSE);
+    $options = chado_get_organism_select_options(false);
 
 
     $widget['chado-' . $field_table . '__' . $pkey] = array(
