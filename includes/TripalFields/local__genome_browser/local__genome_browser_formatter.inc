@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @class
  * Purpose:
@@ -12,12 +13,12 @@ class local__genome_browser_formatter extends ChadoFieldFormatter {
   public static $default_label = 'Genome Browser';
 
   // The list of field types for which this formatter is appropriate.
-  public static $field_types = array('local__genome_browser');
+  public static $field_types = ['local__genome_browser'];
 
   // The list of default settings for this formatter.
-  public static $default_settings = array(
+  public static $default_settings = [
     'setting1' => 'default_value',
-  );
+  ];
 
   /**
    * Provides the field's setting form.
@@ -68,14 +69,14 @@ class local__genome_browser_formatter extends ChadoFieldFormatter {
    *  into a CSV file will always be identical.  The view need not show all
    *  of the data in the 'values' array.
    *
-   *  @param $element
-   *  @param $entity_type
-   *  @param $entity
-   *  @param $langcode
-   *  @param $items
-   *  @param $display
+   * @param $element
+   * @param $entity_type
+   * @param $entity
+   * @param $langcode
+   * @param $items
+   * @param $display
    *
-   *  @return
+   * @return
    *    An element array compatible with that returned by the
    *    hook_field_formatter_view() function.
    */
@@ -90,25 +91,26 @@ class local__genome_browser_formatter extends ChadoFieldFormatter {
     if (empty($entity->{$field}['und'][0]['value'])) {
       return;
     }
+    if (is_array($entity->{$field}['und'][0]['value'])) {
+      $rows = array_map(function ($analysis) {
+        $date = new DateTime($analysis->timeexecuted);
+        return [
+          l($analysis->name, "bio_data/{$analysis->entity_id}"),
+          $analysis->program,
+          $date->format('M jS, Y'),
+        ];
+      }, $entity->{$field}['und'][0]['value']);
 
-    $rows = array_map(function ($analysis) {
-      $date = new DateTime($analysis->timeexecuted);
-      return [
-        l($analysis->name, "bio_data/{$analysis->entity_id}"),
-        $analysis->program,
-        $date->format('M jS, Y'),
+      $output = theme('table', [
+        'header' => ['Name', 'Program', 'Date Constructed'],
+        'rows' => $rows,
+      ]);
+
+      $element[] = [
+        '#type' => 'markup',
+        '#markup' => $output,
       ];
-    }, $entity->{$field}['und'][0]['value']);
-
-    $output = theme('table', [
-      'header' => ['Name', 'Program', 'Date Constructed'],
-      'rows' => $rows,
-    ]);
-
-    $element[] = [
-      '#type' => 'markup',
-      '#markup' => $output,
-    ];
+    }
   }
 
   /**
