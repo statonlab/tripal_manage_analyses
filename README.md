@@ -2,23 +2,27 @@
 
 This module creates browseable analysis and library lists for organisms.
 
+It also provides the `obi__organism` linker.  This linker attaches to **analyses** and lists organisms linked to it.
+
 ## Viewer fields
 
 ### analysis viewers
+
+The following fields attach to **organism**.
+
 * local__analysis_browser
 * local__genome_browser
 * local__transcriptome_viewer
+* ero__nucleic_acid_library
 
-These fields are for listing **analysis** entities associated with an organism.  There are unique fields for the transcriptome and genome assembly bundles, so that the user can quickly find these analyses and hte corresponding data.
+
+These fields are for listing **analysis** entities (or library entities) associated with an organism.  There are unique fields for the transcriptome and genome assembly bundles, so that the user can quickly find these analyses and hte corresponding data.
 
 To use the above fields, you also need the field for linking analysis to organism:
 
-* ero__nucleic_acid_library
+## obi__organism linker field
 
-### Other
-* ero__nucleic_acid_library
-
-This field is for listing **library** entities associated with an organism.
+In addition to the viewer fields wich attach to **organism**, we also provide the obi__organism linker field.  This field is the **inverse** of the analysis linker fields.  It attaches to analysis and displays the associated organism.  More importantly, it provides a widget for the analysis, so you can specify the organism so it will show up on the organism page.
 
 # Set Up
 ## Installation
