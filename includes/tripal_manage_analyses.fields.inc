@@ -197,6 +197,9 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
       'description' => 'Organism associated with this entity',
       'required' => FALSE,
       'settings' => array(
+        'term_vocabulary' => 'OBI',
+        'term_name' => 'organism',
+        'term_accession' => '0100026',
         'auto_attach' => FALSE,
         'chado_table' => 'organism_analysis',//chado table is what its inserting into
         'chado_column' => 'analysis_id', //organism_id is a constant.   what changes is the record linker id, which is what this is.
@@ -214,7 +217,7 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
         ),
       ),
     );
-  
+
   }
 
   // FEATUREMAPS
@@ -231,6 +234,9 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
       'description' => 'Organism associated with this map.',
       'required' => FALSE,
       'settings' => array(
+        'term_vocabulary' => 'OBI',
+        'term_name' => 'organism',
+        'term_accession' => '0100026',
         'auto_attach' => FALSE,
         'chado_table' => 'featuremap_organism',//chado table is what its inserting into
         'chado_column' => 'featuremap_id',
@@ -263,6 +269,9 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
       'description' => 'Display a set of analyses related to an organism',
       'required' => FALSE,
       'settings' => [
+        'term_vocabulary' => 'local',
+        'term_name' => 'analysis_browser',
+        'term_accession' => 'analysis_browser',
         'auto_attach' => FALSE,
         'chado_table' => $bundle->data_table,
         'chado_column' => 'organism_id',
@@ -291,6 +300,9 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
       'description' => 'Displays libraries (BAC, YAC etc) associated with this entity.',
       'required' => FALSE,
       'settings' => [
+        'term_vocabulary' => 'ero',
+        'term_name' => 'nucleic_acid_library',
+        'term_accession' => '0000160',
         'auto_attach' => FALSE,
         'chado_table' => $bundle->data_table,
         'chado_column' => 'organism_id',
@@ -319,6 +331,9 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
       'description' => 'The transcriptome associated with this entity',
       'required' => FALSE,
       'settings' => array(
+        'term_vocabulary' => 'local',
+        'term_name' => 'transcriptome_viewer',
+        'term_accession' => 'transcriptome_viewer',
         'auto_attach' => FALSE,
         'chado_table' => $bundle->data_table,
         'chado_column' => 'organism_id',
@@ -348,6 +363,9 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
       'description' => 'List the genomes for an organism',
       'required' => FALSE,
       'settings' => array(
+        'term_vocabulary' => 'local',
+        'term_name' => 'genome_browser',
+        'term_accession' => 'genome_browser',
         'auto_attach' => FALSE,
         'chado_table' => $bundle->data_table,
         'chado_column' => 'organism_id',
