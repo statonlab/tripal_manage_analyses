@@ -7,7 +7,8 @@
  */
 function tripal_manage_analyses_install() {
   create_organism_analysis_table();
-  //insert terms
+
+  // Insert terms
   tripal_insert_cvterm([
     'name' => 'Transcriptome Assembly',
     'def' => '',
@@ -15,6 +16,7 @@ function tripal_manage_analyses_install() {
     'cv_name' => 'operation',
     'db_name' => 'EDAM',
   ]);
+
   tripal_insert_cvterm([
     'name' => 'Genome Assembly',
     'def' => '',
@@ -22,13 +24,23 @@ function tripal_manage_analyses_install() {
     'cv_name' => 'operation',
     'db_name' => 'EDAM',
   ]);
+
+  tripal_manage_analysis_remove_orphaned_records();
+  tripal_manage_analyses_add_foreign_keys();
 }
 
-
-//define the organism_analysis mview table
+/**
+ * Uninstall the module.
+ */
+function tripal_manage_analyses_uninstall() {
+  // Delete the table on uninstall
+  if (db_table_exists('chado.organism_analysis')) {
+    db_drop_table('chado.organism_analysis');
+  }
+}
 
 /**
- *
+ * Define the organism_analysis mview table
  */
 function tripal_manage_analyses_organism_analysis_linker_schema() {
   $schema['organism_analysis'] = [
@@ -38,20 +50,20 @@ function tripal_manage_analyses_organism_analysis_linker_schema() {
       'analysis_id' => ['type' => 'int', 'not null' => TRUE],
     ],
     'primary key' => ['organism_analysis_id'],
-    'foreign keys' => [
-      'organism' => [
-        'table' => 'organism',
-        'columns' => [
-          'organism_id' => 'organism_id',
-        ],
-      ],
-      'analysis' => [
-        'table' => 'analysis',
-        'columns' => [
-          'analysis_id' => 'analysis_id',
-        ],
-      ],
-    ],
+    //'foreign keys' => [
+    //  'organism' => [
+    //    'table' => 'organism',
+    //    'columns' => [
+    //      'organism_id' => 'organism_id',
+    //    ],
+    //  ],
+    //  'analysis' => [
+    //    'table' => 'analysis',
+    //    'columns' => [
+    //      'analysis_id' => 'analysis_id',
+    //    ],
+    //  ],
+    //],
     'indexes' => [
       'organism_analysis_idx1' => ['organism_id'],
       'organism_analysis_idx2' => ['analysis_id'],
@@ -65,12 +77,16 @@ function tripal_manage_analyses_organism_analysis_linker_schema() {
   return $schema;
 }
 
+/**
+ * Create the table.
+ */
 function create_organism_analysis_table() {
   $schema = tripal_manage_analyses_organism_analysis_linker_schema();
 
-  chado_create_custom_table('organism_analysis', $schema['organism_analysis'], TRUE, NULL, FALSE);
+  chado_create_custom_table('organism_analysis', $schema['organism_analysis'],
+    TRUE, NULL, FALSE);
 
-  //Now, migrate existing analysis_organism records to the proper linker table.
+  // Now, migrate existing analysis_organism records to the proper linker table.
   if (!db_table_exists('analysis_organism')) {
     return;
   }
@@ -96,4 +112,48 @@ function tripal_manage_analyses_update_7305() {
   create_organism_analysis_table();
 }
 
+/**
+ * Remove analysis to organism associations that link to deleted records.
+ */
+function tripal_manage_analysis_remove_orphaned_records() {
+  // Find deleted organisms and remove them
+  db_query('DELETE FROM chado.organism_analysis WHERE organism_analysis_id IN (
+              SELECT organism_analysis_id FROM chado.organism_analysis oa
+              LEFT JOIN chado.organism o ON o.organism_id = oa.organism_id 
+              WHERE o.organism_id IS NULL)')->execute();
+
+  // Find deleted analyses and remove them
+  db_query('DELETE FROM chado.organism_analysis WHERE organism_analysis_id IN (
+              SELECT organism_analysis_id FROM chado.organism_analysis oa
+              LEFT JOIN chado.analysis a ON a.analysis_id = oa.analysis_id 
+              WHERE a.analysis_id IS NULL)')->execute();
+}
+
+/**
+ * Add foreign keys to organism_analysis linker table.
+ */
+function tripal_manage_analyses_add_foreign_keys() {
+  $prev_db = chado_set_active('chado');
+  db_query('ALTER TABLE chado.organism_analysis
+   ADD CONSTRAINT organism_analysis_organism_id_fk
+   FOREIGN KEY (organism_id)
+   REFERENCES chado.organism(organism_id)
+   ON DELETE CASCADE')->execute();
+
+  db_query('ALTER TABLE chado.organism_analysis 
+   ADD CONSTRAINT organism_analysis_analysis_id_fk
+   FOREIGN KEY (analysis_id) 
+   REFERENCES chado.analysis(analysis_id)
+   ON DELETE CASCADE')->execute();
+  chado_set_active($prev_db);
+}
+
+/**
+ * Delete any orphaned relationships and add foreign keys
+ * to organism_analysis table.
+ */
+function tripal_manage_analyses_update_7306() {
+  tripal_manage_analysis_remove_orphaned_records();
+  tripal_manage_analyses_add_foreign_keys();
+}
 
