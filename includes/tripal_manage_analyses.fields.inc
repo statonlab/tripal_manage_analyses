@@ -37,6 +37,32 @@
 function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
   $fields = [];
 
+  if (isset($bundle->data_table) AND ($bundle->data_table == 'feature')) {
+
+    // First add my term.
+    tripal_insert_cvterm(array(
+      'id' => 'data:1255',
+      'name' => 'Sequence features',
+      'cv_name' => 'EDAM',
+      'definition' => 'Gathers information about all subfeatures (mRNA, CDS, proteins) associated with a top-level feature (gene)',
+    ));
+
+    // Then describe the field defined by that term.
+    $field_name = 'data__sequence_features';
+    $field_type = 'data__sequence_features';
+    $fields[$field_name] = array(
+      'field_name' => $field_name,
+      'type' => $field_type,
+      'cardinality' => 1,
+      'locked' => FALSE,
+      'storage' => array(
+        'type' => 'field_chado_storage',
+      ),
+    );
+  }
+
+
+
   //organism linker on analysis
   if (isset($bundle->data_table) AND ($bundle->data_table == 'analysis')) {
     $field_name = 'obi__organism_linker';
@@ -184,6 +210,42 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
  */
 function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
   $instances = [];
+
+
+
+  if (isset($bundle->data_table) AND ($bundle->data_table == 'feature')) {
+    $field_name = 'data__sequence_features';
+    $instances[$field_name] = [
+      'field_name' => $field_name,
+      'entity_type' => $entity_type,
+      'bundle' => $bundle->name,
+      'label' => 'Transcript Information',
+      'description' => 'Gathers information about all subfeatures (mRNA, CDS, proteins) associated with a top-level feature (gene)',
+      'required' => FALSE,
+      'settings' => [
+        'term_vocabulary' => 'data',
+        'term_name' => 'Sequence features',
+        'term_accession' => '1255',
+        'auto_attach' => FALSE,
+        'chado_table' => $bundle->data_table,
+        'chado_column' => 'organism_id',
+        'base_table' => $bundle->data_table,
+      ],
+      'widget' => [
+        'type' => 'data__sequence_features_widget',
+        'settings' => [],
+      ],
+      'display' => [
+        'default' => [
+          'label' => 'hidden',
+          'type' => 'data__sequence_features_formatter',
+          'settings' => [],
+        ],
+      ],
+    ];
+
+
+  }
 
   if (isset($bundle->data_table) AND ($bundle->data_table == 'analysis')) {
 

@@ -17,7 +17,7 @@ class data__sequence_features extends ChadoField {
   // --------------------------------------------------------------------------
 
   // The default label for this field.
-  public static $default_label = 'Transcript Information';
+  public static $default_label = 'Child Features';
 
   // The default description for this field.
   public static $default_description = 'Gathers information about all subfeatures (mRNA, CDS, proteins) associated with a top-level feature (gene)';
@@ -54,7 +54,7 @@ class data__sequence_features extends ChadoField {
   public static $download_formatters = array(
      'TripalTabDownloader',
      'TripalCSVDownloader',
-  ),
+  );
 
   // Provide a list of instance specific settings. These can be access within
   // the instanceSettingsForm.  When the instanceSettingsForm is submitted
@@ -111,6 +111,11 @@ class data__sequence_features extends ChadoField {
     // need to implement this function. However, if you need to add any
     // additional data to be used in the display, you should add it here.
     parent::load($entity);
+
+    $field = get_class($this);
+
+    $entity->{$field}['und'][0]['value'] = $entity;
+
   }
 
 
