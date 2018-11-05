@@ -47,56 +47,96 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
 
     foreach ($children as $child_id => $child) {
+      $info = $child['info'][0];
+
+      $name = $info->uniquename;
+
+      $element[$child_id] = [
+        '#type' => 'fieldset',
+        '#title' => $name,
+        '#attributes' => [
+          'class' => [
+            'collapsible',
+          ],
+        ],
+      ];
 
       #populate info for this child
-      $name = $child['info']->name;
+      $type = $info->type_name;
 
-      $output = "<h3>{$name} </h3>";
+      $source_feature = $info->source_feature_name;
 
-      $output .= $this->buildChildTable($child);
+      $header = ['Type', 'Location', 'Start', 'Stop'];
 
-      $element[$child] = ['#markup' => $output];
+      $rows[] = [$type, $source_feature, $info->fmin, $info->fmax];
 
+      $output = theme('table', ['header' => $header, 'rows' => $rows]);
+
+
+      $rows = $this->buildChildTable($child);
+
+
+      $header = [
+        'Name',
+        'Type',
+        'Start',
+        'Stop',
+        // 'Parent',
+        'Annotations',
+        'Sequence',
+      ];
+      $output .= theme('table', ['header' => $header, 'rows' => $rows]);
+      $element[$child_id]['tables'] = ['#markup' => $output];
     }
-
 
   }
 
 
   private function buildChildTable($child) {
 
-    $parent_name = $child['info']->name;
-
-
-
-    $header = ['Name', 'Type', 'Parent', 'Annotations', 'Download'];
-
+    $parent_name = $child['info'][0]->uniquename;
     $rows = [];
-
-
 
     $children = $child['children'];
 
-    foreach ($children as $gchild){
-      $info = $gchild['info'];
+    foreach ($children as $gchild) {
+      $info = $gchild['info'][0];
+      $annotations = [];
 
-      ['Name' => $gchild
-      'Type' =>
-      'Parent' => $parent_name]
+      if (count($gchild['info']) > 1){
 
+        foreach ($gchild['info'] as $record){
 
+          $annotations[] = $record->annotation_name;
+        }
 
+      }
 
+      $sequences = NULL;
+      if ($info->residues) {
+        $sequences = "Click to Download";
+      }
+
+      $annotation_string = implode('\n', $annotations);
+      //If more than one entry, those are extra annotations
+      $rows[] = [
+        'Name' => $info->uniquename,
+        'Type' => $info->type_name,
+        'Start' => $info->fmin,
+        'Stop' => $info->fmax,
+        //  'Parent' => $parent_name,
+        'Annotations' => $annotation_string,
+        'Download' => $sequences
+        // 'Download' => wordwrap($info->residues, 40, "<br>", TRUE),
+      ];
+
+      if (isset($gchild['children'])) {
+        $ggchild = $this->buildChildTable($gchild);
+
+      }
 
     }
-
-
-    $out = theme('table', ['header' => $header, 'rows' => $rows]);
-
-
-    return $out;
-
-
+    return $rows;
   }
 
   /**
@@ -138,13 +178,14 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       $query->addField('cvt', 'name', 'type_name');//table, field, alias
       //Left Join on annotations
       $query->leftJoin('chado.feature_cvterm', 'fcvt', 'fcvt.feature_id = f.feature_id');
-      $query->leftJoin('chado.cvterm', 'cvt', 'cvt.cvterm_id = fcvt.cvterm_id');
+      $query->leftJoin('chado.cvterm', 'cvt2', 'cvt.cvterm_id = fcvt.cvterm_id');
+      $query->addField('cvt2', 'name', 'annotation_name');
+
       //Left join on feature location
       $query->leftJoin('chado.featureloc', 'fl', 'fl.feature_id = f.feature_id');
       $query->leftJoin('chado.feature', 'srcf', 'fl.srcfeature_id = srcf.feature_id');
       $query->addField('srcf', 'name', 'source_feature_name');//table, field, alias
       $query->fields('fl');
-      $query->fields('cvt', ['name']);
       $query->condition('f.feature_id', $child_id);
 
       $child_info = $query->execute()->fetchAll();
