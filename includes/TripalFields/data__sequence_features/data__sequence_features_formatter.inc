@@ -45,13 +45,20 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     //An array of child feature feature_ids.
     //Each of these has two keys: children for THAT child's children, and info, for an array of that child's annotations.
 
+    //TODO when we move this to the load, we'll actually have cardinality.  Let's copy that into items.
+
+    $items = [];
+    //In theory we'll have the load
+
+    $i = 0;
 
     foreach ($children as $child_id => $child) {
+
       $info = $child['info'][0];
 
       $name = $info->uniquename;
 
-      $element[$child_id] = [
+      $element[0][$i] = [
         '#type' => 'fieldset',
         '#title' => $name,
         '#attributes' => [
@@ -66,15 +73,23 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
       $source_feature = $info->source_feature_name;
 
-      $header = ['Type', 'Location', 'Start', 'Stop'];
+      $header = ['Name', 'ID','Type', 'Location', 'Start', 'Stop'];
 
-      $rows[] = [$type, $source_feature, $info->fmin, $info->fmax];
+      $rows[] = [$info->name, $info->uniquename, $type, $source_feature, $info->fmin, $info->fmax];
 
       $output = theme('table', ['header' => $header, 'rows' => $rows]);
 
 
+      $rows = [];
+      $header = [];
+
       $rows = $this->buildChildTable($child);
 
+      if (empty($rows)){
+        continue;
+      }
+
+      $output .='<h3>Derived Features</h3>';
 
       $header = [
         'Name',
@@ -86,7 +101,11 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
         'Sequence',
       ];
       $output .= theme('table', ['header' => $header, 'rows' => $rows]);
-      $element[$child_id]['tables'] = ['#markup' => $output];
+      $element[0][$i][$i.'table'] = ['#markup' => $output];
+    $i++;
+
+      unset($rows);
+      unset($header);
     }
 
   }
@@ -103,9 +122,11 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       $info = $gchild['info'][0];
       $annotations = [];
 
-      if (count($gchild['info']) > 1){
+      if (count($gchild['info']) > 1) {
 
-        foreach ($gchild['info'] as $record){
+        //TODO WRONG!  also for feature map.
+        foreach ($gchild['info'] as $record) {
+
 
           $annotations[] = $record->annotation_name;
         }
@@ -114,11 +135,20 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
       $sequences = NULL;
       if ($info->residues) {
-        $sequences = "Click to Download";
+
+        module_load_include('inc', 'popup', 'includes/popup.api');
+
+        $sequences = popup_element('sequence', $info->residues, $attributes = []);
+
+        //$sequences = '<a class="colorbox-load" href="/?width=950&height=500&iframe=true">Click to Download</a>';
+
       }
 
-      $annotation_string = implode('\n', $annotations);
-      //If more than one entry, those are extra annotations
+      $annotation_string = implode(': ', $annotations);
+
+      //If more than one entry, those are extra annotations OR extra featurelocs.
+
+
       $rows[] = [
         'Name' => $info->uniquename,
         'Type' => $info->type_name,
@@ -163,6 +193,8 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
   private function findChildFeatures($feature_id) {
     $this_children = [];
 
+    $prev_db = chado_set_active('chado');
+
     $query = db_select('chado.feature_relationship', 'fr')
       ->fields('fr')
       ->condition('object_id', $feature_id)
@@ -170,7 +202,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       ->fetchAll();
 
     foreach ($query as $child) {
-      chado_set_active('chado');
       $child_id = $child->subject_id;
       $query = db_select('chado.feature', 'f');
       $query->fields('f');
@@ -198,6 +229,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       }
     }
 
+    chado_set_active($prev_db);
     return $this_children;
   }
 
