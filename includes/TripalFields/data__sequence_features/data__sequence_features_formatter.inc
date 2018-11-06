@@ -53,8 +53,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     $i = 0;
 
     foreach ($children as $child_id => $child) {
-
-      $info = $child['info'][0];
+      $info = $child['info']['base_info'];
 
       $name = $info->uniquename;
 
@@ -64,18 +63,34 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
         '#attributes' => [
           'class' => [
             'collapsible',
+            'collapsed',
           ],
         ],
+        #see: https://www.drupal.org/forum/support/module-development-and-code-questions/2012-02-07/drupal-render-fieldset-element
+        '#attached' => ['js' => ['misc/collapse.js', 'misc/form.js']],
       ];
+
 
       #populate info for this child
       $type = $info->type_name;
 
-      $source_feature = $info->source_feature_name;
+      $locations = $child['info']['locations'];
+      $header = ['Name', 'ID', 'Type', 'Location', 'Start', 'Stop'];
 
-      $header = ['Name', 'ID','Type', 'Location', 'Start', 'Stop'];
 
-      $rows[] = [$info->name, $info->uniquename, $type, $source_feature, $info->fmin, $info->fmax];
+      foreach($locations as $location){
+       $start = $location->fmin;
+       $stop = $location->fmax;
+       $source_feature = $location->source_feature_name;
+        $rows[] = [
+          $info->name,
+          $info->uniquename,
+          $type,
+          $source_feature,
+          $info->fmin,
+          $info->fmax,
+        ];
+      }
 
       $output = theme('table', ['header' => $header, 'rows' => $rows]);
 
@@ -85,11 +100,11 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
       $rows = $this->buildChildTable($child);
 
-      if (empty($rows)){
+      if (empty($rows)) {
         continue;
       }
 
-      $output .='<h3>Derived Features</h3>';
+      $output .= '<h3>Derived Features</h3>';
 
       $header = [
         'Name',
@@ -101,8 +116,8 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
         'Sequence',
       ];
       $output .= theme('table', ['header' => $header, 'rows' => $rows]);
-      $element[0][$i][$i.'table'] = ['#markup' => $output];
-    $i++;
+      $element[0][$i][$i . 'table'] = ['#markup' => $output];
+      $i++;
 
       unset($rows);
       unset($header);
@@ -113,13 +128,12 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
   private function buildChildTable($child) {
 
-    $parent_name = $child['info'][0]->uniquename;
     $rows = [];
 
     $children = $child['children'];
 
     foreach ($children as $gchild) {
-      $info = $gchild['info'][0];
+      $base_info = $gchild['info'];
       $annotations = [];
 
       if (count($gchild['info']) > 1) {
@@ -134,14 +148,14 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       }
 
       $sequences = NULL;
-      if ($info->residues) {
+      if ($base_info->residues) {
 
         module_load_include('inc', 'popup', 'includes/popup.api');
 
-        $sequences = popup_element('sequence', $info->residues, $attributes = []);
+        $sequences = popup_element('sequence', $base_info->residues, $attributes = []);
 
-        //$sequences = '<a class="colorbox-load" href="/?width=950&height=500&iframe=true">Click to Download</a>';
-
+      }else {
+        //Try to infer sequence instead.
       }
 
       $annotation_string = implode(': ', $annotations);
@@ -207,20 +221,43 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       $query->fields('f');
       $query->join('chado.cvterm', 'cvt', 'cvt.cvterm_id = f.type_id');
       $query->addField('cvt', 'name', 'type_name');//table, field, alias
-      //Left Join on annotations
-      $query->leftJoin('chado.feature_cvterm', 'fcvt', 'fcvt.feature_id = f.feature_id');
-      $query->leftJoin('chado.cvterm', 'cvt2', 'cvt.cvterm_id = fcvt.cvterm_id');
-      $query->addField('cvt2', 'name', 'annotation_name');
 
-      //Left join on feature location
-      $query->leftJoin('chado.featureloc', 'fl', 'fl.feature_id = f.feature_id');
-      $query->leftJoin('chado.feature', 'srcf', 'fl.srcfeature_id = srcf.feature_id');
+      $feature_info = $query->execute()->fetchObject();
+
+
+      //TODO: if theres no residues, lets try to infer the sequence.
+
+      //get annotations
+      $query = db_select('chado.feature_cvterm', 'fcvt')
+        //$query->leftJoin('chado.feature_cvterm', 'fcvt', 'fcvt.feature_id = f.feature_id');
+       ->condition('fcvt.feature_id', $child_id);
+      // $query->leftJoin('chado.cvterm', 'cvt2', 'cvt.cvterm_id = fcvt.cvterm_id');
+      $query->join('chado.cvterm', 'cvt', 'cvt.cvterm_id = fcvt.cvterm_id');
+      $query->addField('cvt', 'name', 'annotation_name');
+      $annotations = $query->execute()->fetchAll();
+
+      //get properties
+      $query = db_select('chado.featureprop', 'fp')
+        ->condition('fp.feature_id', $child_id);
+      $query->join('chado.cvterm', 'cvt', 'cvt.cvterm_id = fp.type_id');
+      $query->addField('cvt', 'name', 'prop_name');
+      $query->addField('fp', 'value', 'prop_value');
+      $props = $query->execute()->fetchAll();
+
+      //get feature locations
+      $query = db_select('chado.featureloc', 'fl');
+      $query->join('chado.feature', 'srcf', 'fl.srcfeature_id = srcf.feature_id');
       $query->addField('srcf', 'name', 'source_feature_name');//table, field, alias
       $query->fields('fl');
-      $query->condition('f.feature_id', $child_id);
+      $query->condition('fl.feature_id', $child_id);
+      $locations = $query->execute()->fetchAll();
 
-      $child_info = $query->execute()->fetchAll();
-      // $this_children[$feature_id][$child_id]['info'] = $child_info;
+      $child_info = [
+        'base_info' => $feature_info,
+        'annotations' => $annotations,
+        'props' => $props,
+        'locations' => $locations,
+      ];
       $this_children[$child_id]['info'] = $child_info;
 
       $grand_children = $this->findChildFeatures($child->subject_id);
@@ -228,7 +265,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
         $this_children[$child_id]['children'] = $grand_children;
       }
     }
-
     chado_set_active($prev_db);
     return $this_children;
   }
