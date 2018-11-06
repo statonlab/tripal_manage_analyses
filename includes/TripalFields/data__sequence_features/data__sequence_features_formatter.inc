@@ -53,6 +53,9 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     $i = 0;
 
     foreach ($children as $child_id => $child) {
+
+      // (chado_get_feature_sequences(['feature_id' => $child_id], ['is_html' => TRUE]));
+
       $info = $child['info']['base_info'];
 
       $name = $info->uniquename;
@@ -78,17 +81,15 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       $header = ['Name', 'ID', 'Type', 'Location', 'Start', 'Stop'];
 
 
-      foreach($locations as $location){
-       $start = $location->fmin;
-       $stop = $location->fmax;
-       $source_feature = $location->source_feature_name;
+      foreach ($locations as $location) {
+        $source_feature = $location->source_feature_name;
         $rows[] = [
           $info->name,
           $info->uniquename,
           $type,
           $source_feature,
-          $info->fmin,
-          $info->fmax,
+          $location->fmin,
+          $location->fmax,
         ];
       }
 
@@ -109,8 +110,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       $header = [
         'Name',
         'Type',
-        'Start',
-        'Stop',
+        'Location',
         // 'Parent',
         'Annotations',
         'Sequence',
@@ -133,19 +133,10 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     $children = $child['children'];
 
     foreach ($children as $gchild) {
-      $base_info = $gchild['info'];
-      $annotations = [];
-
-      if (count($gchild['info']) > 1) {
-
-        //TODO WRONG!  also for feature map.
-        foreach ($gchild['info'] as $record) {
-
-
-          $annotations[] = $record->annotation_name;
-        }
-
-      }
+      $base_info = $gchild['info']['base_info'];
+      $props = $gchild['info']['props'];
+      $locations = $gchild['info']['locations'];
+      $annotations = $gchild['info']['annotations'];
 
       $sequences = NULL;
       if ($base_info->residues) {
@@ -154,24 +145,53 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
         $sequences = popup_element('sequence', $base_info->residues, $attributes = []);
 
-      }else {
+      }
+      else {
         //Try to infer sequence instead.
+
+
+        //        $sequences = chado_get_feature_sequences(array('feature_id' => $feature->feature_id), array('derive_from_parent' => 1, 'aggregate' => 1,
+        //          sub_feature_types => array('exon') ,'is_html' => 1, 'width' => $num_bases));
+
       }
 
-      $annotation_string = implode(': ', $annotations);
 
-      //If more than one entry, those are extra annotations OR extra featurelocs.
+      //TODO: build annotations string.
+      $annotation_string = NULL;
+      $location_string = NULL;
+      $parents_loc = [];
 
+      foreach ($locations as $location) {
+
+        $strand_string = "0";
+
+        if ($location->strand == (int) 1){
+          $strand_string = "+";
+        }
+        if ($location->strand == (int) -1){
+          $strand_string = "-";
+        }
+
+        if (!isset($parents[$location->source_feature_id])) {
+          $parents_loc[$location->source_feature_id] = $location->source_feature_name . ': [' . $location->fmin . '-' . $location->fmax . '(' . $strand_string . ')]';
+          continue;
+        }
+
+        $prev = $parents_loc[$location->source_feature_id];
+
+
+        $parents[$location->source_feature_id] = $prev . ', [' . $location->fmin . '-' . $location->fmax . '(' . $location->strand . ')]';
+      }
+
+      $location_string = implode('<br/>', $parents_loc);
 
       $rows[] = [
-        'Name' => $info->uniquename,
-        'Type' => $info->type_name,
-        'Start' => $info->fmin,
-        'Stop' => $info->fmax,
+        'Name' => $base_info->uniquename,
+        'Type' => $base_info->type_name,
+        'Locations' => $location_string,
         //  'Parent' => $parent_name,
         'Annotations' => $annotation_string,
-        'Download' => $sequences
-        // 'Download' => wordwrap($info->residues, 40, "<br>", TRUE),
+        'Download' => $sequences,
       ];
 
       if (isset($gchild['children'])) {
@@ -221,16 +241,14 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       $query->fields('f');
       $query->join('chado.cvterm', 'cvt', 'cvt.cvterm_id = f.type_id');
       $query->addField('cvt', 'name', 'type_name');//table, field, alias
+      $query->condition('f.feature_id', $child_id);
 
       $feature_info = $query->execute()->fetchObject();
-
-
-      //TODO: if theres no residues, lets try to infer the sequence.
 
       //get annotations
       $query = db_select('chado.feature_cvterm', 'fcvt')
         //$query->leftJoin('chado.feature_cvterm', 'fcvt', 'fcvt.feature_id = f.feature_id');
-       ->condition('fcvt.feature_id', $child_id);
+        ->condition('fcvt.feature_id', $child_id);
       // $query->leftJoin('chado.cvterm', 'cvt2', 'cvt.cvterm_id = fcvt.cvterm_id');
       $query->join('chado.cvterm', 'cvt', 'cvt.cvterm_id = fcvt.cvterm_id');
       $query->addField('cvt', 'name', 'annotation_name');
@@ -248,9 +266,74 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       $query = db_select('chado.featureloc', 'fl');
       $query->join('chado.feature', 'srcf', 'fl.srcfeature_id = srcf.feature_id');
       $query->addField('srcf', 'name', 'source_feature_name');//table, field, alias
+      $query->addField('srcf', 'feature_id', 'source_feature_id');//table, field, alias
       $query->fields('fl');
       $query->condition('fl.feature_id', $child_id);
       $locations = $query->execute()->fetchAll();
+
+      //TODO: if theres no residues, lets try to infer the sequence.
+
+      //      if (!$feature_info->residues && isset($locations[0]) && $locations[0]->source_feature_id) {
+      //
+      //        $source_seq = db_select('chado.feature', 'f')
+      //          ->addField('f', 'residues')
+      //          ->condition('f.feature_id', $locations[0]->feature_id)
+      //          ->execute()
+      //          ->fetchObject();
+      //
+      //        $sequences = [];
+      //
+      //        $parent = $locations[0]->feature_id;
+      //
+      //        $sequence = '';
+      //
+      //        foreach ($locations as $location) {
+      //
+      //          $new_parent = $location->source_feature_id;
+      //
+      //          $start = $location->fmin;
+      //          $stop = $location->fmax;
+      //          $length = $stop - $start;
+      //
+      //          if ($parent != $new_parent) {
+      //            //New sequence!
+      //
+      //            $sequences[] = $sequence;
+      //
+      //            //get the new source sequence
+      //            $source_seq = db_select('chado.feature', 'f')
+      //              ->addField('f', 'residues')
+      //              ->condition('f.feature_id', $locations->feature_id)
+      //              ->execute()
+      //              ->fetchObject();
+      //
+      //            $sequence = substr($source_seq, $start, $length);
+      //
+      //            //if strand is -, reverse the sequence.
+      //            if ($location->strand == '-'){
+      //              $sequence = strrev($sequence);
+      //            }
+      //            continue;
+      //          }
+      //
+      //
+      //          $sequence_piece = substr($source_seq, $start, $length);
+      //
+      //          //if strand is -, reverse the sequence.
+      //          if ($location->strand == '-') {
+      //            $sequence_piece = strrev($sequence);
+      //          }
+      //
+      //          $sequence .= $sequence_piece;
+      //        }
+      //
+      //        //end locations loop: add in the last sequence
+      //        $sequences[] = $sequence;
+      //
+      //        if (!empty($sequences)) {
+      //          $feature_info->residues = $sequences;
+      //        }
+      //      }
 
       $child_info = [
         'base_info' => $feature_info,
