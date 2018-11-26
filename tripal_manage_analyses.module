@@ -2,23 +2,15 @@
 
 require_once "includes/tripal_manage_analyses.fields.inc";
 
+/**
+ * Implementation of hook_entity_delete
+ *
+ * @param $entity
+ */
 function tripal_manage_analyses_entity_delete($entity)
 {
-    $analysis_bundle_id = db_query('
-        SELECT cb.bundle_id
-        FROM {chado_bundle} cb
-        WHERE cb.data_table = :bundle',
-        [':bundle' => 'analysis'])->fetchAll();
-
-    $analysis_bundle_ids = [];
-
-    foreach($analysis_bundle_id as $object)
-        $analysis_bundle_ids[] = $object->bundle_id;
-
-
-    if (property_exists($entity, "term_id") && in_array($entity->term_id, $analysis_bundle_ids)) {
+    if ($entity->chado_table == 'analysis') {
         db_query('DELETE FROM {chado.organism_analysis} oa WHERE analysis_id = :id',
             [':id' => $entity->chado_record_id]);
-        return;
     }
 }
