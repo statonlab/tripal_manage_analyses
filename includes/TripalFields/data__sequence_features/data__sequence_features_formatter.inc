@@ -158,6 +158,9 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
       //TODO: build annotations string.
       $annotation_string = NULL;
+
+      //Build the location string.  If one feature has lots of locations on different source features, let's separate them out.
+
       $location_string = NULL;
       $parents_loc = [];
 
@@ -180,6 +183,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
         $prev = $parents_loc[$location->source_feature_id];
 
 
+        //TODO: I think we have got to sort this instead.
         $parents[$location->source_feature_id] = $prev . ', [' . $location->fmin . '-' . $location->fmax . '(' . $location->strand . ')]';
       }
 
@@ -271,70 +275,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       $query->condition('fl.feature_id', $child_id);
       $locations = $query->execute()->fetchAll();
 
-      //TODO: if theres no residues, lets try to infer the sequence.
-
-      //      if (!$feature_info->residues && isset($locations[0]) && $locations[0]->source_feature_id) {
-      //
-      //        $source_seq = db_select('chado.feature', 'f')
-      //          ->addField('f', 'residues')
-      //          ->condition('f.feature_id', $locations[0]->feature_id)
-      //          ->execute()
-      //          ->fetchObject();
-      //
-      //        $sequences = [];
-      //
-      //        $parent = $locations[0]->feature_id;
-      //
-      //        $sequence = '';
-      //
-      //        foreach ($locations as $location) {
-      //
-      //          $new_parent = $location->source_feature_id;
-      //
-      //          $start = $location->fmin;
-      //          $stop = $location->fmax;
-      //          $length = $stop - $start;
-      //
-      //          if ($parent != $new_parent) {
-      //            //New sequence!
-      //
-      //            $sequences[] = $sequence;
-      //
-      //            //get the new source sequence
-      //            $source_seq = db_select('chado.feature', 'f')
-      //              ->addField('f', 'residues')
-      //              ->condition('f.feature_id', $locations->feature_id)
-      //              ->execute()
-      //              ->fetchObject();
-      //
-      //            $sequence = substr($source_seq, $start, $length);
-      //
-      //            //if strand is -, reverse the sequence.
-      //            if ($location->strand == '-'){
-      //              $sequence = strrev($sequence);
-      //            }
-      //            continue;
-      //          }
-      //
-      //
-      //          $sequence_piece = substr($source_seq, $start, $length);
-      //
-      //          //if strand is -, reverse the sequence.
-      //          if ($location->strand == '-') {
-      //            $sequence_piece = strrev($sequence);
-      //          }
-      //
-      //          $sequence .= $sequence_piece;
-      //        }
-      //
-      //        //end locations loop: add in the last sequence
-      //        $sequences[] = $sequence;
-      //
-      //        if (!empty($sequences)) {
-      //          $feature_info->residues = $sequences;
-      //        }
-      //      }
-
       $child_info = [
         'base_info' => $feature_info,
         'annotations' => $annotations,
@@ -351,6 +291,4 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     chado_set_active($prev_db);
     return $this_children;
   }
-
-
 }
