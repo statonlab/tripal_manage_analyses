@@ -77,7 +77,6 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
     $field_column = $this->instance['settings']['chado_column'];
     $base_table = $this->instance['settings']['base_table'];
 
-
     // Get information about this organism linker table.
     $schema = chado_get_schema($field_table);
     if (!$schema){

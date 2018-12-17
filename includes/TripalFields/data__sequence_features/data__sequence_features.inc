@@ -136,7 +136,10 @@ class data__sequence_features extends ChadoField {
 
     $children = $this->findChildFeatures($parent);
 
-    $entity->{$field}['und'][0]['value'] = $entity;
+
+    var_dump($field);
+    var_dump("does this seriously never happen?");
+    $entity->{$field}['und'][0]['value'] = 'any body home?';
 
   }
 
