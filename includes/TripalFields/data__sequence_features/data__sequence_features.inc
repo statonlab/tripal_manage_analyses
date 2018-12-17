@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @class
  * Purpose:
@@ -14,30 +15,41 @@ class data__sequence_features extends ChadoField {
   // The following constants SHOULD be set for each descendant class.  They are
   // used by the static functions to provide information to Drupal about
   // the field and it's default widget and formatter.
-  // --------------------------------------------------------------------------
-
-  // The default label for this field.
+  // --------------------------------------------------------------------------.
+  /**
+   * The default label for this field.
+   */
   public static $default_label = 'Child Features';
 
-  // The default description for this field.
+  /**
+   * The default description for this field.
+   */
   public static $default_description = 'Gathers information about all subfeatures (mRNA, CDS, proteins) associated with a top-level feature (gene)';
 
-  // The default widget for this field.
+  /**
+   * The default widget for this field.
+   */
   public static $default_widget = 'data__sequence_features_widget';
 
-  // The default formatter for this field.
+  /**
+   * The default formatter for this field.
+   */
   public static $default_formatter = 'data__sequence_features_formatter';
 
   // The module that manages this field.
   // If no module manages the field (IE it's added via libraries)
-  // set this to 'tripal_chado'
+  /**
+   * Set this to 'tripal_chado'.
+   */
   public static $module = 'tripal_manage_analyses';
 
   // A list of global settings. These can be accessed within the
   // globalSettingsForm.  When the globalSettingsForm is submitted then
   // Drupal will automatically change these settings for all fields.
-  // Once instances exist for a field type then these settings cannot be
-  // changed.
+  // Once instances exist for a field type then these settings cannot be.
+  /**
+   * Changed.
+   */
   public static $default_settings = array(
     'storage' => 'field_chado_storage',
      // It is expected that all fields set a 'value' in the load() function.
@@ -46,14 +58,16 @@ class data__sequence_features extends ChadoField {
      // be a controlled vocabulary term (e.g. rdfs:type). Keys in the load()
      // function that are supported by the query() function should be
      // listed here.
-     'searchable_keys' => array(),
+    'searchable_keys' => array(),
   );
 
-  // Indicates the download formats for this field.  The list must be the
-  // name of a child class of the TripalFieldDownloader.
+  // Indicates the download formats for this field.  The list must be the.
+  /**
+   * Name of a child class of the TripalFieldDownloader.
+   */
   public static $download_formatters = array(
-     'TripalTabDownloader',
-     'TripalCSVDownloader',
+    'TripalTabDownloader',
+    'TripalCSVDownloader',
   );
 
   // Provide a list of instance specific settings. These can be access within
@@ -61,8 +75,10 @@ class data__sequence_features extends ChadoField {
   // then Drupal with automatically change these settings for the instance.
   // It is recommended to put settings at the instance level whenever possible.
   // If you override this variable in a child class be sure to replicate the
-  // term_name, term_vocab, term_accession and term_fixed keys as these are
-  // required for all TripalFields.
+  // term_name, term_vocab, term_accession and term_fixed keys as these are.
+  /**
+   * Required for all TripalFields.
+   */
   public static $default_instance_settings = array(
     // The DATABASE name, as it appears in chado.db.  This also builds the link-out url.  In most cases this will simply be the CV name.  In some cases (EDAM) this will be the SUBONTOLOGY.
     'term_vocabulary' => 'data',
@@ -90,20 +106,22 @@ class data__sequence_features extends ChadoField {
   // A boolean specifying that users should not be allowed to create
   // fields and instances of this field type through the UI. Such
   // fields can only be created programmatically with field_create_field()
-  // and field_create_instance().
+  /**
+   * And field_create_instance().
+   */
   public static $no_ui = FALSE;
 
   // A boolean specifying that the field will not contain any data. This
   // should exclude the field from web services or downloads.  An example
-  // could be a quick search field that appears on the page that redirects
-  // the user but otherwise provides no data.
+  // could be a quick search field that appears on the page that redirects.
+  /**
+   * The user but otherwise provides no data.
+   */
   public static $no_data = FALSE;
 
-   /**
-    * @see ChadoField::load()
-    *
-    **/
-
+  /**
+   * @see ChadoField::load()
+   **/
   public function load($entity) {
 
     // ChadoFields automatically load the chado column specified in the
@@ -114,34 +132,29 @@ class data__sequence_features extends ChadoField {
 
     $field = get_class($this);
 
+    $parent = $entity->chado_record->feature_id;
+
+    $children = $this->findChildFeatures($parent);
+
     $entity->{$field}['und'][0]['value'] = $entity;
 
   }
 
-
-
-    /**
-    * @see ChadoField::query()
-    *
-    **/
-
+  /**
+   * @see ChadoField::query()
+   **/
   public function query($query, $condition) {
   }
 
-    /**
-    * @see ChadoField::queryOrder()
-    *
-    **/
-
+  /**
+   * @see ChadoField::queryOrder()
+   **/
   public function queryOrder($query, $order) {
   }
 
-
-    /**
-    * @see ChadoField::elementInfo()
-    *
-    **/
-    
+  /**
+   * @see ChadoField::elementInfo()
+   **/
   public function elementInfo() {
     $field_term = $this->getFieldTermID();
     return array(
@@ -153,6 +166,83 @@ class data__sequence_features extends ChadoField {
     );
   }
 
+  /**
+   * For a given feature, find all child features.  For each child feature,
+   * return:
+   *  - the type name
+   *  - annotation names in feature_cvterm
+   *  - featureloc info, including source feature name.
+   *
+   * @param string $feature_id
+   *   Chado feature.feature_id.
+   *
+   * @return array
+   */
+  private function findChildFeatures(string $feature_id) {
+    $this_children = [];
+
+    $prev_db = chado_set_active('chado');
+
+    $query = db_select('chado.feature_relationship', 'fr')
+      ->fields('fr')
+      ->condition('object_id', $feature_id)
+      ->execute()
+      ->fetchAll();
+
+    foreach ($query as $child) {
+      $child_id = $child->subject_id;
+      $query = db_select('chado.feature', 'f');
+      $query->fields('f');
+      $query->join('chado.cvterm', 'cvt', 'cvt.cvterm_id = f.type_id');
+      // table, field, alias.
+      $query->addField('cvt', 'name', 'type_name');
+      $query->condition('f.feature_id', $child_id);
+
+      $feature_info = $query->execute()->fetchObject();
+
+      // Get annotations.
+      $query = db_select('chado.feature_cvterm', 'fcvt')
+        // $query->leftJoin('chado.feature_cvterm', 'fcvt', 'fcvt.feature_id = f.feature_id');.
+        ->condition('fcvt.feature_id', $child_id);
+      // $query->leftJoin('chado.cvterm', 'cvt2', 'cvt.cvterm_id = fcvt.cvterm_id');.
+      $query->join('chado.cvterm', 'cvt', 'cvt.cvterm_id = fcvt.cvterm_id');
+      $query->addField('cvt', 'name', 'annotation_name');
+      $annotations = $query->execute()->fetchAll();
+
+      // Get properties.
+      $query = db_select('chado.featureprop', 'fp')
+        ->condition('fp.feature_id', $child_id);
+      $query->join('chado.cvterm', 'cvt', 'cvt.cvterm_id = fp.type_id');
+      $query->addField('cvt', 'name', 'prop_name');
+      $query->addField('fp', 'value', 'prop_value');
+      $props = $query->execute()->fetchAll();
+
+      // Get feature locations.
+      $query = db_select('chado.featureloc', 'fl');
+      $query->join('chado.feature', 'srcf', 'fl.srcfeature_id = srcf.feature_id');
+      // table, field, alias.
+      $query->addField('srcf', 'name', 'source_feature_name');
+      // table, field, alias.
+      $query->addField('srcf', 'feature_id', 'source_feature_id');
+      $query->fields('fl');
+      $query->condition('fl.feature_id', $child_id);
+      $locations = $query->execute()->fetchAll();
+
+      $child_info = [
+        'base_info' => $feature_info,
+        'annotations' => $annotations,
+        'props' => $props,
+        'locations' => $locations,
+      ];
+      $this_children[$child_id]['info'] = $child_info;
+
+      $grand_children = $this->findChildFeatures($child->subject_id);
+      if (!empty($grand_children)) {
+        $this_children[$child_id]['children'] = $grand_children;
+      }
+    }
+    chado_set_active($prev_db);
+    return $this_children;
+  }
+
 }
-
-

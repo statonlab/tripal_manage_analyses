@@ -42,6 +42,8 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     $parent = $entity->chado_record->feature_id;
 
     $children = $this->findChildFeatures($parent);
+
+    $other = $this->findChildFeaturesTwo($parent);
     //An array of child feature feature_ids.
     //Each of these has two keys: children for THAT child's children, and info, for an array of that child's annotations.
 
@@ -214,6 +216,39 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
   public function settingsSummary($view_mode) {
     return '';
+  }
+
+
+  private function findChildFeaturesTwo($feature_id){
+    $this_children = [];
+
+    $prev_db = chado_set_active('chado');
+
+    $query = db_select('chado.feature_relationship', 'fr')
+      ->fields('fr')
+      ->condition('object_id', $feature_id)
+      ->execute()
+      ->fetchAll();
+
+    foreach ($query as $child) {
+      $child_id = $child->subject_id;
+
+      // expand var on this
+
+      $feature = chado_generate_var('feature', ['feature_id' =>$child_id]);
+      $feature = chado_expand_var($feature, 'field', 'feature.residues');
+      $feature = chado_expand_var($feature, 'table', 'featureloc');
+      $feature = chado_expand_var($feature, 'table', 'featureprop');
+      $feature = chado_expand_var($feature, 'table', 'feature_cvterm');
+      $this_children[$child_id]['info'] = $feature;
+
+      $grand_children = $this->findChildFeaturesTwo($child->subject_id);
+      if (!empty($grand_children)) {
+        $this_children[$child_id]['children'] = $grand_children;
+      }
+    }
+    chado_set_active($prev_db);
+    return $this_children;
   }
 
 
