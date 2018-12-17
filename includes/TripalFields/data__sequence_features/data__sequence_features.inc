@@ -136,10 +136,7 @@ class data__sequence_features extends ChadoField {
 
     $children = $this->findChildFeatures($parent);
 
-
-    var_dump($field);
-    var_dump("does this seriously never happen?");
-    $entity->{$field}['und'][0]['value'] = 'any body home?';
+    $entity->{$field}['und'][0]['value'] = $children;
 
   }
 
@@ -194,50 +191,16 @@ class data__sequence_features extends ChadoField {
 
     foreach ($query as $child) {
       $child_id = $child->subject_id;
-      $query = db_select('chado.feature', 'f');
-      $query->fields('f');
-      $query->join('chado.cvterm', 'cvt', 'cvt.cvterm_id = f.type_id');
-      // table, field, alias.
-      $query->addField('cvt', 'name', 'type_name');
-      $query->condition('f.feature_id', $child_id);
 
-      $feature_info = $query->execute()->fetchObject();
+      // expand var on this
 
-      // Get annotations.
-      $query = db_select('chado.feature_cvterm', 'fcvt')
-        // $query->leftJoin('chado.feature_cvterm', 'fcvt', 'fcvt.feature_id = f.feature_id');.
-        ->condition('fcvt.feature_id', $child_id);
-      // $query->leftJoin('chado.cvterm', 'cvt2', 'cvt.cvterm_id = fcvt.cvterm_id');.
-      $query->join('chado.cvterm', 'cvt', 'cvt.cvterm_id = fcvt.cvterm_id');
-      $query->addField('cvt', 'name', 'annotation_name');
-      $annotations = $query->execute()->fetchAll();
+      $feature = chado_generate_var('feature', ['feature_id' =>$child_id]);
+      $feature = chado_expand_var($feature, 'field', 'feature.residues');
+      $feature = chado_expand_var($feature, 'table', 'featureloc');
+      $feature = chado_expand_var($feature, 'table', 'featureprop');
+      $feature = chado_expand_var($feature, 'table', 'feature_cvterm');
 
-      // Get properties.
-      $query = db_select('chado.featureprop', 'fp')
-        ->condition('fp.feature_id', $child_id);
-      $query->join('chado.cvterm', 'cvt', 'cvt.cvterm_id = fp.type_id');
-      $query->addField('cvt', 'name', 'prop_name');
-      $query->addField('fp', 'value', 'prop_value');
-      $props = $query->execute()->fetchAll();
-
-      // Get feature locations.
-      $query = db_select('chado.featureloc', 'fl');
-      $query->join('chado.feature', 'srcf', 'fl.srcfeature_id = srcf.feature_id');
-      // table, field, alias.
-      $query->addField('srcf', 'name', 'source_feature_name');
-      // table, field, alias.
-      $query->addField('srcf', 'feature_id', 'source_feature_id');
-      $query->fields('fl');
-      $query->condition('fl.feature_id', $child_id);
-      $locations = $query->execute()->fetchAll();
-
-      $child_info = [
-        'base_info' => $feature_info,
-        'annotations' => $annotations,
-        'props' => $props,
-        'locations' => $locations,
-      ];
-      $this_children[$child_id]['info'] = $child_info;
+      $this_children[$child_id]['info'] = $feature;
 
       $grand_children = $this->findChildFeatures($child->subject_id);
       if (!empty($grand_children)) {
