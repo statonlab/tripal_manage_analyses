@@ -58,50 +58,14 @@ class data__sequence_featuresTest extends TripalTestCase {
   }
 
   /**
-   * Dont run this test, its redundant with below, just anotehr way to approach it.
-   *
-   * @group slack
-   */
-  public function testFieldFindsAllRecords() {
-
-    $records = $this->create_test_features();
-    $gene = $records['gene'];
-
-    $entity = $records['entity'];
-    $entity_id = $records['entity_id'];
-    $bundle_name = $records['bundle_name'];
-    $field_name = 'data__sequence_features';
-    $formatter_name = 'data__sequence_features_formatter';
-
-    // Initialize the widget class via the TripalFieldTestHelper class.
-    $machine_names = [
-      'field_name' => $field_name,
-      'formatter_name' => $formatter_name,
-    ];
-    $field_info = field_info_field($field_name);
-    // $instance_info = field_info_instance('TripalEntity', $field_name, $bundle_name);.
-    $id = $field_info['id'];
-    $entities = tripal_load_entity('TripalEntity', [$entity_id], FALSE, [$id]);
-
-    $entity = $entities[$entity_id];
-
-    $this->assertEquals($gene->uniquename, $entity->chado_record->uniquename);
-
-    // Load the fields.  TODO: can we load specific fields instead?
-    $entity->view();
-
-    // OK we got our gene back!
-    $field = $entity->{'data__sequence_features'};
-    var_dump($field['und'][0]['value']);
-  }
-
-  /**
    * @group doggo
    */
   public function testFieldDirect() {
     $records = $this->create_test_features();
     $gene = $records['gene'];
     $mrna = $records['mrna'];
+    $cds = $records['cds'];
+    $protein = $records['protein'];
 
     $entity_id = $records['entity_id'];
     $bundle_name = $records['bundle_name'];
@@ -129,22 +93,37 @@ class data__sequence_featuresTest extends TripalTestCase {
 
     $value = $entity->{'data__sequence_features'}['und'][0]['value'];
 
-    var_dump($value);
 
     $this->assertNotEmpty($value);
 
-    $this->assertArrayHasKey('children', $value);
-    // The main parent shouldnt have the info key.
-    $this->assertArrayNotHasKey('info', $value);
+    foreach ($value as $mrna_key => $fmrna) {
 
-    $children = $value['children'];
+      $this->assertEquals($mrna->feature_id, $mrna_key);
+      $this->assertArrayHasKey('info', $fmrna);
+      $this->assertArrayHasKey('children', $fmrna);
 
-    $this->assertArrayHasKey($mrna->feature_id, $children);
+      $mrna_info = $fmrna['info'];
+      var_dump($mrna_info);
 
-    $mrna = $children[$mrna->feature_id];
-    // The main parent shouldnt have the info key.
-    $this->assertArrayHasKey('info', $mrna);
-    $this->assertArrayHasKey('children', $mrna);
+      $this->assertArrayHasKey($mrna_info['residues']);
+
+
+      $gchildren = $fmrna['children'];
+
+      $this->assertArrayHasKey($cds->feature_id, $gchildren);
+      $this->assertArrayHasKey($protein->feature_id, $gchildren);
+
+
+      $fcds = $gchildren[$cds->feature_id];
+      $fprotein = $gchildren[$protein->feature_id];
+
+      $this->assertArrayNotHasKey('children', $fcds);
+      $this->assertArrayNotHasKey('children', $fprotein);
+
+      $this->assertArrayHasKey('info', $fcds);
+      $this->assertArrayHasKey('info', $fprotein);
+
+    }
 
   }
 
@@ -169,19 +148,32 @@ class data__sequence_featuresTest extends TripalTestCase {
     $mrna = factory('chado.feature')->create([
       'type_id' => chado_get_cvterm(['id' => 'SO:0000234'])->cvterm_id,
       'organism_id' => $organism_id,
+      'residues' => 'MRNAMRNAMRNA',
+
     ]);
     $cds = factory('chado.feature')->create([
       'type_id' => chado_get_cvterm(['id' => 'SO:0000316'])->cvterm_id,
       'organism_id' => $organism_id,
+      'residues' => 'CDSCDSCDS',
+
     ]);
     $protein = factory('chado.feature')->create([
       'type_id' => chado_get_cvterm(['id' => 'SO:0000104'])->cvterm_id,
       'organism_id' => $organism_id,
+      'residues' => 'PROTPROT'
     ]);
 
     $this->associate_features($gene, $mrna);
     $this->associate_features($mrna, $cds);
     $this->associate_features($mrna, $protein);
+
+    factory('chado.featureprop')->create(['feature_id' => $mrna->feature_id]);
+    factory('chado.featureprop')->create(['feature_id' => $mrna->feature_id]);
+
+    factory('chado.feature_cvterm')->create(['feature_id' => $mrna->feature_id]);
+    factory('chado.feature_cvterm')->create(['feature_id' => $mrna->feature_id]);
+
+
 
     // Publish the gene feature.
     $this->publish('feature');
@@ -219,6 +211,8 @@ class data__sequence_featuresTest extends TripalTestCase {
     return $records;
   }
 
+
+
   /**
    *
    */
@@ -236,6 +230,44 @@ class data__sequence_featuresTest extends TripalTestCase {
     ];
     $success = chado_insert_record('feature_relationship', $values);
     return $success;
+  }
+
+
+
+  /**
+   * Dont run this test, its redundant with below, just anotehr way to approach it.
+   **/
+  public function FieldFindsAllRecords() {
+
+    $records = $this->create_test_features();
+    $gene = $records['gene'];
+
+    $entity = $records['entity'];
+    $entity_id = $records['entity_id'];
+    $bundle_name = $records['bundle_name'];
+    $field_name = 'data__sequence_features';
+    $formatter_name = 'data__sequence_features_formatter';
+
+    // Initialize the widget class via the TripalFieldTestHelper class.
+    $machine_names = [
+      'field_name' => $field_name,
+      'formatter_name' => $formatter_name,
+    ];
+    $field_info = field_info_field($field_name);
+    // $instance_info = field_info_instance('TripalEntity', $field_name, $bundle_name);.
+    $id = $field_info['id'];
+    $entities = tripal_load_entity('TripalEntity', [$entity_id], FALSE, [$id]);
+
+    $entity = $entities[$entity_id];
+
+    $this->assertEquals($gene->uniquename, $entity->chado_record->uniquename);
+
+    // Load the fields.  TODO: can we load specific fields instead?
+    $entity->view();
+
+    // OK we got our gene back!
+    $field = $entity->{'data__sequence_features'};
+    var_dump($field['und'][0]['value']);
   }
 
 }

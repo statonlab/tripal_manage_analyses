@@ -130,13 +130,13 @@ class data__sequence_features extends ChadoField {
     // additional data to be used in the display, you should add it here.
     parent::load($entity);
 
-    $field = 'data__sequence_features';
+    $field = get_class($this);
 
     $parent = $entity->chado_record->feature_id;
 
     $children = $this->findChildFeatures($parent);
 
-    $entity->{$field}['und'][0]['value']['children'] = $children;
+    $entity->{$field}['und'][0]['value'] = $children;
 
     return $entity;
   }
