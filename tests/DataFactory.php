@@ -80,6 +80,28 @@ Factory::define('chado.feature', function (Faker\Generator $faker) {
 });
 
 
+/** @see  StatonLab\TripalTestSuite\Database\Factory::define() */
+Factory::define('chado.featureprop', function (Faker\Generator $faker) {
+  return [
+    'feature_id' => factory('chado.feature')->create()->feature_id,
+    'type_id' => factory('chado.cvterm')->create()->cvterm_id,
+    'value' => $faker->word,
+    'rank' => 0,
+  ];
+});
+
+
+/** @see  StatonLab\TripalTestSuite\Database\Factory::define() */
+Factory::define('chado.feature_cvterm', function (Faker\Generator $faker) {
+  return [
+    'feature_id' => factory('chado.feature')->create()->feature_id,
+    'cvterm_id' => factory('chado.cvterm')->create()->cvterm_id,
+    'pub_id' => 1,
+    'rank' => 0,
+  ];
+});
+
+
 Factory::define('chado.analysis', function (Faker\Generator $faker) {
   return [
     'name' => $faker->word,

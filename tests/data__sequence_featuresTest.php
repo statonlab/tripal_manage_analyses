@@ -66,6 +66,7 @@ class data__sequence_featuresTest extends TripalTestCase {
     $mrna = $records['mrna'];
     $cds = $records['cds'];
     $protein = $records['protein'];
+    $prop_term = $records['cvterm'];
 
     $entity_id = $records['entity_id'];
     $bundle_name = $records['bundle_name'];
@@ -103,10 +104,17 @@ class data__sequence_featuresTest extends TripalTestCase {
       $this->assertArrayHasKey('children', $fmrna);
 
       $mrna_info = $fmrna['info'];
-      var_dump($mrna_info);
+      //Check the expandvars.
 
-      $this->assertArrayHasKey($mrna_info['residues']);
+      $this->assertObjectHasAttribute('residues', $mrna_info);
+      $this->assertObjectHasAttribute('feature_cvterm', $mrna_info);
+      $this->assertObjectHasAttribute('featureprop', $mrna_info);
+      $this->assertObjectHasAttribute('featureloc', $mrna_info);
+      $this->assertEquals($mrna->residues, $mrna_info->residues);
+      $this->assertEquals($prop_term->cvterm_id, $mrna_info->featureprop->type_id->cvterm_id);
+      $this->assertEquals($prop_term->cvterm_id, $mrna_info->feature_cvterm->cvterm_id->cvterm_id);
 
+      //TODO:  test featureloc
 
       $gchildren = $fmrna['children'];
 
@@ -122,6 +130,8 @@ class data__sequence_featuresTest extends TripalTestCase {
 
       $this->assertArrayHasKey('info', $fcds);
       $this->assertArrayHasKey('info', $fprotein);
+
+      //TODO: follow through the with expanded values as we do above for mrna...
 
     }
 
@@ -167,12 +177,11 @@ class data__sequence_featuresTest extends TripalTestCase {
     $this->associate_features($mrna, $cds);
     $this->associate_features($mrna, $protein);
 
-    factory('chado.featureprop')->create(['feature_id' => $mrna->feature_id]);
-    factory('chado.featureprop')->create(['feature_id' => $mrna->feature_id]);
 
-    factory('chado.feature_cvterm')->create(['feature_id' => $mrna->feature_id]);
-    factory('chado.feature_cvterm')->create(['feature_id' => $mrna->feature_id]);
+    $test_term = factory('chado.cvterm')->create();
 
+    factory('chado.featureprop')->create(['feature_id' => $mrna->feature_id, 'type_id' => $test_term->cvterm_id] );
+    factory('chado.feature_cvterm')->create(['feature_id' => $mrna->feature_id, 'cvterm_id' => $test_term->cvterm_id] );
 
 
     // Publish the gene feature.
@@ -204,6 +213,7 @@ class data__sequence_featuresTest extends TripalTestCase {
       'cds' => $cds,
       'protein' => $protein,
       'bundle_name' => $bundle_name,
+      'cvterm' => $test_term //term for properties and _cvterm
     ];
 
     $this->records = $records;
