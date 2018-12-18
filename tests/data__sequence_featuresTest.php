@@ -7,6 +7,7 @@ use StatonLab\TripalTestSuite\TripalTestCase;
 
 module_load_include('php', 'tripal_chado', '../tests/TripalFieldTestHelper');
 module_load_include('inc', 'tripal_manage_analyses', 'includes/TripalFields/data__sequence_features/data__sequence_features');
+module_load_include('inc', 'tripal_manage_analyses', 'includes/TripalFields/data__sequence_features/data__sequence_features_formatter');
 
 /**
  *
@@ -134,6 +135,45 @@ class data__sequence_featuresTest extends TripalTestCase {
       //TODO: follow through the with expanded values as we do above for mrna...
 
     }
+
+  }
+
+  public function testSequenceFeaturesFormatter(){
+
+    $records = $this->create_test_features();
+    $gene = $records['gene'];
+    $mrna = $records['mrna'];
+    $cds = $records['cds'];
+    $protein = $records['protein'];
+    $prop_term = $records['cvterm'];
+
+    $entity_id = $records['entity_id'];
+    $bundle_name = $records['bundle_name'];
+    $field_name = 'data__sequence_features';
+    $formatter_name = 'data__sequence_features_formatter';
+
+    // Initialize the widget class via the TripalFieldTestHelper class.
+    $machine_names = [
+      'field_name' => $field_name,
+      'formatter_name' => $formatter_name,
+    ];
+    $field = field_info_field($field_name);
+    $instance = field_info_instance('TripalEntity', $field_name, $bundle_name);
+
+    $id = $field['id'];
+    $entities = tripal_load_entity('TripalEntity', [$entity_id], FALSE, [$id]);
+
+
+    $entity = $entities[$entity_id];
+    $entity->view();
+
+    $field_object = new \data__sequence_features($field, $instance);
+    $formatter = new \data__sequence_features_formatter($field, $instance);
+
+
+    //$field_object->findChildFeatures($gene->feature_id);
+
+    // put this in items...
 
   }
 

@@ -43,10 +43,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
     $children = $entity->{'data__sequence_features'}['und'][0]['value'];
 
-
-    //An array of child feature feature_ids.
-    //Each of these has two keys: children for THAT child's children, and info, for an array of that child's annotations.
-
     $i = 0;
 
     foreach ($children as $child_id => $child) {
@@ -109,19 +105,29 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
       $info = $gchild['info'];
 
+      $location = isset($info->featureloc) ? 'set' : "nah";
+
+      if ($info->type_id->name == 'polypeptide'){
+        dpm($info);
+
+      }
+
+      $annotations = isset($info->feature_cvterm) ? "set" : 'nah';
+
+      $download = isset($info->residues) ? "set" : 'nah';
 
       $rows[] = [
         'Name' => $info->uniquename,
-   //     'Type' => $base_info->type_name,
-//        'Locations' => $location_string,
-//        //  'Parent' => $parent_name,
-//        'Annotations' => $annotation_string,
-//        'Download' => $sequences,
+        'Type' => $info->type_id->name,
+        'Locations' => $location,
+        'Annotations' => $annotations,
+        'Download' => $download,
       ];
 
       if (isset($gchild['children'])) {
         $ggchild = $this->buildChildTable($gchild);
 
+        $rows = array_merge($rows, $ggchild);
       }
 
     }
