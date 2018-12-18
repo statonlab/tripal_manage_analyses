@@ -37,7 +37,7 @@
 function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
   $fields = [];
 
-  if (isset($bundle->data_table) AND ($bundle->data_table == 'feature')) {
+  if (isset($bundle->data_table) AND ($bundle->data_table == 'feature') and $bundle->term->name == 'gene') {
 
     // First add my term.
     tripal_insert_cvterm(array(
@@ -213,7 +213,7 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
 
 
 
-  if (isset($bundle->data_table) AND ($bundle->data_table == 'feature')) {
+  if (isset($bundle->data_table) AND ($bundle->data_table == 'feature') AND $bundle->term->name == 'gene') {
     $field_name = 'data__sequence_features';
     $instances[$field_name] = [
       'field_name' => $field_name,
@@ -227,8 +227,8 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
         'term_name' => 'Sequence features',
         'term_accession' => '1255',
         'auto_attach' => FALSE,
-        'chado_table' => $bundle->data_table,
-        'chado_column' => 'organism_id',
+        'chado_table' => 'feature_relationship',
+        'chado_column' => 'subject_id',
         'base_table' => $bundle->data_table,
       ],
       'widget' => [

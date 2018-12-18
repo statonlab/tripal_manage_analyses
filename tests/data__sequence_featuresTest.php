@@ -6,14 +6,16 @@ use StatonLab\TripalTestSuite\DBTransaction;
 use StatonLab\TripalTestSuite\TripalTestCase;
 
 module_load_include('php', 'tripal_chado', '../tests/TripalFieldTestHelper');
+module_load_include('inc', 'tripal_manage_analyses', 'includes/TripalFields/data__sequence_features/data__sequence_features');
+
 /**
  *
  */
 class data__sequence_featuresTest extends TripalTestCase {
 
   /**
- * Uncomment to auto start and rollback db transactions per test method.
- */
+   * Uncomment to auto start and rollback db transactions per test method.
+   */
   use DBTransaction;
 
   private static $records = [];
@@ -56,7 +58,9 @@ class data__sequence_featuresTest extends TripalTestCase {
   }
 
   /**
-   * @group wip
+   * Dont run this test, its redundant with below, just anotehr way to approach it.
+   *
+   * @group slack
    */
   public function testFieldFindsAllRecords() {
 
@@ -74,22 +78,74 @@ class data__sequence_featuresTest extends TripalTestCase {
       'field_name' => $field_name,
       'formatter_name' => $formatter_name,
     ];
-    // $field_info = field_info_field($field_name);
-    //    $instance_info = field_info_instance('TripalEntity', $field_name, $bundle_name);.
-    $entities = tripal_load_entity('TripalEntity', [$entity_id], FALSE);
+    $field_info = field_info_field($field_name);
+    // $instance_info = field_info_instance('TripalEntity', $field_name, $bundle_name);.
+    $id = $field_info['id'];
+    $entities = tripal_load_entity('TripalEntity', [$entity_id], FALSE, [$id]);
 
     $entity = $entities[$entity_id];
+
     $this->assertEquals($gene->uniquename, $entity->chado_record->uniquename);
 
     // Load the fields.  TODO: can we load specific fields instead?
-    $entity->save();
     $entity->view();
 
     // OK we got our gene back!
-    $field = $entity->{'data__sequence'};
+    $field = $entity->{'data__sequence_features'};
+    var_dump($field['und'][0]['value']);
+  }
 
-    var_dump($entity) ;
-var_dump($field);
+  /**
+   * @group doggo
+   */
+  public function testFieldDirect() {
+    $records = $this->create_test_features();
+    $gene = $records['gene'];
+    $mrna = $records['mrna'];
+
+    $entity_id = $records['entity_id'];
+    $bundle_name = $records['bundle_name'];
+    $field_name = 'data__sequence_features';
+    $formatter_name = 'data__sequence_features_formatter';
+
+    // Initialize the widget class via the TripalFieldTestHelper class.
+    $machine_names = [
+      'field_name' => $field_name,
+      'formatter_name' => $formatter_name,
+    ];
+    $field = field_info_field($field_name);
+    $instance = field_info_instance('TripalEntity', $field_name, $bundle_name);
+
+    $id = $field['id'];
+    $entities = tripal_load_entity('TripalEntity', [$entity_id], FALSE, [$id]);
+
+
+    $entity = $entities[$entity_id];
+    $entity->view();
+
+    $field_object = new \data__sequence_features($field, $instance);
+    // $entity->view();
+    $entity = $field_object->load($entity);
+
+    $value = $entity->{'data__sequence_features'}['und'][0]['value'];
+
+    var_dump($value);
+
+    $this->assertNotEmpty($value);
+
+    $this->assertArrayHasKey('children', $value);
+    // The main parent shouldnt have the info key.
+    $this->assertArrayNotHasKey('info', $value);
+
+    $children = $value['children'];
+
+    $this->assertArrayHasKey($mrna->feature_id, $children);
+
+    $mrna = $children[$mrna->feature_id];
+    // The main parent shouldnt have the info key.
+    $this->assertArrayHasKey('info', $mrna);
+    $this->assertArrayHasKey('children', $mrna);
+
   }
 
   /**
@@ -105,10 +161,23 @@ var_dump($field);
     $gene_term = chado_get_cvterm(['id' => 'SO:0000704']);
 
     $organism_id = factory('chado.organism')->create()->organism_id;
-    $gene = factory('chado.feature')->create(['type_id' => $gene_term->cvterm_id, 'organism_id' => $organism_id, 'residues' => 'AAAAAAAA']);
-    $mrna = factory('chado.feature')->create(['type_id' => chado_get_cvterm(['id' => 'SO:0000234'])->cvterm_id, 'organism_id' => $organism_id]);
-    $cds = factory('chado.feature')->create(['type_id' => chado_get_cvterm(['id' => 'SO:0000316'])->cvterm_id, 'organism_id' => $organism_id]);
-    $protein = factory('chado.feature')->create(['type_id' => chado_get_cvterm(['id' => 'SO:0000104'])->cvterm_id, 'organism_id' => $organism_id]);
+    $gene = factory('chado.feature')->create([
+      'type_id' => $gene_term->cvterm_id,
+      'organism_id' => $organism_id,
+      'residues' => 'AAAAAAAA',
+    ]);
+    $mrna = factory('chado.feature')->create([
+      'type_id' => chado_get_cvterm(['id' => 'SO:0000234'])->cvterm_id,
+      'organism_id' => $organism_id,
+    ]);
+    $cds = factory('chado.feature')->create([
+      'type_id' => chado_get_cvterm(['id' => 'SO:0000316'])->cvterm_id,
+      'organism_id' => $organism_id,
+    ]);
+    $protein = factory('chado.feature')->create([
+      'type_id' => chado_get_cvterm(['id' => 'SO:0000104'])->cvterm_id,
+      'organism_id' => $organism_id,
+    ]);
 
     $this->associate_features($gene, $mrna);
     $this->associate_features($mrna, $cds);
