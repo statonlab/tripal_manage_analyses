@@ -66,7 +66,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
         '#attached' => ['js' => ['misc/collapse.js', 'misc/form.js']],
       ];
 
-
       $rows = [];
       $header = [];
 
@@ -81,8 +80,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
         'Name',
         'Type',
         'Location',
-        'Annotations',
-        'Sequence',
       ];
       $output = theme('table', ['header' => $header, 'rows' => $rows]);
       $element[0][$i][$i . 'table'] = ['#markup' => $output];
@@ -94,6 +91,25 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
   }
 
+  /**
+   * @param $featureloc
+   * The featureloc object returned from chado_expand_var on featureloc.
+   *
+   * @return string
+   */
+  private function buildFeatureString($featureloc) {
+
+    $info = $featureloc->feature_id;
+
+    $min = $info->fmin;
+    $max = $info->fmax;
+    $strand = $info->strand;
+    $parent = $info->srcfeature_id->name;
+
+    $out = "${parent}:  ${min}-${max} (${strand})";
+
+    return $out;
+  }
 
   private function buildChildTable($child) {
 
@@ -105,12 +121,8 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
       $info = $gchild['info'];
 
-      $location = isset($info->featureloc) ? 'set' : "nah";
+      $location = isset($info->featureloc) ? $this->buildFeatureString($info->featureloc) : 'Not available';
 
-      if ($info->type_id->name == 'polypeptide'){
-        dpm($info);
-
-      }
 
       $annotations = isset($info->feature_cvterm) ? "set" : 'nah';
 
@@ -120,8 +132,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
         'Name' => $info->uniquename,
         'Type' => $info->type_id->name,
         'Locations' => $location,
-        'Annotations' => $annotations,
-        'Download' => $download,
       ];
 
       if (isset($gchild['children'])) {
