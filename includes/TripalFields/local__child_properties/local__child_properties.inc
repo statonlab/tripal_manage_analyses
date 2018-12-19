@@ -130,34 +130,34 @@ class local__child_properties extends ChadoField {
     // need to implement this function. However, if you need to add any
     // additional data to be used in the display, you should add it here.
     parent::load($entity);
-
-
-    $master = $entity->data__sequence_features;
-
-    // TODO: get this in the load.  For now we'll use the formatter instead.
-    if (!$master) {
-      $master = $entity->{'data__sequence_features'};
-    }
-    $i = 0;
-
-
-    foreach ($master['und'][0]['value'] as $transcript_id => $transcript) {
-
-      $properties = [];
-
-      foreach ($transcript['children'] as $child_key => $child) {
-
-        $props = $child->featureprop;
-
-        dpm($props);
-
-        $properties[] = $props;
-      }
-
-      $entity->local__child_properties['und'][0]['value'][$i] = $properties;
-
-      $i++;
-    }
+//
+//
+//    $master = $entity->data__sequence_features;
+//
+//    // TODO: get this in the load.  For now we'll use the formatter instead.
+//    if (!$master) {
+//      $master = $entity->{'data__sequence_features'};
+//    }
+//    $i = 0;
+//
+//
+//    foreach ($master['und'][0]['value'] as $transcript_id => $transcript) {
+//
+//      $properties = [];
+//
+//      foreach ($transcript['children'] as $child_key => $child) {
+//
+//        $props = $child->featureprop;
+//
+//        dpm($props);
+//
+//        $properties[] = $props;
+//      }
+//
+//      $entity->local__child_properties['und'][0]['value'][$i] = $properties;
+//
+//      $i++;
+//    }
 
 
   }
