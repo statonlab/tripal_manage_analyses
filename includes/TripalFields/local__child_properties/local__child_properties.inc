@@ -131,8 +131,8 @@ class local__child_properties extends ChadoField {
     // additional data to be used in the display, you should add it here.
     parent::load($entity);
 
-    $entity{'local__child_properties'}['und'][0]['values'] = [TRUE];
-//
+    $entity->{'local__child_properties'}['und'][0]['values'] = [TRUE];
+//  
 //
 //    $master = $entity->data__sequence_features;
 //
