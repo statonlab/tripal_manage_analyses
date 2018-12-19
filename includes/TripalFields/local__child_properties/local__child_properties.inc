@@ -134,7 +134,7 @@ class local__child_properties extends ChadoField {
 
     $master = $entity->data__sequence_features;
 
-
+    // TODO: get this in the load.  For now we'll use the formatter instead.
     if (!$master) {
       $master = $entity->{'data__sequence_features'};
     }
