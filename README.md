@@ -6,6 +6,15 @@ It also provides the `obi__organism` linker.  This linker attaches to **analyses
 
 ## Viewer fields
 
+### gene page fields
+
+These fields are currently **under development**.
+
+* data__sequence_features (master field which recursively gathers info for all child features)
+* local__child_properties (display properties of child features)
+
+In Tripal core, gene pages only display info directly related to that underly chado gene feature.  Typically the gene is composed of many child features, which in turn may have annotations in featureprop, feature_cvterm, etc.   These fields gather that information and allow it to be displayed on the gene page.
+
 ### analysis viewers
 
 The following fields attach to **organism**.
