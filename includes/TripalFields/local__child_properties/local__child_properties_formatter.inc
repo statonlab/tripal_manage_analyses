@@ -42,7 +42,7 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
     $settings = $display['settings'];
 
     // For now, values come from the data__sequence_features field.
-    $data = $entity->{'data__sequence_features'};
+    $data = $entity->{'data__sequence_features'}['und'][0]['value'];
 
     if (!$data) {
       return;
@@ -62,10 +62,9 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
       ];
 
       $info = $child['info'];
-
       $name = $info->uniquename;
 
-      $element[$i] = [
+      $element[0][$i] = [
         '#type' => 'fieldset',
         '#title' => $name,
         '#attributes' => [
@@ -81,10 +80,12 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
       $rows = $this->getPropRows($child);
 
       $table = theme('table', ['rows' => $rows, 'header' => $header]);
-      $element[$i]['prop_table'] = [
+      $element[0][$i]['prop_table'] = [
         '#markup' => $table,
         '#title' => t("Child Properties for !root", ['!root' => $name]),
       ];
+
+      $i++;
     }
   }
 
@@ -99,24 +100,41 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
 
     $info = $data['info'];
 
-    $children = $data['children'];
+    $children = $data['children'] ?? NULL;
 
-    $props = $info->featureprops;
 
-    dpm($props);
+    $props = $info->featureprop;
 
     //        'Feature Name',
     //        'Feature Type',
     //        'Property Name',
     //        'Property Value',
-    foreach ($props as $prop) {
 
-      $rows[] = [
-        $info->uniquename,
-        $info->type_id->name,
-        $prop->type_id->name,
-        $prop->value,
-      ];
+    if ($props) {
+
+      // If there is only one property, it will be an object not an array.
+      if (is_array($props)) {
+        foreach ($props as $prop) {
+
+          $rows[] = [
+            $info->uniquename,
+            $info->type_id->name,
+            $prop->type_id->name,
+            $prop->value,
+          ];
+        }
+      }
+      else {
+
+        $rows[] = [
+          $info->uniquename,
+          $info->type_id->name,
+          $props->type_id->name,
+          $props->value,
+        ];
+
+      }
+
     }
 
     if ($children && !empty($children)) {
@@ -125,7 +143,6 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
         $rows = array_merge($this->getPropRows($child), $rows);
       }
     }
-
     return $rows;
   }
 

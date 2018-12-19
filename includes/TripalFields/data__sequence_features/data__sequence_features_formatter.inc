@@ -46,11 +46,8 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     $i = 0;
 
     foreach ($children as $child_id => $child) {
-
       // mRNA.
-
       $info = $child['info'];
-
       $name = $info->uniquename;
 
       $element[$i] = [
@@ -82,13 +79,12 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
         'Location',
       ];
       $output = theme('table', ['header' => $header, 'rows' => $rows]);
-      $element[0][$i][$i . 'table'] = ['#markup' => $output];
+      $element[$i][$i . 'table'] = ['#markup' => $output];
       $i++;
 
       unset($rows);
       unset($header);
     }
-
   }
 
   /**
