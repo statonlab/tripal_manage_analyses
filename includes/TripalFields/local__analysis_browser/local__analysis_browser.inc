@@ -157,6 +157,6 @@ class local__analysis_browser extends ChadoField {
       }
     }
 
-    $entity->{$field}['und'][0]['value'] = $analyses;
+    $entity->{$field}['und'][0]['value'] = TRUE;
   }
 }

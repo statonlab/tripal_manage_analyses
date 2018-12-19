@@ -37,19 +37,67 @@
 function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
   $fields = [];
 
+  if (isset($bundle->data_table) AND ($bundle->data_table == 'feature') and $bundle->term->name == 'gene') {
+
+    // First add my term.
+    tripal_insert_cvterm([
+      'id' => 'data:1255',
+      'name' => 'Sequence features',
+      'cv_name' => 'EDAM',
+      'definition' => 'Gathers information about all subfeatures (mRNA, CDS, proteins) associated with a top-level feature (gene)',
+    ]);
+
+    // Then describe the field defined by that term.
+    $field_name = 'data__sequence_features';
+    $field_type = 'data__sequence_features';
+    $fields[$field_name] = [
+      'field_name' => $field_name,
+      'type' => $field_type,
+      'cardinality' => 1,
+      'locked' => FALSE,
+      'storage' => [
+        'type' => 'field_chado_storage',
+      ],
+    ];
+
+
+    // First add my term.
+    tripal_insert_cvterm([
+      'id' => 'local:child_properties',
+      'name' => 'child_properties',
+      'cv_name' => 'local',
+      'definition' => 'Properties associated with child features.',
+    ]);
+
+    // Then describe the field defined by that term.
+    $field_name = 'local__child_properties';
+    $field_type = 'local__child_properties';
+    $fields[$field_name] = [
+      'field_name' => $field_name,
+      'type' => $field_type,
+      'cardinality' => 1,
+      'locked' => FALSE,
+      'storage' => [
+        'type' => 'field_chado_storage',
+      ],
+    ];
+
+  }
+
+
   //organism linker on analysis
   if (isset($bundle->data_table) AND ($bundle->data_table == 'analysis')) {
     $field_name = 'obi__organism_linker';
     $field_type = 'obi__organism_linker';
-    $fields[$field_name] = array(
+    $fields[$field_name] = [
       'field_name' => $field_name,
       'type' => $field_type,
       'cardinality' => FIELD_CARDINALITY_UNLIMITED,
       'locked' => FALSE,
-      'storage' => array(
+      'storage' => [
         'type' => 'field_chado_storage',
-      ),
-    );
+      ],
+    ];
 
   }
 
@@ -59,18 +107,18 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
 
     $field_name = 'obi__organism_linker';
     $field_type = 'obi__organism_linker';
-    $fields[$field_name] = array(
+    $fields[$field_name] = [
       'field_name' => $field_name,
       'type' => $field_type,
       'cardinality' => FIELD_CARDINALITY_UNLIMITED,
       'locked' => FALSE,
-      'storage' => array(
+      'storage' => [
         'type' => 'field_chado_storage',
-      ),
-    );
+      ],
+    ];
   }
 
-    if (isset($bundle->data_table) AND ($bundle->data_table == 'organism')) {
+  if (isset($bundle->data_table) AND ($bundle->data_table == 'organism')) {
     // First add my term.
     tripal_insert_cvterm([
       'id' => 'local:analysis_browser',
@@ -113,47 +161,47 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
     ];
 
 
-    tripal_insert_cvterm(array(
+    tripal_insert_cvterm([
       'id' => 'local:transcriptome_viewer',
       'name' => 'transcriptome_viewer',
       'cv_name' => 'local',
       'definition' => 'The transcriptome associated with this entity',
-    ));
+    ]);
 
     // Then describe the field defined by that term.
     $field_name = 'local__transcriptome_viewer';
     $field_type = 'local__transcriptome_viewer';
-    $fields[$field_name] = array(
+    $fields[$field_name] = [
       'field_name' => $field_name,
       'type' => $field_type,
       'cardinality' => 1,
       'locked' => FALSE,
-      'storage' => array(
+      'storage' => [
         'type' => 'field_chado_storage',
-      ),
-    );
+      ],
+    ];
 
-    tripal_insert_cvterm(array(
+    tripal_insert_cvterm([
       'id' => 'local:genome_browser',
       'name' => 'genome_browser',
       'cv_name' => 'local',
       'definition' => 'List the genomes for an organism',
-    ));
+    ]);
 
     // Then describe the field defined by that term.
     $field_name = 'local__genome_browser';
     $field_type = 'local__genome_browser';
-    $fields[$field_name] = array(
+    $fields[$field_name] = [
       'field_name' => $field_name,
       'type' => $field_type,
       'cardinality' => 1,
       'locked' => FALSE,
-      'storage' => array(
+      'storage' => [
         'type' => 'field_chado_storage',
-      ),
-    );
+      ],
+    ];
 
-}
+  }
 
   return $fields;
 }
@@ -185,38 +233,106 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
 function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
   $instances = [];
 
+
+  if (isset($bundle->data_table) AND ($bundle->data_table == 'feature') AND $bundle->term->name == 'gene') {
+    $field_name = 'data__sequence_features';
+    $instances[$field_name] = [
+      'field_name' => $field_name,
+      'entity_type' => $entity_type,
+      'bundle' => $bundle->name,
+      'label' => 'Transcript Information',
+      'description' => 'Gathers information about all subfeatures (mRNA, CDS, proteins) associated with a top-level feature (gene)',
+      'required' => FALSE,
+      'settings' => [
+        'term_vocabulary' => 'data',
+        'term_name' => 'Sequence features',
+        'term_accession' => '1255',
+        'auto_attach' => FALSE,
+        'chado_table' => 'feature_relationship',
+        'chado_column' => 'subject_id',
+        'base_table' => $bundle->data_table,
+      ],
+      'widget' => [
+        'type' => 'data__sequence_features_widget',
+        'settings' => [],
+      ],
+      'display' => [
+        'default' => [
+          'label' => 'hidden',
+          'type' => 'data__sequence_features_formatter',
+          'settings' => [],
+        ],
+      ],
+    ];
+
+    $field_name = 'local__child_properties';
+    $instances[$field_name] = [
+      'field_name' => $field_name,
+      'entity_type' => $entity_type,
+      'bundle' => $bundle->name,
+      'label' => 'Child Properties',
+      'description' => 'Displays property information associated with children of this feature.',
+      'required' => FALSE,
+      'settings' => [
+        'term_vocabulary' => 'local',
+        'term_name' => 'child_properties',
+        'term_accession' => 'child_properties',
+        'auto_attach' => FALSE,
+        'chado_table' => 'featureprop',
+        'chado_column' => 'feature_id',
+        'base_table' => $bundle->data_table,
+      ],
+      'widget' => [
+        'type' => 'local__child_properties_widget',
+        'settings' => [],
+      ],
+      'display' => [
+        'default' => [
+          'label' => 'hidden',
+          'type' => 'local__child_properties_formatter',
+          'settings' => [],
+        ],
+      ],
+    ];
+
+
+  }
+
   if (isset($bundle->data_table) AND ($bundle->data_table == 'analysis')) {
 
     $field_name = 'obi__organism_linker';
     $field_type = 'obi__organism_linker';
-    $instances[$field_name] =  array(
+    $instances[$field_name] = [
       'field_name' => $field_name,
       'entity_type' => $entity_type,
       'bundle' => $bundle->name,
       'label' => 'Organism',
       'description' => 'Organism associated with this entity',
       'required' => FALSE,
-      'settings' => array(
+      'settings' => [
         'term_vocabulary' => 'OBI',
         'term_name' => 'organism',
         'term_accession' => '0100026',
         'auto_attach' => FALSE,
-        'chado_table' => 'organism_analysis',//chado table is what its inserting into
-        'chado_column' => 'analysis_id', //organism_id is a constant.   what changes is the record linker id, which is what this is.
-        'base_table' => 'analysis', //the bundle's base table i think?
-      ),
-      'widget' => array(
+        'chado_table' => 'organism_analysis',
+        //chado table is what its inserting into
+        'chado_column' => 'analysis_id',
+        //organism_id is a constant.   what changes is the record linker id, which is what this is.
+        'base_table' => 'analysis',
+        //the bundle's base table i think?
+      ],
+      'widget' => [
         'type' => 'obi__organism_linker_widget',
-        'settings' => array(),
-      ),
-      'display' => array(
-        'default' => array(
+        'settings' => [],
+      ],
+      'display' => [
+        'default' => [
           'label' => 'hidden',
           'type' => 'obi__organism_linker_formatter',
-          'settings' => array(),
-        ),
-      ),
-    );
+          'settings' => [],
+        ],
+      ],
+    ];
 
   }
 
@@ -226,34 +342,36 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
 
     $field_name = 'obi__organism_linker';
     $field_type = 'obi__organism_linker';
-    $instances[$field_name] =  array(
+    $instances[$field_name] = [
       'field_name' => $field_name,
       'entity_type' => $entity_type,
       'bundle' => $bundle->name,
       'label' => 'Organism',
       'description' => 'Organism associated with this map.',
       'required' => FALSE,
-      'settings' => array(
+      'settings' => [
         'term_vocabulary' => 'OBI',
         'term_name' => 'organism',
         'term_accession' => '0100026',
         'auto_attach' => FALSE,
-        'chado_table' => 'featuremap_organism',//chado table is what its inserting into
+        'chado_table' => 'featuremap_organism',
+        //chado table is what its inserting into
         'chado_column' => 'featuremap_id',
-        'base_table' => 'featuremap', //the bundle's base table i think?
-      ),
-      'widget' => array(
+        'base_table' => 'featuremap',
+        //the bundle's base table i think?
+      ],
+      'widget' => [
         'type' => 'obi__organism_linker_widget',
-        'settings' => array(),
-      ),
-      'display' => array(
-        'default' => array(
+        'settings' => [],
+      ],
+      'display' => [
+        'default' => [
           'label' => 'hidden',
           'type' => 'obi__organism_linker_formatter',
-          'settings' => array(),
-        ),
-      ),
-    );
+          'settings' => [],
+        ],
+      ],
+    ];
   }
 
   // ORGANISM.
@@ -323,14 +441,14 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
 
     $field_name = 'local__transcriptome_viewer';
     $field_type = 'local__transcriptome_viewer';
-    $instances[$field_name] =  array(
+    $instances[$field_name] = [
       'field_name' => $field_name,
       'entity_type' => $entity_type,
       'bundle' => $bundle->name,
       'label' => 'Transcriptome',
       'description' => 'The transcriptome associated with this entity',
       'required' => FALSE,
-      'settings' => array(
+      'settings' => [
         'term_vocabulary' => 'local',
         'term_name' => 'transcriptome_viewer',
         'term_accession' => 'transcriptome_viewer',
@@ -338,31 +456,31 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
         'chado_table' => $bundle->data_table,
         'chado_column' => 'organism_id',
         'base_table' => $bundle->data_table,
-      ),
-      'widget' => array(
+      ],
+      'widget' => [
         'type' => 'local__transcriptome_viewer_widget',
-        'settings' => array(),
-      ),
-      'display' => array(
-        'default' => array(
+        'settings' => [],
+      ],
+      'display' => [
+        'default' => [
           'label' => 'hidden',
           'type' => 'local__transcriptome_viewer_formatter',
-          'settings' => array(),
-        ),
-      ),
-    );
+          'settings' => [],
+        ],
+      ],
+    ];
 
 
     $field_name = 'local__genome_browser';
     $field_type = 'local__genome_browser';
-    $instances[$field_name] =  array(
+    $instances[$field_name] = [
       'field_name' => $field_name,
       'entity_type' => $entity_type,
       'bundle' => $bundle->name,
       'label' => 'Genome Browser',
       'description' => 'List the genomes for an organism',
       'required' => FALSE,
-      'settings' => array(
+      'settings' => [
         'term_vocabulary' => 'local',
         'term_name' => 'genome_browser',
         'term_accession' => 'genome_browser',
@@ -370,20 +488,19 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
         'chado_table' => $bundle->data_table,
         'chado_column' => 'organism_id',
         'base_table' => $bundle->data_table,
-      ),
-      'widget' => array(
+      ],
+      'widget' => [
         'type' => 'local__genome_browser_widget',
-        'settings' => array(),
-      ),
-      'display' => array(
-        'default' => array(
+        'settings' => [],
+      ],
+      'display' => [
+        'default' => [
           'label' => 'hidden',
           'type' => 'local__genome_browser_formatter',
-          'settings' => array(),
-        ),
-      ),
-    );
-
+          'settings' => [],
+        ],
+      ],
+    ];
 
 
   }

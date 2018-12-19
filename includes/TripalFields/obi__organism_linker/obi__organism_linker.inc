@@ -123,7 +123,9 @@ class obi__organism_linker extends ChadoField {
    *
    */
   public function load($entity) {
+
     parent::load($entity);
+
 
     $entity_record = $entity->chado_record;
     //
