@@ -9,34 +9,36 @@
  */
 class data__sequence_features_formatter extends ChadoFieldFormatter {
 
-  // The default label for this field.
+  /**
+   * The default label for this field.
+   */
   public static $default_label = 'Transcript Information';
 
-  // The list of field types for which this formatter is appropriate.
+  /**
+   * The list of field types for which this formatter is appropriate.
+   */
   public static $field_types = ['data__sequence_features'];
 
-  // The list of default settings for this formatter.
+  /**
+   * The list of default settings for this formatter.
+   */
   public static $default_settings = [
     'setting1' => 'default_value',
   ];
 
   /**
    * @see ChadoFieldFormatter::settingsForm()
-   *
    **/
-
   public function settingsForm($view_mode, $form, &$form_state) {
 
   }
 
   /**
    * @see ChadoFieldFormatter::View()
-   *
    **/
-
   public function view(&$element, $entity_type, $entity, $langcode, $items, $display) {
 
-    // Get the settings
+    // Get the settings.
     $settings = $display['settings'];
 
     $parent = $entity->chado_record->feature_id;
@@ -59,7 +61,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
             'collapsed',
           ],
         ],
-        #see: https://www.drupal.org/forum/support/module-development-and-code-questions/2012-02-07/drupal-render-fieldset-element
+        // see: https://www.drupal.org/forum/support/module-development-and-code-questions/2012-02-07/drupal-render-fieldset-element
         '#attached' => ['js' => ['misc/collapse.js', 'misc/form.js']],
       ];
 
@@ -71,7 +73,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       if (empty($rows)) {
         continue;
       }
-
 
       $header = [
         'Name',
@@ -89,7 +90,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
   /**
    * @param $featureloc
-   * The featureloc object returned from chado_expand_var on featureloc.
+   *   The featureloc object returned from chado_expand_var on featureloc.
    *
    * @return string
    */
@@ -107,6 +108,9 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     return $out;
   }
 
+  /**
+   *
+   */
   private function buildChildTable($child) {
 
     $rows = [];
@@ -118,7 +122,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       $info = $gchild['info'];
 
       $location = isset($info->featureloc) ? $this->buildFeatureString($info->featureloc) : 'Not available';
-
 
       $annotations = isset($info->feature_cvterm) ? "set" : 'nah';
 
@@ -142,12 +145,9 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
   /**
    * @see ChadoFieldFormatter::settingsSummary()
-   *
    **/
-
   public function settingsSummary($view_mode) {
     return '';
   }
-
 
 }

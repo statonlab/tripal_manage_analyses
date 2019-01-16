@@ -15,28 +15,39 @@ class local__genome_browser extends ChadoField {
   // The following constants SHOULD be set for each descendant class.  They are
   // used by the static functions to provide information to Drupal about
   // the field and it's default widget and formatter.
-  // --------------------------------------------------------------------------
-
-  // The default label for this field.
+  // --------------------------------------------------------------------------.
+  /**
+   * The default label for this field.
+   */
   public static $default_label = 'Genome';
 
-  // The default description for this field.
+  /**
+   * The default description for this field.
+   */
   public static $default_description = 'List the genomes for an organism';
 
-  // The default widget for this field.
+  /**
+   * The default widget for this field.
+   */
   public static $default_widget = 'local__genome_browser_widget';
 
-  // The default formatter for this field.
+  /**
+   * The default formatter for this field.
+   */
   public static $default_formatter = 'local__genome_browser_formatter';
 
-  // The module that manages this field.
+  /**
+   * The module that manages this field.
+   */
   public static $module = 'tripal_manage_analysees';
 
   // A list of global settings. These can be accessed within the
   // globalSettingsForm.  When the globalSettingsForm is submitted then
   // Drupal will automatically change these settings for all fields.
-  // Once instances exist for a field type then these settings cannot be
-  // changed.
+  // Once instances exist for a field type then these settings cannot be.
+  /**
+   * Changed.
+   */
   public static $default_settings = [
     'storage' => 'field_chado_storage',
     // It is expected that all fields set a 'value' in the load() function.
@@ -53,8 +64,10 @@ class local__genome_browser extends ChadoField {
   // then Drupal with automatically change these settings for the instance.
   // It is recommended to put settings at the instance level whenever possible.
   // If you override this variable in a child class be sure to replicate the
-  // term_name, term_vocab, term_accession and term_fixed keys as these are
-  // required for all TripalFields.
+  // term_name, term_vocab, term_accession and term_fixed keys as these are.
+  /**
+   * Required for all TripalFields.
+   */
   public static $default_instance_settings = [
     // The DATABASE name, as it appears in chado.db.  This also builds the link-out url.  In most cases this will simply be the CV name.  In some cases (EDAM) this will be the SUBONTOLOGY.
     'term_vocabulary' => 'local',
@@ -82,13 +95,17 @@ class local__genome_browser extends ChadoField {
   // A boolean specifying that users should not be allowed to create
   // fields and instances of this field type through the UI. Such
   // fields can only be created programmatically with field_create_field()
-  // and field_create_instance().
+  /**
+   * And field_create_instance().
+   */
   public static $no_ui = FALSE;
 
   // A boolean specifying that the field will not contain any data. This
   // should exclude the field from web services or downloads.  An example
-  // could be a quick search field that appears on the page that redirects
-  // the user but otherwise provides no data.
+  // could be a quick search field that appears on the page that redirects.
+  /**
+   * The user but otherwise provides no data.
+   */
   public static $no_data = FALSE;
 
   /**
@@ -115,8 +132,6 @@ class local__genome_browser extends ChadoField {
    *   The array may contain as many other keys at the same level as 'value'
    *   but those keys are for internal field use and are not considered the
    *   value of the field.
-   *
-   *
    */
   public function load($entity) {
 
@@ -128,12 +143,9 @@ class local__genome_browser extends ChadoField {
     $field = get_class($this);
     $entity->{$field}['und'][0]['value'] = NULL;
 
-
-
     if ($entity->chado_table != 'organism') {
       return;
     }
-
 
     $genome_term = tripal_load_term_entity([
       'vocabulary' => 'operation',
@@ -164,18 +176,19 @@ class local__genome_browser extends ChadoField {
       $analyses[$analysis->analysis_id] = $analysis;
     }
 
-    // Push any entries containing the word archived to the back of the array
+    // Push any entries containing the word archived to the back of the array.
     foreach ($analyses as $key => $analysis) {
       if (stripos($analysis->name, 'archived') !== FALSE) {
-        // Store the analysis
+        // Store the analysis.
         $value = $analysis;
-        // Remove the entry from the array
+        // Remove the entry from the array.
         unset($analyses[$key]);
-        // Add the stored analysis to the back of the array
+        // Add the stored analysis to the back of the array.
         $analyses[] = $value;
       }
     }
 
     $entity->{$field}['und'][0]['value'] = $analyses;
   }
+
 }

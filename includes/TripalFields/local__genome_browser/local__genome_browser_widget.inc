@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @class
  * Purpose:
@@ -9,10 +10,14 @@
  */
 class local__genome_browser_widget extends ChadoFieldWidget {
 
-  // The default label for this field.
+  /**
+   * The default label for this field.
+   */
   public static $default_label = 'Genome Browser';
 
-  // The list of field types for which this formatter is appropriate.
+  /**
+   * The list of field types for which this formatter is appropriate.
+   */
   public static $field_types = array('local__genome_browser');
 
   /**
@@ -49,25 +54,25 @@ class local__genome_browser_widget extends ChadoFieldWidget {
    * @param $delta
    *   The order of this item in the array of subelements (0, 1, 2, etc).
    * @param $element
-   * A form element array containing basic properties for the widget:
-   *  - #entity_type: The name of the entity the field is attached to.
-   *  - #bundle: The name of the field bundle the field is contained in.
-   *  - #field_name: The name of the field.
-   *  - #language: The language the field is being edited in.
-   *  - #field_parents: The 'parents' space for the field in the form. Most
+   *   A form element array containing basic properties for the widget:
+   *   - #entity_type: The name of the entity the field is attached to.
+   *   - #bundle: The name of the field bundle the field is contained in.
+   *   - #field_name: The name of the field.
+   *   - #language: The language the field is being edited in.
+   *   - #field_parents: The 'parents' space for the field in the form. Most
    *    widgets can simply overlook this property. This identifies the location
    *    where the field values are placed within $form_state['values'], and is
    *    used to access processing information for the field through the
    *    field_form_get_state() and field_form_set_state() functions.
-   *  - #columns: A list of field storage columns of the field.
-   *  - #title: The sanitized element label for the field instance, ready for
+   *   - #columns: A list of field storage columns of the field.
+   *   - #title: The sanitized element label for the field instance, ready for
    *    output.
-   *  - #description: The sanitized element description for the field instance,
+   *   - #description: The sanitized element description for the field instance,
    *    ready for output.
-   *  - #required: A Boolean indicating whether the element value is required;
+   *   - #required: A Boolean indicating whether the element value is required;
    *    for required multiple value fields, only the first widget's values are
    *    required.
-   *  - #delta: The order of this item in the array of subelements; see
+   *   - #delta: The order of this item in the array of subelements; see
    *    $delta above
    */
   public function form(&$widget, &$form, &$form_state, $langcode, $items, $delta, $element) {
@@ -105,15 +110,15 @@ class local__genome_browser_widget extends ChadoFieldWidget {
    * function.
    *
    * @param $form
-   *    The submitted form array.
-   * @param $form_state .
-   *    The form state array.
+   *   The submitted form array.
+   * @param $form_state
+   *   The form state array.
    * @param $entity_type
-   *    The type of $entity.
+   *   The type of $entity.
    * @param $entity
-   *    The entity for the operation.
+   *   The entity for the operation.
    * @param $langcode
-   *    The language associated with $items.
+   *   The language associated with $items.
    * @param $delta
    */
   public function submit($form, &$form_state, $entity_type, $entity, $langcode, $delta) {

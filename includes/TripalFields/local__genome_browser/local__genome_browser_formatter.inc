@@ -9,13 +9,19 @@
  */
 class local__genome_browser_formatter extends ChadoFieldFormatter {
 
-  // The default label for this field.
+  /**
+   * The default label for this field.
+   */
   public static $default_label = 'Genome Browser';
 
-  // The list of field types for which this formatter is appropriate.
+  /**
+   * The list of field types for which this formatter is appropriate.
+   */
   public static $field_types = ['local__genome_browser'];
 
-  // The list of default settings for this formatter.
+  /**
+   * The list of default settings for this formatter.
+   */
   public static $default_settings = [
     'setting1' => 'default_value',
   ];
@@ -57,7 +63,7 @@ class local__genome_browser_formatter extends ChadoFieldFormatter {
   }
 
   /**
-   *  Provides the display for a field
+   * Provides the display for a field.
    *
    * This function corresponds to the hook_field_formatter_view()
    * function of the Drupal Field API.
@@ -77,14 +83,13 @@ class local__genome_browser_formatter extends ChadoFieldFormatter {
    * @param $display
    *
    * @return
-   *    An element array compatible with that returned by the
+   *   An element array compatible with that returned by the
    *    hook_field_formatter_view() function.
    */
   public function view(&$element, $entity_type, $entity, $langcode, $items, $display) {
 
-    // Get the settings
+    // Get the settings.
     $settings = $display['settings'];
-
 
     $field = 'local__genome_browser';
 
@@ -138,7 +143,6 @@ class local__genome_browser_formatter extends ChadoFieldFormatter {
    * @return string
    *   A string that provides a very brief summary of the field settings
    *   to the user.
-   *
    */
   public function settingsSummary($view_mode) {
     return '';

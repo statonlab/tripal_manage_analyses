@@ -6,10 +6,14 @@
  */
 class obi__organism_linker_widget extends ChadoFieldWidget {
 
-  // The default label for this field.
+  /**
+   * The default label for this field.
+   */
   public static $default_label = 'Organism';
 
-  // The list of field types for which this formatter is appropriate.
+  /**
+   * The list of field types for which this formatter is appropriate.
+   */
   public static $field_types = ['obi__organism_linker'];
 
   /**
@@ -46,25 +50,25 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
    * @param $delta
    *   The order of this item in the array of subelements (0, 1, 2, etc).
    * @param $element
-   * A form element array containing basic properties for the widget:
-   *  - #entity_type: The name of the entity the field is attached to.
-   *  - #bundle: The name of the field bundle the field is contained in.
-   *  - #field_name: The name of the field.
-   *  - #language: The language the field is being edited in.
-   *  - #field_parents: The 'parents' space for the field in the form. Most
+   *   A form element array containing basic properties for the widget:
+   *   - #entity_type: The name of the entity the field is attached to.
+   *   - #bundle: The name of the field bundle the field is contained in.
+   *   - #field_name: The name of the field.
+   *   - #language: The language the field is being edited in.
+   *   - #field_parents: The 'parents' space for the field in the form. Most
    *    widgets can simply overlook this property. This identifies the location
    *    where the field values are placed within $form_state['values'], and is
    *    used to access processing information for the field through the
    *    field_form_get_state() and field_form_set_state() functions.
-   *  - #columns: A list of field storage columns of the field.
-   *  - #title: The sanitized element label for the field instance, ready for
+   *   - #columns: A list of field storage columns of the field.
+   *   - #title: The sanitized element label for the field instance, ready for
    *    output.
-   *  - #description: The sanitized element description for the field instance,
+   *   - #description: The sanitized element description for the field instance,
    *    ready for output.
-   *  - #required: A Boolean indicating whether the element value is required;
+   *   - #required: A Boolean indicating whether the element value is required;
    *    for required multiple value fields, only the first widget's values are
    *    required.
-   *  - #delta: The order of this item in the array of subelements; see
+   *   - #delta: The order of this item in the array of subelements; see
    *    $delta above
    */
   public function form(&$widget, &$form, &$form_state, $langcode, $items, $delta, $element) {
@@ -79,42 +83,42 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
 
     // Get information about this organism linker table.
     $schema = chado_get_schema($field_table);
-    if (!$schema){
-      drupal_set_message(t('The organism linker field for '. $field_table .  ' is not present in the chado database!'));
+    if (!$schema) {
+      drupal_set_message(t('The organism linker field for ' . $field_table . ' is not present in the chado database!'));
     }
-    $pkey = $schema['primary key'][0];//ie featuremap_organism_id
+    // Ie featuremap_organism_id.
+    $pkey = $schema['primary key'][0];
     $lfkey_field = key($schema['foreign keys'][$base_table]['columns']);
 
     $linker_field = 'chado-' . $field_table . '__organism_id';
 
     $fkey_lcolumn = key($schema['foreign keys'][$base_table]['columns']);
-    //    $fkey_lcolumn = key($schema['foreign keys']['protocol']['columns']);
-
+    // $fkey_lcolumn = key($schema['foreign keys']['protocol']['columns']);.
     $fkey_rcolumn = $schema['foreign keys'][$base_table]['columns'][$fkey_lcolumn];
 
     $record_id = '';
 
     $organism_id = 0;
-    //duh where do we get organism id...
+    // Duh where do we get organism id...
     $fk_value = (array_key_exists('#entity', $element) and $element['#entity']) ? $element['#entity']->chado_record_id : NULL;
-
 
     // If the field already has a value then it will come through the $items
     // array.  This happens when editing an existing record.
     if (count($items) > 0 and array_key_exists($delta, $items)) {
 
-     $fk_value = tripal_get_field_item_keyval($items, $delta, 'chado-' . $field_table . '__' . $fkey_lcolumn, $fk_value); //ie analysis_id
+      // Ie analysis_id.
+      $fk_value = tripal_get_field_item_keyval($items, $delta, 'chado-' . $field_table . '__' . $fkey_lcolumn, $fk_value);
       $record_id = tripal_get_field_item_keyval($items, $delta, 'chado-' . $field_table . '__' . $pkey, $record_id);
-     //ie organism_analysis_id
-      $organism_id = tripal_get_field_item_keyval($items, $delta, 'chado-' . $field_table . '__organism_id', $organism_id); //organism_id
+      // Ie organism_analysis_id
+      // organism_id.
+      $organism_id = tripal_get_field_item_keyval($items, $delta, 'chado-' . $field_table . '__organism_id', $organism_id);
     }
 
     $widget['value'] = [
       '#type' => 'value',
       '#value' => array_key_exists($delta, $items) ? $items[$delta]['value'] : '',
     ];
-    $options = chado_get_organism_select_options(false);
-
+    $options = chado_get_organism_select_options(FALSE);
 
     $widget['chado-' . $field_table . '__' . $pkey] = array(
       '#type' => 'value',
@@ -137,7 +141,8 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
       '#default_value' => $organism_id,
       '#required' => $element['#required'],
       '#weight' => isset($element['#weight']) ? $element['#weight'] : 0,
-      '#delta' => $delta,//delta is its order in an array of subelements
+    // Delta is its order in an array of subelements.
+      '#delta' => $delta,
     ];
 
   }
@@ -160,15 +165,15 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
 
     // Get information about this organism linker table.
     $schema = chado_get_schema($field_table);
-    $pkey = $schema['primary key'][0];//ie featuremap_organism_id
+    // Ie featuremap_organism_id.
+    $pkey = $schema['primary key'][0];
     $lfkey_field = key($schema['foreign keys'][$base_table]['columns']);
 
     // Get the organism_id from the form state.
     $organism_id = $form_state['values'][$field_name]['und'][$delta]['value'];
 
-
     if ($organism_id) {
-            $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__organism_id'] = $organism_id;
+      $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__organism_id'] = $organism_id;
     }
 
     // If no organism is provided then we want to set the field for deletion.
