@@ -1,3 +1,6 @@
+
+[![Build Status](https://travis-ci.org/statonlab/tripal_manage_analyses.svg?branch=master)](https://travis-ci.org/statonlab/tripal_manage_analyses)
+
 # Tripal Manage Analyses
 
 This module creates browseable analysis and library lists for organisms.
