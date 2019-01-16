@@ -120,8 +120,10 @@ class data__sequence_features extends ChadoField {
   public static $no_data = FALSE;
 
   /**
+   * Load field.
+   *
    * @see ChadoField::load()
-   **/
+   */
   public function load($entity) {
 
     // ChadoFields automatically load the chado column specified in the
@@ -193,9 +195,8 @@ class data__sequence_features extends ChadoField {
     foreach ($query as $child) {
       $child_id = $child->subject_id;
 
-      // expand var on this
-
-      $feature = chado_generate_var('feature', ['feature_id' =>$child_id]);
+      // Expand var on this.
+      $feature = chado_generate_var('feature', ['feature_id' => $child_id]);
       $feature = chado_expand_var($feature, 'field', 'feature.residues');
       $feature = chado_expand_var($feature, 'table', 'featureloc');
       $feature = chado_expand_var($feature, 'table', 'featureprop');
