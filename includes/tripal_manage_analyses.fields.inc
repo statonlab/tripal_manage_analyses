@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Contains all field specific code outside the classes.
@@ -37,7 +38,7 @@
 function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
   $fields = [];
 
-  if (isset($bundle->data_table) AND ($bundle->data_table == 'feature') and $bundle->term->name == 'gene') {
+  if (isset($bundle->data_table) and ($bundle->data_table == 'feature') and $bundle->term->name == 'gene') {
 
     // First add my term.
     tripal_insert_cvterm([
@@ -59,7 +60,6 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
         'type' => 'field_chado_storage',
       ],
     ];
-
 
     // First add my term.
     tripal_insert_cvterm([
@@ -84,9 +84,8 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
 
   }
 
-
-  //organism linker on analysis
-  if (isset($bundle->data_table) AND ($bundle->data_table == 'analysis')) {
+  // Organism linker on analysis.
+  if (isset($bundle->data_table) and ($bundle->data_table == 'analysis')) {
     $field_name = 'obi__organism_linker';
     $field_type = 'obi__organism_linker';
     $fields[$field_name] = [
@@ -101,9 +100,8 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
 
   }
 
-
-  //organism linker on map
-  if (isset($bundle->data_table) AND ($bundle->data_table == 'featuremap')) {
+  // Organism linker on map.
+  if (isset($bundle->data_table) and ($bundle->data_table == 'featuremap')) {
 
     $field_name = 'obi__organism_linker';
     $field_type = 'obi__organism_linker';
@@ -118,7 +116,7 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
     ];
   }
 
-  if (isset($bundle->data_table) AND ($bundle->data_table == 'organism')) {
+  if (isset($bundle->data_table) and ($bundle->data_table == 'organism')) {
     // First add my term.
     tripal_insert_cvterm([
       'id' => 'local:analysis_browser',
@@ -159,7 +157,6 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
         'type' => 'field_chado_storage',
       ],
     ];
-
 
     tripal_insert_cvterm([
       'id' => 'local:transcriptome_viewer',
@@ -233,8 +230,7 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
 function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
   $instances = [];
 
-
-  if (isset($bundle->data_table) AND ($bundle->data_table == 'feature') AND $bundle->term->name == 'gene') {
+  if (isset($bundle->data_table) and ($bundle->data_table == 'feature') and $bundle->term->name == 'gene') {
     $field_name = 'data__sequence_features';
     $instances[$field_name] = [
       'field_name' => $field_name,
@@ -295,10 +291,9 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
       ],
     ];
 
-
   }
 
-  if (isset($bundle->data_table) AND ($bundle->data_table == 'analysis')) {
+  if (isset($bundle->data_table) and ($bundle->data_table == 'analysis')) {
 
     $field_name = 'obi__organism_linker';
     $field_type = 'obi__organism_linker';
@@ -315,11 +310,8 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
         'term_accession' => '0100026',
         'auto_attach' => FALSE,
         'chado_table' => 'organism_analysis',
-        //chado table is what its inserting into
         'chado_column' => 'analysis_id',
-        //organism_id is a constant.   what changes is the record linker id, which is what this is.
         'base_table' => 'analysis',
-        //the bundle's base table i think?
       ],
       'widget' => [
         'type' => 'obi__organism_linker_widget',
@@ -337,8 +329,8 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
   }
 
   // FEATUREMAPS
-  //==============
-  if (isset($bundle->data_table) AND ($bundle->data_table == 'featuremap')) {
+  // ==============.
+  if (isset($bundle->data_table) and ($bundle->data_table == 'featuremap')) {
 
     $field_name = 'obi__organism_linker';
     $field_type = 'obi__organism_linker';
@@ -355,10 +347,10 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
         'term_accession' => '0100026',
         'auto_attach' => FALSE,
         'chado_table' => 'featuremap_organism',
-        //chado table is what its inserting into
+        // Chado table is what its inserting into.
         'chado_column' => 'featuremap_id',
         'base_table' => 'featuremap',
-        //the bundle's base table i think?
+        // The bundle's base table i think?
       ],
       'widget' => [
         'type' => 'obi__organism_linker_widget',
@@ -375,8 +367,8 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
   }
 
   // ORGANISM.
-  //===============
-  if (isset($bundle->data_table) AND ($bundle->data_table == 'organism')) {
+  // ===============.
+  if (isset($bundle->data_table) and ($bundle->data_table == 'organism')) {
     $field_name = 'local__analysis_browser';
     $field_type = 'local__analysis_browser';
     $instances[$field_name] = [
@@ -470,7 +462,6 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
       ],
     ];
 
-
     $field_name = 'local__genome_browser';
     $field_type = 'local__genome_browser';
     $instances[$field_name] = [
@@ -501,7 +492,6 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
         ],
       ],
     ];
-
 
   }
 

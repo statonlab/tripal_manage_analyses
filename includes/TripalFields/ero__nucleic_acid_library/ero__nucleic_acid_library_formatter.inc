@@ -103,9 +103,9 @@ class ero__nucleic_acid_library_formatter extends ChadoFieldFormatter {
         $rows[] = $value;
       }
 
-if (empty($rows)){
-return NULL;
-}
+      if (empty($rows)) {
+        return NULL;
+      }
 
       $output = theme('table', [
         'header' => $header,

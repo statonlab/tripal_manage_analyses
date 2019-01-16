@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @class
  * Purpose:
@@ -13,7 +14,7 @@ class local__analysis_browser_widget extends ChadoFieldWidget {
   public static $default_label = 'Analyses';
 
   // The list of field types for which this formatter is appropriate.
-  public static $field_types = array('local__analysis_browser');
+  public static $field_types = ['local__analysis_browser'];
 
   /**
    * Provides the form for editing of this field.

@@ -17,30 +17,41 @@ class obi__organism_linker extends ChadoField {
   // The following constants SHOULD be set for each descendant class.  They are
   // used by the static functions to provide information to Drupal about
   // the field and it's default widget and formatter.
-  // --------------------------------------------------------------------------
-
-  // The default label for this field.
+  // --------------------------------------------------------------------------.
+  /**
+   * The default label for this field.
+   */
   public static $default_label = 'Organism';
 
-  // The default description for this field.
+  /**
+   * The default description for this field.
+   */
   public static $default_description = 'Organism associated with this entity';
 
-  // The default widget for this field.
+  /**
+   * The default widget for this field.
+   */
   public static $default_widget = 'obi__organism_linker_widget';
 
-  // The default formatter for this field.
+  /**
+   * The default formatter for this field.
+   */
   public static $default_formatter = 'obi__organism_linker_formatter';
 
   // The module that manages this field.
   // If no module manages the field (IE it's added via libraries)
-  // set this to 'tripal_chado'
+  /**
+   * Set this to 'tripal_chado'.
+   */
   public static $module = 'tripal_manage_analyses';
 
   // A list of global settings. These can be accessed within the
   // globalSettingsForm.  When the globalSettingsForm is submitted then
   // Drupal will automatically change these settings for all fields.
-  // Once instances exist for a field type then these settings cannot be
-  // changed.
+  // Once instances exist for a field type then these settings cannot be.
+  /**
+   * Changed.
+   */
   public static $default_settings = [
     'storage' => 'field_chado_storage',
     // It is expected that all fields set a 'value' in the load() function.
@@ -57,8 +68,10 @@ class obi__organism_linker extends ChadoField {
   // then Drupal with automatically change these settings for the instance.
   // It is recommended to put settings at the instance level whenever possible.
   // If you override this variable in a child class be sure to replicate the
-  // term_name, term_vocab, term_accession and term_fixed keys as these are
-  // required for all TripalFields.
+  // term_name, term_vocab, term_accession and term_fixed keys as these are.
+  /**
+   * Required for all TripalFields.
+   */
   public static $default_instance_settings = [
     // The DATABASE name, as it appears in chado.db.  This also builds the link-out url.  In most cases this will simply be the CV name.  In some cases (EDAM) this will be the SUBONTOLOGY.
     'term_vocabulary' => 'OBI',
@@ -86,13 +99,17 @@ class obi__organism_linker extends ChadoField {
   // A boolean specifying that users should not be allowed to create
   // fields and instances of this field type through the UI. Such
   // fields can only be created programmatically with field_create_field()
-  // and field_create_instance().
+  /**
+   * And field_create_instance().
+   */
   public static $no_ui = FALSE;
 
   // A boolean specifying that the field will not contain any data. This
   // should exclude the field from web services or downloads.  An example
-  // could be a quick search field that appears on the page that redirects
-  // the user but otherwise provides no data.
+  // could be a quick search field that appears on the page that redirects.
+  /**
+   * The user but otherwise provides no data.
+   */
   public static $no_data = FALSE;
 
   /**
@@ -119,16 +136,12 @@ class obi__organism_linker extends ChadoField {
    *   The array may contain as many other keys at the same level as 'value'
    *   but those keys are for internal field use and are not considered the
    *   value of the field.
-   *
-   *
    */
   public function load($entity) {
 
     parent::load($entity);
 
-
     $entity_record = $entity->chado_record;
-    //
     $field_name = $this->field['field_name'];
     $field_type = $this->field['type'];
     $field_table = $this->instance['settings']['chado_table'];
@@ -137,8 +150,8 @@ class obi__organism_linker extends ChadoField {
     $key = $base_table . '_id';
 
     $schema = chado_get_schema($field_table);
-    if (!$schema){
-      drupal_set_message(t('The organism linker field for '. $field_table .  ' is not present in the chado database!'));
+    if (!$schema) {
+      drupal_set_message(t('The organism linker field for ' . $field_table . ' is not present in the chado database!'));
     }
     $pkey = $schema['primary key'][0];
 
@@ -193,7 +206,6 @@ class obi__organism_linker extends ChadoField {
 
   }
 
-
   /**
    * Used to filter records that match a given condition.
    *
@@ -222,13 +234,13 @@ class obi__organism_linker extends ChadoField {
    * @param $condition
    *   The field specific condition as set in the TripalFieldQuery object.
    *
-   * In addition to the rules to follow for the TripalField::query function
-   * these should also be followed for the ChadoField::query implementation.
+   *   In addition to the rules to follow for the TripalField::query function
+   *   these should also be followed for the ChadoField::query implementation.
    *
-   * - When giving alias to joined tables be sure to use aliases that are
+   *   - When giving alias to joined tables be sure to use aliases that are
    *   unique to avoid conflicts with other fields.
-   * - When joining with the base table its alias is 'base'.
-   * - You may join to materialized views if need be to help speed queries.
+   *   - When joining with the base table its alias is 'base'.
+   *   - You may join to materialized views if need be to help speed queries.
    */
   public function query($query, $condition) {
   }
@@ -243,10 +255,8 @@ class obi__organism_linker extends ChadoField {
    *   The field ordering as set in the TripalFieldQuery object.  This function
    *   should handle the ordering request as specified by this object.
    */
-
   public function queryOrder($query, $order) {
   }
-
 
   /**
    * Provides the list of elements returned by the 'value' of the field.
@@ -358,5 +368,3 @@ class obi__organism_linker extends ChadoField {
   }
 
 }
-
-

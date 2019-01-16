@@ -1,13 +1,16 @@
 <?php
 
 /**
- * Install module.
- * This creates the custom table necessary for the analysis browser field.
- *
+ * @file
+ * Functions for module setup on install.
+ */
+
+/**
+ * Implements hook install.
  */
 function tripal_manage_analyses_install() {
   create_organism_analysis_table();
-  //insert terms
+  // Insert terms.
   tripal_insert_cvterm([
     'name' => 'Transcriptome Assembly',
     'def' => '',
@@ -24,11 +27,8 @@ function tripal_manage_analyses_install() {
   ]);
 }
 
-
-//define the organism_analysis mview table
-
 /**
- *
+ * Defines the organism_analysis table.
  */
 function tripal_manage_analyses_organism_analysis_linker_schema() {
   $schema['organism_analysis'] = [
@@ -65,12 +65,15 @@ function tripal_manage_analyses_organism_analysis_linker_schema() {
   return $schema;
 }
 
+/**
+ * Installs the organism_analysis table, migrates analysis_organism.
+ */
 function create_organism_analysis_table() {
   $schema = tripal_manage_analyses_organism_analysis_linker_schema();
 
   chado_create_custom_table('organism_analysis', $schema['organism_analysis'], TRUE, NULL, FALSE);
 
-  //Now, migrate existing analysis_organism records to the proper linker table.
+  // Now, migrate existing analysis_organism records to the proper linker table.
   if (!db_table_exists('analysis_organism')) {
     return;
   }
@@ -89,11 +92,9 @@ function create_organism_analysis_table() {
   }
 }
 
-/*
- * install organism analysis table
+/**
+ * Install organism analysis table.
  */
 function tripal_manage_analyses_update_7305() {
   create_organism_analysis_table();
 }
-
-
