@@ -25,6 +25,6 @@ script:
   - docker exec -it tripal yum install -y php-pecl-xdebug.x86_64
   - docker exec -it tripal bash -c "cd /modules/tripal_manage_analyses && composer install && DRUPAL_ROOT=/var/www/html IS_TRAVIS=TRUE ./vendor/bin/phpunit --coverage-clover ./clover.xml"
 
-
+#send coverage report to code climate
 after_script:
   - ./cc-test-reporter after-build clover.xml --debug -t clover -p /var/www/html/sites/all/modules/custom/tripal_manage_analyses --exit-code $TRAVIS_TEST_RESULT
