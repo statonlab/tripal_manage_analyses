@@ -8,16 +8,6 @@
 /**
  * Implements hook_bundle_fields_info().
  *
- * This hook tells Drupal/Tripal about your new field type. Make sure you've
- * created the field (handles basic storage of your data), widget (provides
- * user UI to set data), and formatter (describes display of data on Entity
- * Page) classes. These should be located in the following directory: [your
- * module]/includes/TripalFields/[classname].inc with one file per class. Your
- * field name should be [cv name]__[cvterm name] and the classes should be
- * named [field name], [field_name]_widget, [field name]_formatter for the
- * field, widget and formatter respectively. MAKE SURE YOU'VE CLEARED THE CACHE
- * SINCE ADDING THESE FILES so Tripal magic can find them or the following will
- * fail.
  *
  * @param $entity_type
  *   This should be 'TripalEntity' for all Tripal Content.

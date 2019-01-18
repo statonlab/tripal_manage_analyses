@@ -138,7 +138,12 @@ class data__sequence_features extends ChadoField {
 
     $children = $this->findChildFeatures($parent);
 
-    $entity->{$field}['und'][0]['value'] = $children;
+    $i = 0;
+    foreach ($children as $child_id => $child) {
+      $entity->{$field}['und'][$i]['value'] = $child;
+
+      $i++;
+    }
 
     return $entity;
   }

@@ -43,14 +43,14 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
     $parent = $entity->chado_record->feature_id;
 
-    $children = $entity->{'data__sequence_features'}['und'][0]['value'];
+    foreach ($entity->{'data__sequence_features'}['und'] as $i => $data) {
 
-    $i = 0;
+      $child = $data['value'];
 
-    foreach ($children as $child_id => $child) {
-      // mRNA.
       $info = $child['info'];
       $name = $info->uniquename;
+
+
 
       $element[$i] = [
         '#type' => 'fieldset',
@@ -61,12 +61,9 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
             'collapsed',
           ],
         ],
-        // see: https://www.drupal.org/forum/support/module-development-and-code-questions/2012-02-07/drupal-render-fieldset-element
+          // see: https://www.drupal.org/forum/support/module-development-and-code-questions/2012-02-07/drupal-render-fieldset-element
         '#attached' => ['js' => ['misc/collapse.js', 'misc/form.js']],
       ];
-
-      $rows = [];
-      $header = [];
 
       $rows = $this->buildChildTable($child);
 
@@ -81,11 +78,10 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       ];
       $output = theme('table', ['header' => $header, 'rows' => $rows]);
       $element[$i][$i . 'table'] = ['#markup' => $output];
-      $i++;
 
       unset($rows);
-      unset($header);
     }
+
   }
 
   /**

@@ -42,7 +42,7 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
     $settings = $display['settings'];
 
     // For now, values come from the data__sequence_features field.
-    $data = $entity->{'data__sequence_features'}['und'][0]['value'];
+    $data = $entity->{'data__sequence_features'}['und'];
 
     if (!$data) {
       return;
@@ -50,7 +50,10 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
 
     $i = 0;
 
-    foreach ($data as $child_id => $child) {
+    foreach ($data as $i => $child) {
+
+      $child = $child['value'];
+      //[0]['value']
 
       // Assumption: we're on the gene entity.  We've got an array of mRNA feature ID's.
 
