@@ -46,6 +46,7 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
       'type' => $field_type,
       'cardinality' => 1,
       'locked' => FALSE,
+      'weight' => -100,
       'storage' => [
         'type' => 'field_chado_storage',
       ],

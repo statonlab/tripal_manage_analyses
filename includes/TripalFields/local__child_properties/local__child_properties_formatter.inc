@@ -53,10 +53,8 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
     foreach ($data as $i => $child) {
 
       $child = $child['value'];
-      //[0]['value']
-
+      // [0]['value']
       // Assumption: we're on the gene entity.  We've got an array of mRNA feature ID's.
-
       $header = [
         'Feature Name',
         'Feature Type',
@@ -88,12 +86,79 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
         '#title' => t("Child Properties for !root", ['!root' => $name]),
       ];
 
+      $rows = $this->getAnnotationRows($child);
+      $header = ['name', 'type', 'annotation'];
+
+      $table = theme('table', ['rows' => $rows, 'header' => $header]);
+      $element[0][$i]['annotation_table'] = [
+        '#markup' => $table,
+        '#title' => t("Annotations for !root", ['!root' => $name]),
+      ];
+
       $i++;
     }
   }
 
   /**
-   * Recursively goes through the child feature array and builds an array of
+   * This functionality should move to a separate field.
+   *
+   * @param $data
+   */
+  private function getAnnotationRows($data) {
+
+    $rows = [];
+
+    $info = $data['info'];
+
+    $children = $data['children'] ?? NULL;
+
+    $annotations = $info->feature_cvterm;
+
+    if ($annotations) {
+
+      if (is_array($annotations)) {
+        foreach ($annotations as $ann) {
+
+          $annotation_name = $ann->cvterm_id->name;
+          if ($ann->is_not) {
+            $annotation_name = "is not " . $annotation_name;
+          }
+
+          $rows[] = [
+            $info->uniquename,
+            $info->type_id->name,
+            $annotation_name,
+          ];
+        }
+      }
+      else {
+        $annotation_name = $annotations->cvterm_id->name;
+        if ($annotations->is_not) {
+          $annotation_name = "is not " . $annotation_name;
+        }
+
+        $rows[] = [
+          $info->uniquename,
+          $info->type_id->name,
+          $annotation_name,
+        ];
+
+      }
+
+    }
+
+    if ($children && !empty($children)) {
+
+      foreach ($children as $child) {
+        $rows = array_merge($this->getAnnotationRows($child), $rows);
+      }
+    }
+    return $rows;
+
+  }
+
+  /**
+   * Recursively goes through the child feature array and builds an array of.
    *
    * @param $data
    */
@@ -105,13 +170,7 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
 
     $children = $data['children'] ?? NULL;
 
-
     $props = $info->featureprop;
-
-    //        'Feature Name',
-    //        'Feature Type',
-    //        'Property Name',
-    //        'Property Value',
 
     if ($props) {
 
