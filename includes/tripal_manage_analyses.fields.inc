@@ -46,7 +46,6 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
       'type' => $field_type,
       'cardinality' => 1,
       'locked' => FALSE,
-      'weight' => -100,
       'storage' => [
         'type' => 'field_chado_storage',
       ],
@@ -277,7 +276,8 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
         'default' => [
           'label' => 'hidden',
           'type' => 'local__child_properties_formatter',
-          'settings' => [],
+          //Set the weight high so that it loads after the master field
+          'settings' => ['weight' => 500],
         ],
       ],
     ];
