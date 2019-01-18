@@ -54,11 +54,13 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
 
     $i = 0;
 
-    foreach ($data[0]['value']['und'] as $i => $child) {
+    foreach ($data as $i => $value) {
+
+      $child = $value['value'];
+
 
       //TODO: this is an extra undefined!  bad.
 
-      $child = $child['value'];
       // Assumption: we're on the gene entity.  We've got an array of mRNA feature ID's.
       $header = [
         'Feature Name',
@@ -66,8 +68,6 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
         'Property Name',
         'Property Value',
       ];
-
-      dpm(array_keys($child));
 
       $info = $child['info'];
       $name = $info->uniquename;
