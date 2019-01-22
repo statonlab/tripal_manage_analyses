@@ -30,18 +30,9 @@
      */
     function tripal_manage_analyses_feature_viewers(features) {
 
-
         var residues = features.residues
-
         children = features.children
-
-        console.log(children)
-
-
         Object.keys(children).forEach(function (key, index) {
-            console.log(key)
-            console.log(index)
-
             //Each child gets its own feature viewer
             var options = {
                 showAxis: true,
@@ -62,27 +53,11 @@
             })
         })
 
-        //     fv.onFeatureSelected(function (d) {
-        //         var id = d.detail.id;
-        //         var re = /tripal-analysis-blast-hsp-(\d+)-(\d+)/;
-        //         var matches = id.match(re);
-        //         var analysis_id = matches[1];
-        //         var j = matches[2];
-        //         $(".tripal-analysis-blast-info-hsp-desc").hide();
-        //         $("#hsp-desc-" + analysis_id + "-" +j).show();
-        //     });
-        // });
-        //
-
         // Trigger a window resize event to notify charting modules that
         // the container dimensions has changed
 
         $(document).on('collapsed', function (e) {
-
-
-
-            setTimeout(function() {
-
+            setTimeout(function () {
                 if (typeof Event !== 'undefined') {
                     window.dispatchEvent(new Event('resize'));
                 }
@@ -92,13 +67,8 @@
                     event.initUIEvent('resize', true, false, window, 0);
                     window.dispatchEvent(event);
                 }
-
             }, 501)
-
-
         });
-
-
 
 
     }
