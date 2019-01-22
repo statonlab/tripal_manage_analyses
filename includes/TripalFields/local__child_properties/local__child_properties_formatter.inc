@@ -46,6 +46,9 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
 
 
 
+    //insert into chado.featureprop (feature_id, type_id, value, rank) VALUES (5505, 100, 'some madeup prop value on a protein', 0);
+
+
     $data = $entity->{'local__child_properties'}['und'];
 
     if (!$data) {
@@ -184,7 +187,6 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
       // If there is only one property, it will be an object not an array.
       if (is_array($props)) {
         foreach ($props as $prop) {
-
           $rows[] = [
             $info->uniquename,
             $info->type_id->name,
@@ -194,7 +196,6 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
         }
       }
       else {
-
         $rows[] = [
           $info->uniquename,
           $info->type_id->name,
@@ -209,7 +210,9 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
     if ($children && !empty($children)) {
 
       foreach ($children as $child) {
-        $rows = array_merge($this->getPropRows($child), $rows);
+        $result = array_merge($this->getPropRows($child), $rows);
+
+        $rows = $result;
       }
     }
     return $rows;
