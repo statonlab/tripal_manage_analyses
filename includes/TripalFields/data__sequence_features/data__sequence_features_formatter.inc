@@ -43,6 +43,24 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
     $parent = $entity->chado_record->feature_id;
 
+    drupal_add_js("https://cdn.rawgit.com/calipho-sib/feature-viewer/v1.0.0/dist/feature-viewer.bundle.js", [
+      'type' => 'external',
+      'scope' => 'header',
+      'group' => 15,
+      'every_page' => TRUE,
+      'weight' => 500,
+    ]);
+
+    $child_draw = [];
+    $child_draw['residues'] = 'AAAAATTTTGGGCCCC';
+
+    $element[0]['drawing'] = [
+      '#type' => 'item',
+      '#title' => t('Drawing'),
+      '#prefix' => '<div class="tripal_manage_expression_featureloc_viewer">',
+      '#suffix' => '</div>',
+    ];
+
     foreach ($entity->{'data__sequence_features'}['und'] as $i => $data) {
 
       $child = $data['value'];
@@ -50,7 +68,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       $info = $child['info'];
       $name = $info->uniquename;
 
-      $element[$i] = [
+      $element[$i]['fs'] = [
         '#type' => 'fieldset',
         '#title' => $name,
         '#attributes' => [
@@ -59,7 +77,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
             'collapsed',
           ],
         ],
-          // see: https://www.drupal.org/forum/support/module-development-and-code-questions/2012-02-07/drupal-render-fieldset-element
+        // see: https://www.drupal.org/forum/support/module-development-and-code-questions/2012-02-07/drupal-render-fieldset-element
         '#attached' => ['js' => ['misc/collapse.js', 'misc/form.js']],
       ];
 
@@ -75,10 +93,23 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
         'Location',
       ];
       $output = theme('table', ['header' => $header, 'rows' => $rows]);
-      $element[$i][$i . 'table'] = ['#markup' => $output];
+      $element[$i]['fs'][$i . 'table'] = ['#markup' => $output];
 
       unset($rows);
+
+      $child_draw['children'][] = ['name' => $name, 'children' => $child];
+
     }
+
+    // Un-collapse the first fieldset.
+    $element[0]['fs']['#attributes']['class'] = ['collapsible'];
+
+    // Pass in the needed JS info.
+    drupal_add_js([
+      'children_draw_info' => $child_draw,
+    ], 'setting');
+
+    drupal_add_js(drupal_get_path('module', 'tripal_manage_analyses') . "/theme/js/tripal_manage_analyses_featureloc.js");
 
   }
 
@@ -96,6 +127,10 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     $max = $info->fmax;
     $strand = $info->strand;
     $parent = $info->srcfeature_id->name;
+
+    if (!$min or !$max or !$strand) {
+      return 'No location available.';
+    }
 
     $out = "${parent}:  ${min}-${max} (${strand})";
 
