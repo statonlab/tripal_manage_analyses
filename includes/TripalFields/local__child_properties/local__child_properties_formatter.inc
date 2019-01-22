@@ -42,13 +42,8 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
     $settings = $display['settings'];
 
     // For now, values come from the data__sequence_features field.
-   // $data = $entity->{'data__sequence_features'}['und'];
-
-
-
-    //insert into chado.featureprop (feature_id, type_id, value, rank) VALUES (5505, 100, 'some madeup prop value on a protein', 0);
-
-
+    // $data = $entity->{'data__sequence_features'}['und'];.
+    // insert into chado.featureprop (feature_id, type_id, value, rank) VALUES (5505, 100, 'some madeup prop value on a protein', 0);.
     $data = $entity->{'local__child_properties'}['und'];
 
     if (!$data) {
@@ -61,9 +56,7 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
 
       $child = $value['value'];
 
-
-      //TODO: this is an extra undefined!  bad.
-
+      // TODO: this is an extra undefined!  bad.
       // Assumption: we're on the gene entity.  We've got an array of mRNA feature ID's.
       $header = [
         'Feature Name',

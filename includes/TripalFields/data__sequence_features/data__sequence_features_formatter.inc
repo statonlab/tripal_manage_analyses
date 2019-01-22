@@ -50,8 +50,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       $info = $child['info'];
       $name = $info->uniquename;
 
-
-
       $element[$i] = [
         '#type' => 'fieldset',
         '#title' => $name,
