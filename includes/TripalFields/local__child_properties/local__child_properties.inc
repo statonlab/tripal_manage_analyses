@@ -131,35 +131,11 @@ class local__child_properties extends ChadoField {
     // additional data to be used in the display, you should add it here.
     parent::load($entity);
 
-    $entity->{'local__child_properties'}['und'][0]['value'] = [TRUE];
-//  
-//
-//    $master = $entity->data__sequence_features;
-//
-//    // TODO: get this in the load.  For now we'll use the formatter instead.
-//    if (!$master) {
-//      $master = $entity->{'data__sequence_features'};
-//    }
-//    $i = 0;
-//
-//
-//    foreach ($master['und'][0]['value'] as $transcript_id => $transcript) {
-//
-//      $properties = [];
-//
-//      foreach ($transcript['children'] as $child_key => $child) {
-//
-//        $props = $child->featureprop;
-//
-//        dpm($props);
-//
-//        $properties[] = $props;
-//      }
-//
-//      $entity->local__child_properties['und'][0]['value'][$i] = $properties;
-//
-//      $i++;
-//    }
+    $master = $entity->data__sequence_features['und'];
+
+    //TODO: filter this to just hte properties.  Right now we include everything because we are having this field do double duty for annotations.
+      $entity->local__child_properties['und'] = $master;
+
 
 
   }
