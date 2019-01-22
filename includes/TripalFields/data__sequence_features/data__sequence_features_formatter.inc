@@ -28,17 +28,17 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
 
   /**
-   * featureloc start rel to parent.
+   * Featureloc start rel to parent.
    */
   private $parent_start;
 
   /**
-   * featureloc stop rel to parent.
+   * Featureloc stop rel to parent.
    */
   private $parent_stop;
 
   /**
-   * featureloc strand rel to parent.
+   * Featureloc strand rel to parent.
    */
   private $parent_strand;
 
@@ -46,7 +46,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
    * Holds converted featureloc information for the feature viewer drawing.
    */
   private $feature_coords;
-
 
   /**
    * @see ChadoFieldFormatter::settingsForm()
@@ -77,10 +76,9 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     $sequence = $entity->data__sequence['und'][0]['value'];
 
     if (!$sequence) {
-      //TODO: We cant draw without a sequence.
-      //Now what?
+      // TODO: We cant draw without a sequence.
+      // Now what?
     }
-
 
     $coordinates = $entity->data__sequence_coordinates['und'][0]['value'];
 
@@ -88,24 +86,15 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     $this->parent_stop = $coordinates['local:fmax'];
     $this->parent_strand = $coordinates['data:0853'];
 
-
     $child_draw['residues'] = $sequence;
 
-    $element[0]['drawing'] = [
-      '#type' => 'item',
-      '#title' => t('Drawing'),
-      '#prefix' => '<div id="tripal_manage_expression_featureloc_viewer">',
-      '#suffix' => '</div>',
-    ];
-
     foreach ($entity->{'data__sequence_features'}['und'] as $i => $data) {
-
       $child = $data['value'];
 
       $info = $child['info'];
       $name = $info->uniquename;
 
-      $element[$i]['fs'] = [
+      $element[$i] = [
         '#type' => 'fieldset',
         '#title' => $name,
         '#attributes' => [
@@ -117,17 +106,16 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
         // see: https://www.drupal.org/forum/support/module-development-and-code-questions/2012-02-07/drupal-render-fieldset-element
         '#attached' => ['js' => ['misc/collapse.js', 'misc/form.js']],
       ];
+      $element[$i]['drawing'] = [
+        '#type' => 'item',
+        '#title' => t('Drawing'),
+        '#prefix' => '<div id="tripal_manage_expression_featureloc_viewer_' . $i . '">',
+        '#suffix' => '</div>',
+      ];
 
       $rows = $this->buildChildTable($child);
 
-      $this->feature_coords[$name]['base'] = [
-        'data' => [
-          'x' => 0,
-          'y' => 10000,
-        ],
-      ];
-
-      $this->build_featureviewer_data($name, $child);
+      $this->build_featureviewer_data($i, $child);
 
       if (empty($rows)) {
         continue;
@@ -139,17 +127,15 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
         'Location',
       ];
       $output = theme('table', ['header' => $header, 'rows' => $rows]);
-      $element[$i]['fs'][$i . 'table'] = ['#markup' => $output];
+      $element[$i][$i . 'table'] = ['#markup' => $output];
 
       unset($rows);
 
     }
 
     // Un-collapse the first fieldset.
-    $element[0]['fs']['#attributes']['class'] = ['collapsible'];
+    $element[0]['#attributes']['class'] = ['collapsible'];
 
-
-    dpm($this->feature_coords);
     $child_draw['children'] = $this->feature_coords;
     // Pass in the needed JS info.
     drupal_add_js([
@@ -160,39 +146,31 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
   }
 
-  private function build_featureviewer_data($parent_name, $child) {
+  /**
+   *
+   */
+  private function build_featureviewer_data($i, $child) {
 
     $info = $child['info'];
 
     $grand_children = $child['children'] ?? NULL;
 
-    //Convert and store the coordinates for hte feature viewer.
-    $this->convertFeatureCoords($parent_name, $info->feature_id, $info->featureloc);
+    // Set base info
+    // All child features will be drawn on this one in 'data'
+    // Convert and store the coordinates for hte feature viewer.
+    $this->convertFeatureCoords($i, $info->feature_id, $info);
 
-    //    data (array of objects) : An array of objects, each containing :
-    //x (int) :
-    //first position
-    //y (int) :
-    //last position (or a value for features of type "line")
-    //id (string) :
-    //an Id (Optionnal)
-    //description (string) :
-    //Small description (Optionnal)
-    //color (string) :
-    //a custom color (Optionnal)
-
-
-    //repeat for grandchildren;
-
-    if ($grand_children){
+    // Repeat for grandchildren;.
+    if ($grand_children) {
       foreach ($grand_children as $grand_child) {
-        $this->build_featureviewer_data($parent_name, $grand_child);
+        $this->build_featureviewer_data($i, $grand_child);
       }
     }
-
   }
 
   /**
+   * Builds featureloc string for display to user.
+   *
    * @param $featureloc
    *   The featureloc object returned from chado_expand_var on featureloc.
    *
@@ -216,53 +194,88 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     return $out;
   }
 
-  private function convertFeatureCoords($base_name, $feature_id, $featureloc) {
+  /**
+   * Converts featureloc coordinates to be based on the entity.
+   *
+   * @param $i
+   * @param $feature_id
+   * @param $info
+   */
+  private function convertFeatureCoords($i, $feature_id, $info) {
 
-    //TODO: what if theres no featureloc relative to a parent?
+    $featureloc = $info->featureloc->feature_id;
+    // TODO: what if theres no featureloc relative to a parent?
     $parent_start = $this->parent_start;
     $parent_stop = $this->parent_stop;
     $strand = $this->parent_strand;
 
-    $info = $featureloc->feature_id;
-    $min = $info->fmin;
-    $max = $info->fmax;
-    $strand = $info->strand;
-
-
-    //parent mRNA coordinates, for a positive strand:
-
-    //158059..165483
-
-    //165031-165483 (1)
-
-    //Contig1002: 162296-162356 (1)
-
-    //Contig1002: 158059-158149 (1)
+    $min = $featureloc->fmin;
+    $max = $featureloc->fmax;
+    $strand = $featureloc->strand;
 
     if ($strand == '+') {
 
-      // it doesnt matter what strand it is, we always do this.
+      // It doesnt matter what strand it is, we always do this.
+      // TODO: check that assertion.
       $start = $min - $parent_start + 1;
       $stop = $max - $parent_start + 1;
     }
 
-    //TODO: this is a wreck!  WTF!
     else {
       $start = $min - $parent_start + 1;
-      $stop =  $max - $parent_start + 1;
+      $stop = $max - $parent_start + 1;
     }
 
+    $type = $info->type_id->name;
 
-    $this->feature_coords[$base_name][$feature_id] = [
-      'data' =>
-        [
-          'x' => $start,
-          'y' => $stop,
-        ],
+    $color = $this->get_feature_color($type);
+
+    if (!isset($this->feature_coords[$i][$type])) {
+
+      $this->feature_coords[$i][$type] = [
+        'name' => $type,
+        'color' => $color,
+        'type' => 'rect',
+      ];
+    }
+
+    $this->feature_coords[$i][$type]['data'][] = [
+      'x' => $start,
+      'y' => $stop,
+      'description' => $info->uniquename,
     ];
 
   }
 
+  /**
+   * A color lookup to pass different colors to different feature subtypes.
+   *
+   * @param string $name
+   *   The feature type name.
+   *
+   * @return string
+   *   a hex color code.
+   */
+  private function get_feature_color(string $name) {
+
+    switch ($name) {
+      case 'mRNA':
+        return '#12E09D';
+
+      case 'polypeptide':
+        return '#808080';
+
+      case 'CDS':
+        return '#FF0000';
+
+      case 'exon':
+        return '#F4D4AD';
+
+      case NULL:
+        return '#000000';
+    }
+
+  }
 
   /**
    *

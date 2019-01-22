@@ -14,33 +14,10 @@
             // Remove the jquery.ui override of our link theme:
             $(".ui-widget-content").removeClass('ui-widget-content')
 
-            /**
-             * JS for the HSP box the appears when the [more] link is clicked.
-             */
-
-            // Hide all the HSP description boxes by default
-            $(".tripal-analysis-blast-info-hsp-desc").hide();
-
-            // When the [more] link is clicked, show the appropriate HSP description box
-            $(".tripal-analysis-blast-info-hsp-link").click(function(e) {
-                var my_id = e.target.id;
-                var re = /hsp-link-(\d+)-(\d+)/;
-                var matches = my_id.match(re);
-                var analysis_id = matches[1];
-                var j = matches[2];
-                $(".tripal-analysis-blast-info-hsp-desc").hide();
-                $("#hsp-desc-" + analysis_id + "-" +j).show();
-            });
-
-            // When the [Close] button is clicked on the HSP description close the box
-            $(".hsp-desc-close").click(function(e) {
-                $(".tripal-analysis-blast-info-hsp-desc").hide();
-            });
-
             // Add the anchor to the pager links so that when the user clicks a pager
             // link and the page refreshes they are taken back to the location
             // on the page that they were viewing.
-            $("div.tripal_manage_analyses-info-box-desc ul.pager a").each(function() {
+            $("div.tripal_manage_analyses-info-box-desc ul.pager a").each(function () {
                 pager_link = $(this);
                 parent = pager_link.parents('div.tripal_manage_analyses-info-box-desc');
                 pager_link.attr('href', pager_link.attr('href') + '#' + parent.attr('id'));
@@ -51,14 +28,21 @@
     /**
      * Initializes the feature viewers on the page.
      */
-    function tripal_manage_analyses_feature_viewers(features){
+    function tripal_manage_analyses_feature_viewers(features) {
+
 
         var residues = features.residues
+
         children = features.children
 
+        console.log(children)
 
-        //Create a single feature viewer.
 
+        Object.keys(children).forEach(function (key, index) {
+            console.log(key)
+            console.log(index)
+
+            //Each child gets its own feature viewer
             var options = {
                 showAxis: true,
                 showSequence: true,
@@ -68,27 +52,15 @@
                 zoomMax: 3
             }
 
-             var fv = new FeatureViewer(residues, '#tripal_manage_expression_featureloc_viewer', options);
+            var fv = new FeatureViewer(residues, '#tripal_manage_expression_featureloc_viewer_' + index, options);
+            subFeatures = children[key]
 
+            Object.keys(subFeatures).forEach(function (sfKey, sfIndex) {
+                subFeature = subFeatures[sfKey]
+                fv.addFeature(subFeature)
 
-            //Loop through features info
-
-        Object.keys(children).forEach(function(key, index) {
-
-            let sub_name = 'something'
-            let data = 'something'
-            fv.addFeature({data:data,
-                name: sub_name,
-                color: '#888888',
-                type: 'rect'
             })
-
         })
-
-
-
-
-
 
         //     fv.onFeatureSelected(function (d) {
         //         var id = d.detail.id;
