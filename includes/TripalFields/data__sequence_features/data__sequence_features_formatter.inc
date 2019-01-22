@@ -26,6 +26,28 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     'setting1' => 'default_value',
   ];
 
+
+  /**
+   * featureloc start rel to parent.
+   */
+  private $parent_start;
+
+  /**
+   * featureloc stop rel to parent.
+   */
+  private $parent_stop;
+
+  /**
+   * featureloc strand rel to parent.
+   */
+  private $parent_strand;
+
+  /**
+   * Holds converted featureloc information for the feature viewer drawing.
+   */
+  private $feature_coords;
+
+
   /**
    * @see ChadoFieldFormatter::settingsForm()
    **/
@@ -52,12 +74,27 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     ]);
 
     $child_draw = [];
-    $child_draw['residues'] = 'AAAAATTTTGGGCCCC';
+    $sequence = $entity->data__sequence['und'][0]['value'];
+
+    if (!$sequence) {
+      //TODO: We cant draw without a sequence.
+      //Now what?
+    }
+
+
+    $coordinates = $entity->data__sequence_coordinates['und'][0]['value'];
+
+    $this->parent_start = $coordinates['local:fmin'];
+    $this->parent_stop = $coordinates['local:fmax'];
+    $this->parent_strand = $coordinates['data:0853'];
+
+
+    $child_draw['residues'] = $sequence;
 
     $element[0]['drawing'] = [
       '#type' => 'item',
       '#title' => t('Drawing'),
-      '#prefix' => '<div class="tripal_manage_expression_featureloc_viewer">',
+      '#prefix' => '<div id="tripal_manage_expression_featureloc_viewer">',
       '#suffix' => '</div>',
     ];
 
@@ -83,6 +120,15 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
       $rows = $this->buildChildTable($child);
 
+      $this->feature_coords[$name]['base'] = [
+        'data' => [
+          'x' => 0,
+          'y' => 10000,
+        ],
+      ];
+
+      $this->build_featureviewer_data($name, $child);
+
       if (empty($rows)) {
         continue;
       }
@@ -97,19 +143,52 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
       unset($rows);
 
-      $child_draw['children'][] = ['name' => $name, 'children' => $child];
-
     }
 
     // Un-collapse the first fieldset.
     $element[0]['fs']['#attributes']['class'] = ['collapsible'];
 
+
+    dpm($this->feature_coords);
+    $child_draw['children'] = $this->feature_coords;
     // Pass in the needed JS info.
     drupal_add_js([
       'children_draw_info' => $child_draw,
     ], 'setting');
 
     drupal_add_js(drupal_get_path('module', 'tripal_manage_analyses') . "/theme/js/tripal_manage_analyses_featureloc.js");
+
+  }
+
+  private function build_featureviewer_data($parent_name, $child) {
+
+    $info = $child['info'];
+
+    $grand_children = $child['children'] ?? NULL;
+
+    //Convert and store the coordinates for hte feature viewer.
+    $this->convertFeatureCoords($parent_name, $info->feature_id, $info->featureloc);
+
+    //    data (array of objects) : An array of objects, each containing :
+    //x (int) :
+    //first position
+    //y (int) :
+    //last position (or a value for features of type "line")
+    //id (string) :
+    //an Id (Optionnal)
+    //description (string) :
+    //Small description (Optionnal)
+    //color (string) :
+    //a custom color (Optionnal)
+
+
+    //repeat for grandchildren;
+
+    if ($grand_children){
+      foreach ($grand_children as $grand_child) {
+        $this->build_featureviewer_data($parent_name, $grand_child);
+      }
+    }
 
   }
 
@@ -137,6 +216,54 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     return $out;
   }
 
+  private function convertFeatureCoords($base_name, $feature_id, $featureloc) {
+
+    //TODO: what if theres no featureloc relative to a parent?
+    $parent_start = $this->parent_start;
+    $parent_stop = $this->parent_stop;
+    $strand = $this->parent_strand;
+
+    $info = $featureloc->feature_id;
+    $min = $info->fmin;
+    $max = $info->fmax;
+    $strand = $info->strand;
+
+
+    //parent mRNA coordinates, for a positive strand:
+
+    //158059..165483
+
+    //165031-165483 (1)
+
+    //Contig1002: 162296-162356 (1)
+
+    //Contig1002: 158059-158149 (1)
+
+    if ($strand == '+') {
+
+      // it doesnt matter what strand it is, we always do this.
+      $start = $min - $parent_start + 1;
+      $stop = $max - $parent_start + 1;
+    }
+
+    //TODO: this is a wreck!  WTF!
+    else {
+      $start = $min - $parent_start + 1;
+      $stop =  $max - $parent_start + 1;
+    }
+
+
+    $this->feature_coords[$base_name][$feature_id] = [
+      'data' =>
+        [
+          'x' => $start,
+          'y' => $stop,
+        ],
+    ];
+
+  }
+
+
   /**
    *
    */
@@ -151,10 +278,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       $info = $gchild['info'];
 
       $location = isset($info->featureloc) ? $this->buildFeatureString($info->featureloc) : 'Not available';
-
-      $annotations = isset($info->feature_cvterm) ? "set" : 'nah';
-
-      $download = isset($info->residues) ? "set" : 'nah';
 
       $rows[] = [
         'Name' => $info->uniquename,

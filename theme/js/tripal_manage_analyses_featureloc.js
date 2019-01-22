@@ -52,9 +52,9 @@
      * Initializes the feature viewers on the page.
      */
     function tripal_manage_analyses_feature_viewers(features){
-        console.log(features)
 
         var residues = features.residues
+        children = features.children
 
 
         //Create a single feature viewer.
@@ -73,17 +73,22 @@
 
             //Loop through features info
 
-        features.info.each(function() {
+        Object.keys(children).forEach(function(key, index) {
 
             let sub_name = 'something'
             let data = 'something'
             fv.addFeature({data:data,
-            name: sub_name,
+                name: sub_name,
                 color: '#888888',
                 type: 'rect'
             })
 
         })
+
+
+
+
+
 
         //     fv.onFeatureSelected(function (d) {
         //         var id = d.detail.id;
