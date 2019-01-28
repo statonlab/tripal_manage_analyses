@@ -80,6 +80,11 @@ class local__analysis_browser extends ChadoField {
       ':organism_id' => $entity->chado_record->organism_id,
     ]);
 
+    if (!$results) {
+      unset($entity->{$field});
+      return;
+    }
+
     $analyses = [];
     foreach ($results as $analysis) {
       $analysis->entity_id = chado_get_record_entity_by_table('analysis', $analysis->analysis_id);
@@ -101,6 +106,7 @@ class local__analysis_browser extends ChadoField {
       }
     }
 
+    // TODO: successive analyses should go in $i not all in 0.
     $entity->{$field}['und'][0]['value'] = TRUE;
   }
 

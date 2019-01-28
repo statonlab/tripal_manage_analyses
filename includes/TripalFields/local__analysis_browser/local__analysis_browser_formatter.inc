@@ -95,6 +95,10 @@ class local__analysis_browser_formatter extends ChadoFieldFormatter {
       return;
     }
 
+    if (!is_array($entity->{$field}['und'][0]['value'])) {
+      return;
+    }
+
     $rows = array_map(function ($analysis) {
       $date = new DateTime($analysis->timeexecuted);
       $date_formatted = $date->format('M jS, Y');
