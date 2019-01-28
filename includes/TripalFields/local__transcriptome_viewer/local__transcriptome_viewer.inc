@@ -124,10 +124,9 @@ class local__transcriptome_viewer extends ChadoField {
       'accession' => '3258',
     ]);
 
-    if (!$transcriptome_term){
+    if (!$transcriptome_term) {
       return;
     }
-
 
     $transcriptome_bundle = tripal_load_bundle_entity(['term_id' => $transcriptome_term->id]);
     if (!$transcriptome_bundle) {
