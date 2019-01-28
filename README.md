@@ -11,7 +11,7 @@ It also provides the `obi__organism` linker.  This linker attaches to **analyses
 
 ### gene page fields
 
-These fields are currently **under development**.
+These fields are currently **under development**.  There is an open pull request for adding these fields to **core tripal** at which point they'll be removed from this repository. Please reach out to me on the issue queue if you have any questions.
 
 * data__sequence_features (master field which recursively gathers info for all child features)
 * local__child_properties (display properties of child features)
