@@ -95,7 +95,7 @@ class local__analysis_browser_formatter extends ChadoFieldFormatter {
       return;
     }
 
-    if (!is_array($entity->{$field}['und'][0]['value'])){
+    if (!is_array($entity->{$field}['und'][0]['value'])) {
       return;
     }
 
