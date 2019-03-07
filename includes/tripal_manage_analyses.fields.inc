@@ -30,48 +30,6 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
 
   if (isset($bundle->data_table) and ($bundle->data_table == 'feature') and $bundle->term->name == 'gene') {
 
-    // First add my term.
-    tripal_insert_cvterm([
-      'id' => 'data:1255',
-      'name' => 'Sequence features',
-      'cv_name' => 'EDAM',
-      'definition' => 'Gathers information about all subfeatures (mRNA, CDS, proteins) associated with a top-level feature (gene)',
-    ]);
-
-    // Then describe the field defined by that term.
-    $field_name = 'data__sequence_features';
-    $field_type = 'data__sequence_features';
-    $fields[$field_name] = [
-      'field_name' => $field_name,
-      'type' => $field_type,
-      'cardinality' => 1,
-      'locked' => FALSE,
-      'storage' => [
-        'type' => 'field_chado_storage',
-      ],
-    ];
-
-    // First add my term.
-    tripal_insert_cvterm([
-      'id' => 'local:child_properties',
-      'name' => 'child_properties',
-      'cv_name' => 'local',
-      'definition' => 'Properties associated with child features.',
-    ]);
-
-    // Then describe the field defined by that term.
-    $field_name = 'local__child_properties';
-    $field_type = 'local__child_properties';
-    $fields[$field_name] = [
-      'field_name' => $field_name,
-      'type' => $field_type,
-      'cardinality' => 1,
-      'locked' => FALSE,
-      'storage' => [
-        'type' => 'field_chado_storage',
-      ],
-    ];
-
   }
 
   // Organism linker on analysis.
@@ -221,66 +179,7 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
   $instances = [];
 
   if (isset($bundle->data_table) and ($bundle->data_table == 'feature') and $bundle->term->name == 'gene') {
-    $field_name = 'data__sequence_features';
-    $instances[$field_name] = [
-      'field_name' => $field_name,
-      'entity_type' => $entity_type,
-      'bundle' => $bundle->name,
-      'label' => 'Transcript Information',
-      'description' => 'Gathers information about all subfeatures (mRNA, CDS, proteins) associated with a top-level feature (gene)',
-      'required' => FALSE,
-      'settings' => [
-        'term_vocabulary' => 'data',
-        'term_name' => 'Sequence features',
-        'term_accession' => '1255',
-        'auto_attach' => FALSE,
-        'chado_table' => 'feature_relationship',
-        'chado_column' => 'subject_id',
-        'base_table' => $bundle->data_table,
-      ],
-      'widget' => [
-        'type' => 'data__sequence_features_widget',
-        'settings' => [],
-      ],
-      'display' => [
-        'default' => [
-          'label' => 'hidden',
-          'type' => 'data__sequence_features_formatter',
-          'settings' => [],
-        ],
-      ],
-    ];
 
-    $field_name = 'local__child_properties';
-    $instances[$field_name] = [
-      'field_name' => $field_name,
-      'entity_type' => $entity_type,
-      'bundle' => $bundle->name,
-      'label' => 'Child Properties',
-      'description' => 'Displays property information associated with children of this feature.',
-      'required' => FALSE,
-      'settings' => [
-        'term_vocabulary' => 'local',
-        'term_name' => 'child_properties',
-        'term_accession' => 'child_properties',
-        'auto_attach' => FALSE,
-        'chado_table' => 'featureprop',
-        'chado_column' => 'feature_id',
-        'base_table' => $bundle->data_table,
-      ],
-      'widget' => [
-        'type' => 'local__child_properties_widget',
-        'settings' => [],
-      ],
-      'display' => [
-        'default' => [
-          'label' => 'hidden',
-          'type' => 'local__child_properties_formatter',
-          //Set the weight high so that it loads after the master field
-          'settings' => ['weight' => 500],
-        ],
-      ],
-    ];
 
   }
 
