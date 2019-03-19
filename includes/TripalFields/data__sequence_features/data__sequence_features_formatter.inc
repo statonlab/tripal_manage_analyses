@@ -76,8 +76,17 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     $sequence = $entity->data__sequence['und'][0]['value'];
 
     if (!$sequence) {
-      // TODO: We cant draw without a sequence.
-      // Now what?
+      $length = $entity->data__sequence_length['und'][0]['value'];
+      if (!$length) {
+        $length = '5000';
+      }
+      $sequence = '';
+      $i = 0;
+      while ($i < $length) {
+        $sequence .= 'N';
+        $i++;
+      }
+
     }
 
     $coordinates = $entity->data__sequence_coordinates['und'][0]['value'];
