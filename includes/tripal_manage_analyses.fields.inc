@@ -80,7 +80,7 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
 
     $field_name = 'local__child_annotations';
     $field_type = 'local__child_annotations';
-    $info[$field_name] = [
+    $fields[$field_name] = [
       'field_name' => $field_name,
       'type' => $field_type,
       'cardinality' => 1,
@@ -302,7 +302,7 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
 
 
     $field_name = 'local__child_annotations';
-    $info[$field_name] = [
+    $instances[$field_name] = [
       'field_name' => $field_name,
       'entity_type' => $entity_type,
       'bundle' => $bundle->name,
