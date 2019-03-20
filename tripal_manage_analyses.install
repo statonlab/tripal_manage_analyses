@@ -98,3 +98,27 @@ function create_organism_analysis_table() {
 function tripal_manage_analyses_update_7305() {
   create_organism_analysis_table();
 }
+
+
+/**
+ * Replace typo with the nucleic_acid_library term db association.
+ * If a warning about "Could not find details about the vocabulary: ero" persists
+ * delete the library field and "check for new fields".
+ */
+function tripal_manage_analyses_update_7306() {
+
+  $term = chado_get_cvterm(['id' => 'ero:0000160']);
+
+  if ($term) {
+    $id = $term->cvterm_id;
+    chado_delete_record('cvterm', ['cvterm_id' => $id]);
+  }
+
+  tripal_insert_cvterm([
+    'id' => 'ERO:0000160',
+    'name' => 'nucleic_acid_library',
+    'cv_name' => 'ero',
+    'definition' => 'Reagent library that is a collection of DNA fragments that is stored and propagated in a population of micro-organisms through the process of molecular cloning.',
+  ]);
+
+}
