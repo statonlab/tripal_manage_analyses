@@ -31,10 +31,9 @@ class local__child_annotations_formatter extends ChadoFieldFormatter {
     $settings = $display['settings'];
 
     // For now, values come from the data__sequence_features field.
-    $data = $entity->{'data__sequence_features'}['und'];
+    $data = $entity->data__sequence_features['und'];
 
     if (!$data) {
-
       return;
     }
 
@@ -49,8 +48,7 @@ class local__child_annotations_formatter extends ChadoFieldFormatter {
       $header = [
         'Feature Name',
         'Feature Type',
-        'Property Name',
-        'Property Value',
+        'Annotation Name',
       ];
 
       $info = $child['info'];
@@ -69,8 +67,15 @@ class local__child_annotations_formatter extends ChadoFieldFormatter {
 
       $rows = $this->getAnnotationRows($child);
 
+      if (empty($rows)) {
+        $element[0][$i]['annotation_table'] = [
+          '#markup' => 'No annotations associated with ' . $info->uniquename
+        ];
+        continue;
+
+      }
       $table = theme('table', ['rows' => $rows, 'header' => $header]);
-      $element[0][$i]['prop_table'] = [
+      $element[0][$i]['annotation_table'] = [
         '#markup' => $table,
         '#title' => t("Child Annotations for !root", ['!root' => $name]),
       ];
@@ -97,6 +102,7 @@ class local__child_annotations_formatter extends ChadoFieldFormatter {
     $children = $data['children'] ?? NULL;
 
     $annotations = $info->feature_cvterm;
+    $yo = chado_query('select * from {feature_cvterm} where feature_id = :id;', [':id' => $info->feature_id])->fetchObject();
 
     if ($annotations) {
 
