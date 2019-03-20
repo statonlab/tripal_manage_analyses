@@ -11,12 +11,14 @@ It also provides the `obi__organism` linker.  This linker attaches to **analyses
 
 ### gene page fields
 
-These fields are currently **under development**.  There is an open pull request for adding these fields to **core tripal** at which point they'll be removed from this repository. Please reach out to me on the issue queue if you have any questions.
 
 * data__sequence_features (master field which recursively gathers info for all child features)
-* local__child_properties (display properties of child features)
+* local__child_properties (display properties of child features stores in `featureprop`)
+* local__child_annotations (display annotations in child features, stored in `feature_cvterm`)
 
 In Tripal core, gene pages only display info directly related to that underly chado gene feature.  Typically the gene is composed of many child features, which in turn may have annotations in featureprop, feature_cvterm, etc.   These fields gather that information and allow it to be displayed on the gene page.
+
+Please read [this writeup for more information on the gene page fields](/docs/gene_fields.rst).
 
 ### analysis viewers
 
@@ -28,7 +30,7 @@ The following fields attach to **organism**.
 * ero__nucleic_acid_library
 
 
-These fields are for listing **analysis** entities (or library entities) associated with an organism.  There are unique fields for the transcriptome and genome assembly bundles, so that the user can quickly find these analyses and hte corresponding data.
+These fields are for listing **analysis** entities (or library entities) associated with an organism.  There are unique fields for the transcriptome and genome assembly bundles, so that the user can quickly find these analyses and the corresponding data.
 
 To use the above fields, you also need the field for linking analysis to organism:
 
@@ -68,6 +70,13 @@ You must also enable the organism linker field on your analysis bundles.
 ### The transcriptome and genome fields
 
 These fields are looking for bundles that are analyses associated with a specific cvterm.  For genome assembly that is operation:0525, and operation:3258 for transcriptome.  If you don't have bundles with those terms, the fields will not work.
+
+
+### The child feature fields
+
+These fields only attach to entities in mapping to the **feature** table whose type matches the sequence ontology term for **gene**.
+
+![example gene field usage](/docs/example_gene_field.png)
 
 # Usage
 
