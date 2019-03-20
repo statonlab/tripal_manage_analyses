@@ -7,21 +7,10 @@
  * Display:
  * Configuration:
  */
-class local__child_properties_formatter extends ChadoFieldFormatter {
+class local__child_annotations_formatter extends ChadoFieldFormatter {
 
-  /**
-   * The default label for this field.
-   */
-  public static $default_label = 'Child Properties';
-
-  /**
-   * The list of field types for which this formatter is appropriate.
-   */
-  public static $field_types = ['local__child_properties'];
-
-  /**
-   * The list of default settings for this formatter.
-   */
+  public static $default_label = 'Child Annotations';
+  public static $field_types = ['local__child_annotations'];
   public static $default_settings = [
     'setting1' => 'default_value',
   ];
@@ -42,7 +31,7 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
     $settings = $display['settings'];
 
     // For now, values come from the data__sequence_features field.
-     $data = $entity->data__sequence_features['und'];
+    $data = $entity->data__sequence_features['und'];
 
     if (!$data) {
       return;
@@ -51,19 +40,19 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
     foreach ($data as $i => $value) {
 
       $child = $value['value'];
-
-      // TODO: this is an extra undefined!  bad.
       // Assumption: we're on the gene entity.  We've got an array of mRNA feature ID's.
+
+      if (!$child) {
+        continue;
+      }
       $header = [
         'Feature Name',
         'Feature Type',
-        'Property Name',
-        'Property Value',
+        'Annotation Name',
       ];
 
       $info = $child['info'];
       $name = $info->uniquename;
-
       $element[0][$i] = [
         '#type' => 'fieldset',
         '#title' => $name,
@@ -73,34 +62,38 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
             'collapsed',
           ],
         ],
-        // see: https://www.drupal.org/forum/support/module-development-and-code-questions/2012-02-07/drupal-render-fieldset-element
         '#attached' => ['js' => ['misc/collapse.js', 'misc/form.js']],
       ];
 
-      $rows = $this->getPropRows($child);
-
+      $rows = $this->getAnnotationRows($child);
 
       if (empty($rows)) {
-        $element[0][$i]['prop_table'] = [
-          '#markup' => 'No properties associated with ' . $info->uniquename
+        $element[0][$i]['annotation_table'] = [
+          '#markup' => 'No annotations associated with ' . $info->uniquename
         ];
         continue;
-      }
 
+      }
       $table = theme('table', ['rows' => $rows, 'header' => $header]);
-      $element[0][$i]['prop_table'] = [
+      $element[0][$i]['annotation_table'] = [
         '#markup' => $table,
-        '#title' => t("Child Properties for !root", ['!root' => $name]),
+        '#title' => t("Child Annotations for !root", ['!root' => $name]),
       ];
     }
   }
 
   /**
-   * Recursively goes through the child feature array and builds an array of.
+   * Recursively goes through the child feature array for annotation listings.
+   *   Such listings are in feature_cvterm.
    *
-   * @param $data
+   * @param array $data
+   *   Data formatted by the data__sequence_features field.
+   *    Expects an info and a children key.
+   *
+   * @return array
+   *   Rows array suitable for table.
    */
-  private function getPropRows($data) {
+  private function getAnnotationRows($data) {
 
     $rows = [];
 
@@ -108,27 +101,35 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
 
     $children = $data['children'] ?? NULL;
 
-    $props = $info->featureprop;
+    $annotations = $info->feature_cvterm;
 
-    if ($props) {
+    if ($annotations) {
 
-      // If there is only one property, it will be an object not an array.
-      if (is_array($props)) {
-        foreach ($props as $prop) {
+      if (is_array($annotations)) {
+        foreach ($annotations as $ann) {
+
+          $annotation_name = $ann->cvterm_id->name;
+          if ($ann->is_not) {
+            $annotation_name = "is not " . $annotation_name;
+          }
+
           $rows[] = [
             $info->uniquename,
             $info->type_id->name,
-            $prop->type_id->name,
-            $prop->value,
+            $annotation_name,
           ];
         }
       }
       else {
+        $annotation_name = $annotations->cvterm_id->name;
+        if ($annotations->is_not) {
+          $annotation_name = "is not " . $annotation_name;
+        }
+
         $rows[] = [
           $info->uniquename,
           $info->type_id->name,
-          $props->type_id->name,
-          $props->value,
+          $annotation_name,
         ];
 
       }
@@ -138,12 +139,11 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
     if ($children && !empty($children)) {
 
       foreach ($children as $child) {
-        $result = array_merge($this->getPropRows($child), $rows);
-
-        $rows = $result;
+        $rows = array_merge($this->getAnnotationRows($child), $rows);
       }
     }
     return $rows;
+
   }
 
   /**
