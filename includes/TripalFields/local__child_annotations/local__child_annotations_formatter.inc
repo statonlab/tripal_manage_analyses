@@ -102,7 +102,6 @@ class local__child_annotations_formatter extends ChadoFieldFormatter {
     $children = $data['children'] ?? NULL;
 
     $annotations = $info->feature_cvterm;
-    $yo = chado_query('select * from {feature_cvterm} where feature_id = :id;', [':id' => $info->feature_id])->fetchObject();
 
     if ($annotations) {
 
