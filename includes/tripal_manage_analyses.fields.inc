@@ -31,6 +31,28 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
   if (isset($bundle->data_table) and ($bundle->data_table == 'feature') and $bundle->term->name == 'gene') {
 
     // First add my term.
+    tripal_insert_cvterm(array(
+      'id' => 'local:child_sequences',
+      'name' => 'child_sequences',
+      'cv_name' => 'local',
+      'definition' => 'Sequences of child features',
+    ));
+
+    // Then describe the field defined by that term.
+    $field_name = 'local__child_sequences';
+    $field_type = 'local__child_sequences';
+    $fields[$field_name] = array(
+      'field_name' => $field_name,
+      'type' => $field_type,
+      'cardinality' => 1,
+      'locked' => FALSE,
+      'storage' => array(
+        'type' => 'field_chado_storage',
+      ),
+    );
+  }
+
+    // First add my term.
     tripal_insert_cvterm([
       'id' => 'data:1255',
       'name' => 'Sequence features',
@@ -239,7 +261,41 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
   $instances = [];
 
   if (isset($bundle->data_table) and ($bundle->data_table == 'feature') and $bundle->term->name == 'gene') {
-    $field_name = 'data__sequence_features';
+    $field_name = 'local__child_sequences';
+    $field_type = 'local__child_sequences';
+    $instances[$field_name] =  array(
+      'field_name' => $field_name,
+      'entity_type' => $entity_type,
+      'bundle' => $bundle->name,
+      'label' => 'Child Sequences',
+      'description' => 'Sequences of child features',
+      'required' => FALSE,
+      'settings' => array(
+        'term_vocabulary' => 'local',
+        'term_name' => 'child_sequences',
+        'term_accession' => 'child_sequences',
+        'auto_attach' => FALSE,
+        'chado_table' => $bundle->data_table,
+        'chado_column' => 'organism_id',
+        'base_table' => $bundle->data_table,
+      ),
+      'widget' => array(
+        'type' => 'local__child_sequences_widget',
+        'settings' => array(),
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'local__child_sequences_formatter',
+          'settings' => array(),
+        ),
+      ),
+    );
+
+  }
+
+  
+  $field_name = 'data__sequence_features';
     $instances[$field_name] = [
       'field_name' => $field_name,
       'entity_type' => $entity_type,
