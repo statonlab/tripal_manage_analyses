@@ -75,7 +75,11 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
             'collapsed',
           ],
         ],
-        '#attached' => ['js' => ['misc/collapse.js', 'misc.form.js']],
+        '#attached' => [
+          'library' => [
+            ['system', 'drupal.collapse'],
+          ],
+        ],
       ];
 
       $rows = $this->getPropRows($child);

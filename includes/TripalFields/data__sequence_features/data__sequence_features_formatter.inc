@@ -114,8 +114,13 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
             'collapsed',
           ],
         ],
-        '#attached' => ['js' => ['misc/collapse.js', 'misc.form.js']],
+        '#attached' => [
+          'library' => [
+            ['system', 'drupal.collapse'],
+          ],
+        ],
       ];
+
 
       $element[$i]['drawing'] = [
         '#type' => 'item',

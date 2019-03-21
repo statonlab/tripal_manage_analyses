@@ -10,7 +10,9 @@
 class local__child_annotations_formatter extends ChadoFieldFormatter {
 
   public static $default_label = 'Child Annotations';
+
   public static $field_types = ['local__child_annotations'];
+
   public static $default_settings = [
     'setting1' => 'default_value',
   ];
@@ -58,19 +60,25 @@ class local__child_annotations_formatter extends ChadoFieldFormatter {
         '#title' => $name,
         '#collapsed' => TRUE,
         '#collapsible' => TRUE,
-                '#attributes' => [
-                  'class' => [
-                    'collapsible',
-                    'collapsed',
-                  ],
-                ],
-                '#attached' => ['js' => ['misc/collapse.js', 'misc.form.js']],
+        '#attributes' => [
+          'class' => [
+            'collapsible',
+            'collapsed',
+          ],
+        ],
+        '#attached' => [
+          'library' => [
+            ['system', 'drupal.collapse'],
+          ],
+        ],
       ];
+
+
       $rows = $this->getAnnotationRows($child);
 
       if (empty($rows)) {
         $element[0][$i]['annotation_table'] = [
-          '#markup' => 'No annotations associated with ' . $info->uniquename
+          '#markup' => 'No annotations associated with ' . $info->uniquename,
         ];
         continue;
 
