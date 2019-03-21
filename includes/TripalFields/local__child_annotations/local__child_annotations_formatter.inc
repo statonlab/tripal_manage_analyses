@@ -56,15 +56,16 @@ class local__child_annotations_formatter extends ChadoFieldFormatter {
       $element[0][$i] = [
         '#type' => 'fieldset',
         '#title' => $name,
-        '#attributes' => [
-          'class' => [
-            'collapsible',
-            'collapsed',
-          ],
-        ],
-        '#attached' => ['js' => ['misc/collapse.js', 'misc/form.js']],
+        '#collapsed' => TRUE,
+        '#collapsible' => TRUE,
+                '#attributes' => [
+                  'class' => [
+                    'collapsible',
+                    'collapsed',
+                  ],
+                ],
+                '#attached' => ['js' => ['misc/collapse.js', 'misc.form.js']],
       ];
-
       $rows = $this->getAnnotationRows($child);
 
       if (empty($rows)) {
