@@ -106,15 +106,17 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       $element[$i] = [
         '#type' => 'fieldset',
         '#title' => $name,
+        '#collapsed' => TRUE,
+        '#collapsible' => TRUE,
         '#attributes' => [
           'class' => [
             'collapsible',
             'collapsed',
           ],
         ],
-        // see: https://www.drupal.org/forum/support/module-development-and-code-questions/2012-02-07/drupal-render-fieldset-element
-        '#attached' => ['js' => ['misc/collapse.js', 'misc/form.js']],
+        '#attached' => ['js' => ['misc/collapse.js', 'misc.form.js']],
       ];
+
       $element[$i]['drawing'] = [
         '#type' => 'item',
         '#title' => t('Drawing'),

@@ -67,14 +67,15 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
       $element[0][$i] = [
         '#type' => 'fieldset',
         '#title' => $name,
+        '#collapsed' => TRUE,
+        '#collapsible' => TRUE,
         '#attributes' => [
           'class' => [
             'collapsible',
             'collapsed',
           ],
         ],
-        // see: https://www.drupal.org/forum/support/module-development-and-code-questions/2012-02-07/drupal-render-fieldset-element
-        '#attached' => ['js' => ['misc/collapse.js', 'misc/form.js']],
+        '#attached' => ['js' => ['misc/collapse.js', 'misc.form.js']],
       ];
 
       $rows = $this->getPropRows($child);
