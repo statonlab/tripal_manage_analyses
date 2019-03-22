@@ -140,6 +140,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       $header = [
         'Name',
         'Type',
+        'Sequence',
         'Location',
       ];
       $output = theme('table', ['header' => $header, 'rows' => $rows]);
@@ -308,9 +309,13 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
       $location = isset($info->featureloc) ? $this->buildFeatureString($info->featureloc) : 'Not available';
 
+
+      $sequence = $this->buildSequence($info);
+
       $rows[] = [
         'Name' => $info->uniquename,
         'Type' => $info->type_id->name,
+        'Sequence' => $sequence,
         'Locations' => $location,
       ];
 
@@ -331,4 +336,38 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     return '';
   }
 
+
+  /**
+   * Build and display sequence for polypeptides and mRNA.
+   *
+   * @param $info
+   *
+   * Info object.  @see \chado_generate_var().
+   *
+   * @return string
+   */
+  public function buildSequence($info) {
+
+    //Only display polypeptide, mRNA
+    $check = ['polypeptide', 'mRNA'];
+
+    if (!in_array($info->type_id->name, $check)) {
+      $sequence = 'N/A';
+      return $sequence;
+    }
+
+    $sequence = $info->residues;
+
+    if (!$sequence) {
+
+      //attempt to build sequence from alignment.
+    }
+
+    if (!$sequence) {
+      $sequence = 'Unable to build sequence';
+    }
+
+    return $sequence;
+
+  }
 }
