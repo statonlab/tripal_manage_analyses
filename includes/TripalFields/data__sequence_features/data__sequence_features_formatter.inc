@@ -47,6 +47,8 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
    */
   private $feature_coords;
 
+
+
   /**
    * @see ChadoFieldFormatter::settingsForm()
    **/
@@ -360,6 +362,9 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
    */
   public function buildSequence($info) {
 
+    module_load_include('inc', 'popup', 'includes/popup.api');
+
+
     $type = $info->type_id->name;
     $out = '';
     // Only display polypeptide, mRNA.
@@ -370,7 +375,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       return $out;
     }
 
-    $options = ['width' => 40, 'is_html' => 1];
+    $options = ['width' => 400];
     // TODO: add in more options based on the sequence we're looking at.
     // aggregate: Set to '1' if the sequence should only contain sub features, excluding intro sub feature sequence. For example, set this option to obtain just the coding sequence of an mRNA.
     // sub_feature_types: Only include sub features (or child features) of the types provided in the array.
@@ -387,6 +392,10 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       if ($seq_string) {
         $out .= $defline . $seq_string;
       }
+    }
+
+    if ($out) {
+      $out = popup_element('sequence', $out, $attributes = []);
     }
 
     if (!$out) {
