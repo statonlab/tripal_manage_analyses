@@ -294,7 +294,7 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
 
   }
 
-  
+
   $field_name = 'data__sequence_features';
     $instances[$field_name] = [
       'field_name' => $field_name,
