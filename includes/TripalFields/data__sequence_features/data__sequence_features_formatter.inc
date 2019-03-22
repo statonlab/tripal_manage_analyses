@@ -348,26 +348,41 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
    */
   public function buildSequence($info) {
 
+    $out = '';
     //Only display polypeptide, mRNA
     $check = ['polypeptide', 'mRNA'];
 
     if (!in_array($info->type_id->name, $check)) {
-      $sequence = 'N/A';
-      return $sequence;
+      $out = 'N/A';
+      return $out;
     }
 
-    $sequence = $info->residues;
+    //$sequence = $info->residues;
 
-    if (!$sequence) {
 
-      //attempt to build sequence from alignment.
+      $options = ['width' => 80, 'is_html' => 1];
+      #aggregate: Set to '1' if the sequence should only contain sub features, excluding intro sub feature sequence. For example, set this option to obtain just the coding sequence of an mRNA.
+      #sub_feature_types: Only include sub features (or child features) of the types provided in the array.
+
+
+      $returned = chado_get_feature_sequences(['feature_id' => $info->feature_id], $info->name, $options);
+
+
+      foreach ($returned as $sequence) {
+
+        $seq_string = $sequence['residues'];
+        $defline = $returned['defline'] ??  '>' . $info->name . '<br>';
+
+        if ($seq_string) {
+          $out .= $defline . $seq_string;
+        }
+      }
+
+    if (!$out) {
+      $out = 'Unavailable';
     }
 
-    if (!$sequence) {
-      $sequence = 'Unable to build sequence';
-    }
-
-    return $sequence;
+    return $out;
 
   }
 }
