@@ -76,6 +76,9 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     $sequence = $entity->data__sequence['und'][0]['value'];
 
     if (!$sequence) {
+
+      // TODO: we build the derived sequence below.
+      // Let's do it here and store it in a private variable for reuse instead.
       $length = $entity->data__sequence_length['und'][0]['value'];
       if (!$length) {
         $length = '5000';
@@ -120,7 +123,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
           ],
         ],
       ];
-
 
       $element[$i]['drawing'] = [
         '#type' => 'item',
@@ -197,10 +199,10 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
     $info = $featureloc->feature_id;
 
-    $min = $info->fmin;
-    $max = $info->fmax;
-    $strand = $info->strand;
-    $parent = $info->srcfeature_id->name;
+    $min = $info->fmin ?? NULL;
+    $max = $info->fmax ?? NULL;
+    $strand = $info->strand ?? NULL;
+    $parent = $info->srcfeature_id->name ?? NULL;
 
     if (!$min or !$max or !$strand) {
       return 'No location available.';
@@ -226,9 +228,9 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     $parent_stop = $this->parent_stop;
     $strand = $this->parent_strand;
 
-    $min = $featureloc->fmin;
-    $max = $featureloc->fmax;
-    $strand = $featureloc->strand;
+    $min = $featureloc->fmin ?? NULL;
+    $max = $featureloc->fmax ?? NULL;
+    $strand = $featureloc->strand ?? NULL;
 
     if ($strand == '+') {
 
@@ -303,12 +305,23 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
     $children = $child['children'];
 
+    $mrna = $child['info'];
+
+    $sequence = $this->buildSequence($mrna);
+    $location = isset($mrna->featureloc) ? $this->buildFeatureString($mrna->featureloc) : 'Not available';
+
+    $rows[] = [
+      'Name' => $mrna->uniquename,
+      'Type' => $mrna->type_id->name,
+      'Sequence' => $sequence,
+      'Locations' => $location,
+    ];
+
     foreach ($children as $gchild) {
 
       $info = $gchild['info'];
 
       $location = isset($info->featureloc) ? $this->buildFeatureString($info->featureloc) : 'Not available';
-
 
       $sequence = $this->buildSequence($info);
 
@@ -336,47 +349,45 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     return '';
   }
 
-
   /**
    * Build and display sequence for polypeptides and mRNA.
    *
    * @param $info
    *
-   * Info object.  @see \chado_generate_var().
+   *   Info object.  @see \chado_generate_var().
    *
    * @return string
    */
   public function buildSequence($info) {
 
+    $type = $info->type_id->name;
     $out = '';
-    //Only display polypeptide, mRNA
+    // Only display polypeptide, mRNA.
     $check = ['polypeptide', 'mRNA'];
 
-    if (!in_array($info->type_id->name, $check)) {
+    if (!in_array($type, $check)) {
       $out = 'N/A';
       return $out;
     }
 
-    //$sequence = $info->residues;
+    $options = ['width' => 40, 'is_html' => 1];
+    // TODO: add in more options based on the sequence we're looking at.
+    // aggregate: Set to '1' if the sequence should only contain sub features, excluding intro sub feature sequence. For example, set this option to obtain just the coding sequence of an mRNA.
+    // sub_feature_types: Only include sub features (or child features) of the types provided in the array.
+    // TODO: I guess this should be done in the LOAD instead of the formatter?
+    $returned = chado_get_feature_sequences(['feature_id' => $info->feature_id], $options);
 
+    foreach ($returned as $sequence) {
 
-      $options = ['width' => 80, 'is_html' => 1];
-      #aggregate: Set to '1' if the sequence should only contain sub features, excluding intro sub feature sequence. For example, set this option to obtain just the coding sequence of an mRNA.
-      #sub_feature_types: Only include sub features (or child features) of the types provided in the array.
+      $seq_string = $sequence['residues'];
+      $header = $sequence['defline'] ?? $info->name;
 
+      $defline = '>' . $header . '<br>';
 
-      $returned = chado_get_feature_sequences(['feature_id' => $info->feature_id], $info->name, $options);
-
-
-      foreach ($returned as $sequence) {
-
-        $seq_string = $sequence['residues'];
-        $defline = $returned['defline'] ??  '>' . $info->name . '<br>';
-
-        if ($seq_string) {
-          $out .= $defline . $seq_string;
-        }
+      if ($seq_string) {
+        $out .= $defline . $seq_string;
       }
+    }
 
     if (!$out) {
       $out = 'Unavailable';
@@ -385,4 +396,5 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     return $out;
 
   }
+
 }
