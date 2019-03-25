@@ -91,26 +91,37 @@ class local__analysis_browser_formatter extends ChadoFieldFormatter {
     $settings = $display['settings'];
     $field = 'local__analysis_browser';
 
-    if (empty($entity->{$field}['und'][0]['value'])) {
+    if (!($entity->{$field}['und'][0]['value'])) {
+
+      $output  = 'There are no analyses associated with this organism.';
+      $element[] = [
+        '#type' => 'markup',
+        '#markup' => $output,
+      ];
       return;
     }
 
-    if (!is_array($entity->{$field}['und'][0]['value'])) {
-      return;
-    }
 
-    $rows = array_map(function ($analysis) {
-      $date = new DateTime($analysis->timeexecuted);
+    $rows = [];
+
+    foreach ($items as $analysis) {
+
+      $info = $analysis['value'];
+
+      $date = new DateTime($info->timeexecuted);
       $date_formatted = $date->format('M jS, Y');
       if ($date_formatted === "Jan 1st, 1900") {
         $date_formatted = "Unknown";
       }
-      return [
-        l($analysis->name, "bio_data/{$analysis->entity_id}"),
-        $analysis->program,
+
+
+      $rows[] =  [
+        l($info->name, "bio_data/{$info->entity_id}"),
+        $info->program,
         $date_formatted,
       ];
-    }, $entity->{$field}['und'][0]['value']);
+    }
+
 
     $output = theme('table', [
       'header' => ['Name', 'Program', 'Date Constructed'],
