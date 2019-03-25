@@ -390,7 +390,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       $options['derive_from_parent'] = 1;
       $returned = chado_get_feature_sequences(['feature_id' => $info->feature_id], $options);
     }
-
+  
     foreach ($returned as $sequence) {
 
       $seq_string = $sequence['residues'];
