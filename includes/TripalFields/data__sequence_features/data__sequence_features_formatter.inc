@@ -386,6 +386,11 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     // TODO: I guess this should be done in the LOAD instead of the formatter?
     $returned = chado_get_feature_sequences(['feature_id' => $info->feature_id], $options);
 
+    if (!$returned[0]['residues']) {
+      $options['derive_from_parent'] = 1;
+      $returned = chado_get_feature_sequences(['feature_id' => $info->feature_id], $options);
+    }
+
     foreach ($returned as $sequence) {
 
       $seq_string = $sequence['residues'];
