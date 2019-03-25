@@ -399,14 +399,12 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       $container_id = 'popover-controller-' . $info->feature_id;
       $id = 'popover-' . $info->feature_id;
 
-      $out = '<a data-toggle="popover" data-content="' . $out . ' ">Sequence</a>';
+      //$out = '<a data-toggle="popover" data-content="' . $out . ' ">Sequence</a>';
 
-//
-//      $out = '
-//
-//      <div id="' . $container_id . '" pop_target =' . $container_id .'><a>Sequence</a></div>
-//
-//      <div class="popover tripl-sequence-popover fade left in id = ' . $id  . '"> ' . $out .  '</div>';
+
+      $out = '
+      <a id="' . $container_id . '"data-target="' . $id . '" class="sequence-expand-trigger">Sequence</a>
+      <div class="tripal-sequence-popover" id ="' . $id  . '"> ' . $out .  '</div>';
     }
 
     if (!$out) {

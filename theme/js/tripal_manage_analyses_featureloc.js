@@ -6,12 +6,12 @@
     Drupal.behaviors.tripal_manage_analyses = {
         attach: function (context, settings) {
 
+            console.log("Hey")
             /**
              * JS to add the feature viewer.
              */
             tripal_manage_analyses_feature_viewers(settings.children_draw_info);
 
-            console.log("yeah")
             tripal_manage_analyses_configure_sequence_popup();
 
             // Remove the jquery.ui override of our link theme:
@@ -31,27 +31,43 @@
 
     function tripal_manage_analyses_configure_sequence_popup(){
 
-        $(".tripl-sequence-popover").each(function(i) {
+        $(document).on('click', '.sequence-expand-trigger', function(e) {
 
-                $(this).click(function(e) {
+            var target = $(this).attr('data-target')
+            if(!target) {
+                return
+            }
 
-                    console.log(e)
+            if (target.is(':visible') === true) {
+                target.hide();
+            }
+            else {
+               target.show()
+                $(this).text('Hide sequence');
+            }
+        });
 
-                    var target = e.pop_target
 
 
-                    var sequence = $("# " . $target)
-                    if (sequence.is(':visible') === true) {
-                        sequence.hide();
-                    }
-                    else {
-                        sequence.show();
-                        $(this).text('Hide sequence');
-                    }
-                });
 
-        }
-        )
+
+
+        // $(".tripl-sequence-popover").click(function(e) {
+        //
+        //             console.log(e)
+        //
+        //             var target = e.pop_target
+        //
+        //
+        //             var sequence = $("#" . $target)
+        //             if (sequence.is(':visible') === true) {
+        //                 sequence.hide();
+        //             }
+        //             else {
+        //                 sequence.show();
+        //                 $(this).text('Hide sequence');
+        //             }
+        //         });
     }
     /**
      * Initializes the feature viewers on the page.
