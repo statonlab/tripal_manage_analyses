@@ -5,8 +5,6 @@
 
     Drupal.behaviors.tripal_manage_analyses = {
         attach: function (context, settings) {
-
-            console.log("Hey")
             /**
              * JS to add the feature viewer.
              */
@@ -29,46 +27,6 @@
     };
 
 
-    function tripal_manage_analyses_configure_sequence_popup(){
-
-        $(document).on('click', '.sequence-expand-trigger', function(e) {
-
-            var target = $(this).attr('data-target')
-            if(!target) {
-                return
-            }
-
-            if (target.is(':visible') === true) {
-                target.hide();
-            }
-            else {
-               target.show()
-                $(this).text('Hide sequence');
-            }
-        });
-
-
-
-
-
-
-        // $(".tripl-sequence-popover").click(function(e) {
-        //
-        //             console.log(e)
-        //
-        //             var target = e.pop_target
-        //
-        //
-        //             var sequence = $("#" . $target)
-        //             if (sequence.is(':visible') === true) {
-        //                 sequence.hide();
-        //             }
-        //             else {
-        //                 sequence.show();
-        //                 $(this).text('Hide sequence');
-        //             }
-        //         });
-    }
     /**
      * Initializes the feature viewers on the page.
      */

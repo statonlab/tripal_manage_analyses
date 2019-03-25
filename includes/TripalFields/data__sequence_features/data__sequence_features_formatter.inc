@@ -66,7 +66,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
     $parent = $entity->chado_record->feature_id;
 
-    drupal_add_js("https://cdn.rawgit.com/calipho-sib/feature-viewer/v1.0.0/dist/feature-viewer.bundle.js", [
+    drupal_add_js("https://cdn.rawgit.com/calipho-sib/feature-viewer/v1.0.4/dist/feature-viewer.bundle.js", [
       'type' => 'external',
       'scope' => 'header',
       'group' => 15,
@@ -164,6 +164,10 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     ], 'setting');
 
     drupal_add_js(drupal_get_path('module', 'tripal_manage_analyses') . "/theme/js/tripal_manage_analyses_featureloc.js");
+
+    //Add JS that makes the sequence hideable
+
+    drupal_add_js(drupal_get_path('module', 'tripal_manage_analyses') . "/theme/js/hide_show_sequence.js");
 
   }
 
@@ -375,7 +379,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       return $out;
     }
 
-    $options = ['width' => 400];
+    $options = ['width' => 40, 'is_html' => 1];
     // TODO: add in more options based on the sequence we're looking at.
     // aggregate: Set to '1' if the sequence should only contain sub features, excluding intro sub feature sequence. For example, set this option to obtain just the coding sequence of an mRNA.
     // sub_feature_types: Only include sub features (or child features) of the types provided in the array.
@@ -399,12 +403,9 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       $container_id = 'popover-controller-' . $info->feature_id;
       $id = 'popover-' . $info->feature_id;
 
-      //$out = '<a data-toggle="popover" data-content="' . $out . ' ">Sequence</a>';
-
-
       $out = '
       <a id="' . $container_id . '"data-target="' . $id . '" class="sequence-expand-trigger">Sequence</a>
-      <div class="tripal-sequence-popover" id ="' . $id  . '"> ' . $out .  '</div>';
+      <div style="display: none;" class="tripal-sequence-popover" id ="' . $id  . '"> ' . $out .  '</div>';
     }
 
     if (!$out) {
