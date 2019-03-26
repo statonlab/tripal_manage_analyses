@@ -38,7 +38,7 @@ class ero__nucleic_acid_library extends ChadoField {
 
   public static $default_instance_settings = [
     // The DATABASE name, as it appears in chado.db.  This also builds the link-out url.  In most cases this will simply be the CV name.  In some cases (EDAM) this will be the SUBONTOLOGY.
-    'term_vocabulary' => 'ero',
+    'term_vocabulary' => 'ERO',
     // The name of the term.
     'term_name' => 'nucleic_acid_library',
     // The unique ID (i.e. accession) of the term.
