@@ -452,7 +452,7 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
       'description' => 'Displays libraries (BAC, YAC etc) associated with this entity.',
       'required' => FALSE,
       'settings' => [
-        'term_vocabulary' => 'ero',
+        'term_vocabulary' => 'ERO',
         'term_name' => 'nucleic_acid_library',
         'term_accession' => '0000160',
         'auto_attach' => FALSE,
