@@ -48,7 +48,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
   private $feature_coords;
 
 
-
   /**
    * @see ChadoFieldFormatter::settingsForm()
    **/
@@ -396,17 +395,32 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       $returned = chado_get_feature_sequences(['feature_id' => $info->feature_id], $options);
     }
 
+    if (empty($returned)) {
+      return $out;
+    }
+    $header = $returned[0]['defline'] ?? $info->name;
+    $defline = '>' . $header . '<br>';
+    $seq_build = '';
+
+    //First, sort by rank.
+
+    $sorted = [];
+
     foreach ($returned as $sequence) {
+      $rank = $sequence['rank'];
+      $sorted[$rank] = $sequence;
+    }
 
+    // Concatenate all sequences returned.
+
+    foreach ($sorted as $sequence) {
       $seq_string = $sequence['residues'];
-      $header = $sequence['defline'] ?? $info->name;
-
-      $defline = '>' . $header . '<br>';
-
       if ($seq_string) {
-        $out .= $defline . $seq_string;
+        $seq_build .= $seq_build . $seq_string;
       }
     }
+
+    $out = $defline . $seq_build;
 
     if ($out) {
 
@@ -415,7 +429,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
       $out = '
       <a id="' . $container_id . '"data-target="' . $id . '" class="sequence-expand-trigger">Sequence</a>
-      <div style="display: none;" class="tripal-sequence-popover" id ="' . $id  . '"> ' . $out .  '</div>';
+      <div style="display: none;" class="tripal-sequence-popover" id ="' . $id . '"> ' . $out . '</div>';
     }
 
     if (!$out) {
