@@ -3,15 +3,13 @@
 
 (function ($) {
 
-    Drupal.behaviors.tripal_manage_analyses = {
+    Drupal.behaviors.tripal_manage_analyses_glyph = {
         attach: function (context, settings) {
             /**
              * JS to add the feature viewer.
              */
             tripal_manage_analyses_feature_viewers(settings.children_draw_info);
-
-            tripal_manage_analyses_configure_sequence_popup();
-
+            
             // Remove the jquery.ui override of our link theme:
             $(".ui-widget-content").removeClass('ui-widget-content')
 
