@@ -374,6 +374,8 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     // Only display polypeptide, mRNA.
     $check = ['polypeptide', 'mRNA', 'CDS'];
 
+    //might want to offer noncoding RNA?
+
     if (!in_array($type, $check)) {
       $out = 'N/A';
       return $out;
@@ -385,15 +387,11 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     // sub_feature_types: Only include sub features (or child features) of the types provided in the array.
     // TODO: I guess this should be done in the LOAD instead of the formatter?
 
-    if ($type == 'CDS') {
-      $options['aggregate'] = 1;
-      $options['sub_feature_types'] = ['exon'];
-    }
 
     $returned = chado_get_feature_sequences(['feature_id' => $info->feature_id], $options);
 
 
-    if (!$returned[0]['residues']) {
+    if (!$returned[0]['residues'] && $type === 'mRNA') {
       $options['derive_from_parent'] = 1;
       $returned = chado_get_feature_sequences(['feature_id' => $info->feature_id], $options);
     }
