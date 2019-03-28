@@ -1,6 +1,6 @@
 (function ($) {
 
-        Drupal.behaviors.tripal_manage_analyses = {
+        Drupal.behaviors.tripal_manage_analyses_sequence = {
             attach: function (context, settings) {
 
 
