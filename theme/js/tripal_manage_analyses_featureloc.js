@@ -9,7 +9,7 @@
              * JS to add the feature viewer.
              */
             tripal_manage_analyses_feature_viewers(settings.children_draw_info);
-            
+
             // Remove the jquery.ui override of our link theme:
             $(".ui-widget-content").removeClass('ui-widget-content')
 
@@ -29,6 +29,8 @@
      * Initializes the feature viewers on the page.
      */
     function tripal_manage_analyses_feature_viewers(features) {
+
+        var mRNAInfo= [];
 
         var residues = features.residues
         children = features.children
