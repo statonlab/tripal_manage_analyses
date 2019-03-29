@@ -402,18 +402,11 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     $defline = '>' . $header . '<br>';
     $seq_build = '';
 
-    //First, sort by rank.
 
-    $sorted = [];
-
+    //  Warning for multi-aligned features!!
+    //  https://github.com/tripal/tripal/issues/916
+    
     foreach ($returned as $sequence) {
-      $rank = $sequence['rank'];
-      $sorted[$rank] = $sequence;
-    }
-
-    // Concatenate all sequences returned.
-
-    foreach ($sorted as $sequence) {
       $seq_string = $sequence['residues'];
       if ($seq_string) {
         $seq_build .= $seq_build . $seq_string;
