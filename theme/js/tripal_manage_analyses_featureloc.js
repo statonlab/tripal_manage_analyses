@@ -36,6 +36,8 @@
         var parameters = features.parameters
         var children = features.children
 
+        var strand = features.strand
+
         if (parameters) {
             var options = parameters
         }
@@ -72,7 +74,27 @@
             fv.addFeature(subFeature)
         })
 
+        // Select all rectangles and add directional arrows.
 
+        strand = "+"
+
+        if (strand) {
+
+            if (strand === "+") {
+
+                var gs = d3.selectAll("g").filter(".undefinedGroup")
+
+                gs.append("clipPath").attr("id", "triclip")
+                    .append("ellipse")
+                    .attr("cx", 2)
+                    .attr("cy", 2)
+
+
+                //gs.select("rect").attr("clip-path", "url(#triclip)") // clip the rectangle
+
+            }
+
+        }
 
         // Trigger a window resize event to notify charting modules that
         // the container dimensions has changed
