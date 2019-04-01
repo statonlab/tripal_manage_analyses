@@ -33,15 +33,23 @@
         var mRNAInfo= [];
 
         var residues = features.residues
+        var parameters = features.parameters
         var children = features.children
-        var options = {
-            showAxis: true,
-            showSequence: true,
-            brushActive: true,
-            toolbar: true,
-            bubbleHelp: true,
-            zoomMax: 3
+
+        if (parameters) {
+            var options = parameters
         }
+        else {
+            var options = {
+                showAxis: true,
+                showSequence: true,
+                brushActive: true,
+                toolbar: true,
+                bubbleHelp: true,
+                zoomMax: 3
+            }
+        }
+
         Object.keys(children).forEach(function (key, index) {
             //Each child gets its own feature viewer
             var fv = new FeatureViewer(residues, "#tripal_manage_expression_featureloc_viewer_" + index, options);
@@ -56,13 +64,13 @@
 
         //  Now add master glyph
 
-        // var fv = new FeatureViewer(residues, "#tripal_manage_expression_featureloc_gene", options);
-        // var subFeatures = features.master
-        //
-        // Object.keys(subFeatures).forEach(function (sfKey, sfIndex) {
-        //     var subFeature = subFeatures[sfKey]
-        //     fv.addFeature(subFeature)
-        // })
+        var fv = new FeatureViewer(residues, "#tripal_manage_expression_featureloc_gene", options);
+        var subFeatures = features.master
+
+        Object.keys(subFeatures).forEach(function (sfKey, sfIndex) {
+            var subFeature = subFeatures[sfKey]
+            fv.addFeature(subFeature)
+        })
 
 
 
