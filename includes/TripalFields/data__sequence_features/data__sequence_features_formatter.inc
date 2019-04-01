@@ -349,10 +349,12 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
           $feature_viewer_array = [
             'x' => $loc->fmin,
             'y' => $loc->fmax,
-            'description' => $info->uniquename,
+            'description' => '',
           ];
 
           $this->masterGlyphData[$i]['data'][] = $feature_viewer_array;
+
+          $feature_viewer_array['description'] = $info->uniquename;
 
           $this->featureviewerData[$i]['mRNA']['data'][] = $feature_viewer_array;
 
