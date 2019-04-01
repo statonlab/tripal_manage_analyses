@@ -84,7 +84,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     if (!$sequence) {
       // Fudge a sequence based on the length.
       $length = db_select('chado.feature', 'f')
-        ->fields('f', ['length'])
+        ->fields('f', ['seqlen'])
         ->condition('feature_id', $srcfeature_id)
         ->execute()
         ->fetchField();
