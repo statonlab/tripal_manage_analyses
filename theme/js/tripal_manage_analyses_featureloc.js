@@ -33,27 +33,38 @@
         var mRNAInfo= [];
 
         var residues = features.residues
-        children = features.children
+        var children = features.children
+        var options = {
+            showAxis: true,
+            showSequence: true,
+            brushActive: true,
+            toolbar: true,
+            bubbleHelp: true,
+            zoomMax: 3
+        }
         Object.keys(children).forEach(function (key, index) {
             //Each child gets its own feature viewer
-            var options = {
-                showAxis: true,
-                showSequence: true,
-                brushActive: true,
-                toolbar: true,
-                bubbleHelp: true,
-                zoomMax: 3
-            }
-
-            var fv = new FeatureViewer(residues, '#tripal_manage_expression_featureloc_viewer_' + index, options);
-            subFeatures = children[key]
+            var fv = new FeatureViewer(residues, "#tripal_manage_expression_featureloc_viewer_" + index, options);
+            var subFeatures = children[key]
 
             Object.keys(subFeatures).forEach(function (sfKey, sfIndex) {
-                subFeature = subFeatures[sfKey]
+                var subFeature = subFeatures[sfKey]
                 fv.addFeature(subFeature)
 
             })
         })
+
+        //  Now add master glyph
+
+        // var fv = new FeatureViewer(residues, "#tripal_manage_expression_featureloc_gene", options);
+        // var subFeatures = features.master
+        //
+        // Object.keys(subFeatures).forEach(function (sfKey, sfIndex) {
+        //     var subFeature = subFeatures[sfKey]
+        //     fv.addFeature(subFeature)
+        // })
+
+
 
         // Trigger a window resize event to notify charting modules that
         // the container dimensions has changed

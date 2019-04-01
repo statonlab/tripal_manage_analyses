@@ -41,12 +41,16 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
    */
   private $parent_strand;
 
-  /**
-   * Holds converted featureloc information for the feature viewer drawing.
-   */
-  private $feature_coords;
 
   private $featureviewerData;
+
+  private $masterGlyphData;
+
+  /**
+   * Array of the mRNA info (first level child).
+   * @var
+   */
+  private $mrnaLookup;
 
 
   /**
@@ -64,8 +68,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     // Get the settings.
     $settings = $display['settings'];
 
-    $parent = $entity->chado_record->feature_id;
-
     drupal_add_js("https://cdn.rawgit.com/calipho-sib/feature-viewer/v1.0.4/dist/feature-viewer.bundle.js", [
       'type' => 'external',
       'scope' => 'header',
@@ -75,23 +77,23 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     ]);
 
     $child_draw = [];
-    $sequence = $entity->data__sequence['und'][0]['value'];
 
-    if (!$sequence) {
+    $srcfeature_id = db_select('chado.featureloc', 'fl')
+      ->fields('fl', ['srcfeature_id'])
+      ->condition('feature_id', $entity->chado_record->feature_id)
+      ->execute()
+      ->fetchField();
 
-      $feature_id = $entity->chado_record->feature_id;
+    $sequences = chado_get_feature_sequences(['feature_id' => $srcfeature_id], []);
 
-      $options = ['build_from_parent' => 1];
-      $returned = chado_get_feature_sequences(['feature_id' => $feature_id], $options);
-
-      $sequence = $returned[0]['residues'] ?? NULL;
+    $sequence = $sequences[0]['residues'] ?? NULL;
 
       if (!$sequence) {
         // Fudge a sequence based on the length.
-        $length = $entity->data__sequence_length['und'][0]['value'];
+       $length =  db_select('chado.feature', 'f')->fields('f', ['length'])->condition('feature_id', $srcfeature_id)->execute()->fetchField();
         if (!$length) {
           // Fudge the length.
-          $length = '5000';
+          $length = '500000';
         }
         $sequence = '';
         $i = 0;
@@ -100,8 +102,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
           $i++;
         }
       }
-
-    }
 
     $coordinates = $entity->data__sequence_coordinates['und'][0]['value'];
 
@@ -150,17 +150,41 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
         '#suffix' => '</div>',
       ];
 
-      $rows = $this->buildChildTable($child);
 
-      //Now build glyph data
+      //  We assume the primary child feature is mRNA.
+      $mrna = $child['info'];
 
-      //First, get all exons for use with mRNA
+      $this->mrnaLookup[$i] = $mrna;
 
-      //Now, add mRNA to master glyph with exons
+      //Create base mRNA drawing.
+      $this->featureviewerData[$i]['mRNA'] = [
+        'name' => $mrna->uniquename,
+        'color' => '#FF0000',
+        'type' => 'rect',
+      ];
 
-      //Finally build the glyph for this mRNA with just the CDS and mRNA from exons.
+      //Add this mRNA to mqster drawing.
+      $this->masterGlyphData[$i] = [
+        'name' => $mrna->uniquename,
+        //Color is going to be different for each mRNA!
+        'color' => '#FF0000',
+        'type' => 'rect',
+      ];
 
-      $this->build_featureviewer_data($i, $child);
+      $sequence = $this->buildSequence($mrna);
+      $location = isset($mrna->featureloc) ? $this->buildFeatureString($mrna->featureloc) : 'Not available';
+      $rows = [];
+
+      $rows[] = [
+        'Name' => $mrna->uniquename,
+        'Type' => $mrna->type_id->name,
+        'Sequence' => $sequence,
+        'Locations' => $location,
+      ];
+
+      //Build the table of all child features. use CDS and exon subfeatures for the glyphs.
+
+      $rows = array_merge($rows, $this->buildChildTable($child, $i));
 
       if (empty($rows)) {
         continue;
@@ -182,7 +206,8 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     // Un-collapse the first fieldset.
     $element[0]['#attributes']['class'] = ['collapsible'];
 
-    $child_draw['children'] = $this->feature_coords;
+    $child_draw['children'] = $this->featureviewerData;
+    $child_draw['master'] = $this->masterGlyphData;
     // Pass in the needed JS info.
     drupal_add_js([
       'children_draw_info' => $child_draw,
@@ -195,31 +220,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
   }
 
-  /**
-   *
-   */
-  private function build_featureviewer_data($i, $child) {
-
-    $info = $child['info'];
-
-    $grand_children = $child['children'] ?? NULL;
-
-
-    $exons = $this->prepare_exons_for_mRNA_glyph($i, $info->feature_id, $info);
-    // Set base info
-    // All child features will be drawn on this one in 'data'
-    // Convert and store the coordinates for hte feature viewer.
-    $this->convertFeatureCoords($i, $info->feature_id, $info, $exons);
-
-    $this->buildNewDataScheme($i, $info->feature_id, $info);
-
-    // Repeat for grandchildren;.
-    if ($grand_children) {
-      foreach ($grand_children as $grand_child) {
-        $this->build_featureviewer_data($i, $grand_child);
-      }
-    }
-  }
 
   /**
    * Builds featureloc string for display to user.
@@ -247,110 +247,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     return $out;
   }
 
-
-  /**
-   * Converts featureloc coordinates to be based on the entity.
-   *
-   * @param $i
-   * @param $feature_id
-   * @param $info
-   * @param $exons
-   * Array of exon data for drawing the mRNA.
-   */
-  private function convertFeatureCoords($i, $feature_id, $info, $exons) {
-
-    $type = $info->type_id->name;
-
-    $use = ['CDS', 'mRNA'];
-
-    if (!in_array($type, $use)){
-
-    }
-
-    $featureloc = $info->featureloc->feature_id;
-    // TODO: what if theres no featureloc relative to a parent?
-    $parent_start = $this->parent_start;
-    $parent_stop = $this->parent_stop;
-    $strand = $this->parent_strand;
-
-    $min = $featureloc->fmin ?? NULL;
-    $max = $featureloc->fmax ?? NULL;
-    $strand = $featureloc->strand ?? NULL;
-
-    if ($strand == '+') {
-
-      // It doesnt matter what strand it is, we always do this.
-      // TODO: check that assertion.
-      $start = $min - $parent_start + 1;
-      $stop = $max - $parent_start + 1;
-    }
-
-    else {
-      $start = $min - $parent_start + 1;
-      $stop = $max - $parent_start + 1;
-    }
-
-    $type = $info->type_id->name;
-
-
-    if ($type == 'mRNA') {
-      //Dont draw the mRNA itself, build it from exons instead.
-      return;
-    }
-
-    $cases = ['exon', 'CDS'];
-    if (!inarray($type, $cases)){
-      return;
-    }
-
-    if ($type == 'exon') {
-
-      $name = 'mRNA';
-      //This is going in to build the mRNA
-    }
-
-    if ($type == 'CDS') {
-
-      $name = 'CDS';
-
-      // Build its locations from featureloc instead.
-
-      $query = db_select('chado.featureloc', 'fl');
-        $query->fields('fl', ['fmin', 'fmax']);
-        $query->orderBy('fmin', 'ASC');
-        $query->join('chado.feature', 'f', 'f.feature_id = fl.feature_id');
-        $query->fields('f', ['uniquename']);
-        $query->condition('f.feature_id')->execute();
-
-        $locs = $query->execute();
-        $color = $this->get_feature_color('CDS');
-
-      if (!isset($this->feature_coords[$i]['CDS'])) {
-
-        $this->feature_coords[$i][$type] = [
-          'name' => $info->uniquename,
-          'color' => $color,
-          'type' => 'rect',
-        ];
-      }
-
-        foreach ($locs as $loc) {
-
-          $this->feature_coords[$i]['CDS']['data'][] = [
-            'x' => $loc->fmin,
-            'y' => $loc->fmax,
-            'description' => $loc->fmin . '-' . $loc->fmax,
-          ];
-        }
-    }
-//
-//    $this->feature_coords[$i][$type]['data'][] = [
-//      'x' => $start,
-//      'y' => $stop,
-//      'description' => $info->uniquename,
-//    ];
-
-  }
 
   /**
    * A color lookup to pass different colors to different feature subtypes.
@@ -383,7 +279,13 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
   }
 
   /**
+   * Builds table of sub-feature info, extract CDS/exon info for glyphs.
+   * @param $child
+   * Full child info.
+   * @param $i
    *
+   * @return array
+   * Returns array of rows.
    */
   private function buildChildTable($child, $i) {
 
@@ -391,24 +293,10 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
     $children = $child['children'];
 
-    $mrna = $child['info'];
-
-    $sequence = $this->buildSequence($mrna);
-    $location = isset($mrna->featureloc) ? $this->buildFeatureString($mrna->featureloc) : 'Not available';
-
-    $rows[] = [
-      'Name' => $mrna->uniquename,
-      'Type' => $mrna->type_id->name,
-      'Sequence' => $sequence,
-      'Locations' => $location,
-    ];
-
     foreach ($children as $gchild) {
 
       $info = $gchild['info'];
-
       $location = isset($info->featureloc) ? $this->buildFeatureString($info->featureloc) : 'Not available';
-
       $sequence = $this->buildSequence($info);
 
       $rows[] = [
@@ -418,42 +306,70 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
         'Locations' => $location,
       ];
 
-      if ($info->type_id->name == 'CDS') {
 
-        $this->featureviewerData[$i]['CDS'] = [
-          'name' => $info->uniquename,
-          'color' => $color,
-          'type' => 'rect'
-        ];
+      switch ($info->type_id->name) {
 
-        $locs = $this->unwrittenFetchCDSLocArray;
+        case 'CDS':
 
-        foreach ($locs as $loc) {
-        $this->feature_coords[$i]['CDS']['data'][] = [
-          'x' => $loc->fmin,
-          'y' => $loc->fmax,
-          'description' => $loc->fmin . '-' . $loc->fmax,
-        ];
+          //Get locations.  We assume the single CDS feature has multiple featurelocs, which is anti-Chado but what must be done, see:
+          // @ticket https://github.com/tripal/tripal/issues/52
+          $locs = db_select('chado.featureloc', 'fl')
+            ->condition('fl.feature_id', $info->feature_id)
+            ->fields('fl', ['fmin', 'fmax', 'rank'])
+             ->orderBy('rank', 'ASC')
+            ->execute();
 
-      }
+          if (empty($locs)) {
+            break;
+          }
+
+          $this->featureviewerData[$i]['CDS'] = [
+            'name' => $info->uniquename,
+            'color' => '#FF0000',
+            'type' => 'rect',
+          ];
+
+          //TODO:  will this break?
+          foreach ($locs as $loc) {
+            $this->featureviewerData[$i]['CDS']['data'][] = [
+              'x' => $loc->fmin,
+              'y' => $loc->fmax,
+              'description' => $loc->fmin . '-' . $loc->fmax,
+            ];
+          }
+          break;
 
 
-      }
+        case 'exon':
+          $mrna = $this->mrnaLookup[$i];
 
+          //exon locations go into the glyph for the mRNA.
 
+          $loc = $info->featureloc->feature_id;
 
+          $feature_viewer_array = [
+            'x' => $loc->fmin,
+            'y' => $loc->fmax,
+            'description' => $info->uniquename,
+          ];
 
-      }
+          $this->masterGlyphData[$i]['data'][] = $feature_viewer_array;
 
+          $this->featureviewerData[$i]['mRNA']['data'][] = $feature_viewer_array;
 
-      if (isset($gchild['children'])) {
-        $ggchild = $this->buildChildTable($gchild);
-
-        $rows = array_merge($rows, $ggchild);
+          break;
       }
 
     }
+
+
+    if (isset($gchild['children'])) {
+      $ggchild = $this->buildChildTable($gchild, $i);
+
+      $rows = array_merge($rows, $ggchild);
+    }
     return $rows;
+
   }
 
   /**
@@ -464,7 +380,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
   }
 
   /**
-   * Build and display sequence for polypeptides and mRNA.
+   * Build and display sequence for select feature types.
    *
    * @param $info
    *
@@ -480,7 +396,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     $out = '';
     // Only display polypeptide, mRNA CDS.
     $check = ['polypeptide', 'mRNA', 'CDS'];
-
     // Might want to offer noncoding RNA?
     if (!in_array($type, $check)) {
       $out = 'N/A';
@@ -494,7 +409,11 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     // TODO: I guess this should be done in the LOAD instead of the formatter?
     $returned = chado_get_feature_sequences(['feature_id' => $info->feature_id], $options);
 
+    $seq = $returned[0]['residues'] ?? NULL;
+    $header = $returned[0]['defline'] ?? $info->uniquename;
+
     if (!$returned[0]['residues']) {
+
 
       switch ($type) {
 
@@ -503,31 +422,34 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
           $options['aggregate'] = 1;
           $options['sub_feature_types'] = ['exon'];
           $returned = chado_get_feature_sequences(['feature_id' => $info->feature_id], $options);
+          $seq = $returned[0]['residues'] ?? NULL;
           break;
 
         case 'CDS':
           $options['derive_from_parent'] = 1;
+
+          $header = $info->uniquename;
+
           $returned = chado_get_feature_sequences(['feature_id' => $info->feature_id], $options);
+          $seq_string = '';
+          foreach ($returned as $sequence) {
+            if ($seq_string) {
+              $sequence['residues']= '<br>' . $sequence['residues'];
+            }
+            $seq_string .= $sequence['residues'];
+          }
+          $seq = $seq_string;
           break;
 
         default:
           break;
       }
-
-      foreach ($returned as $sequence) {
-
-        $seq_string = $sequence['residues'];
-        $header = $sequence['defline'] ?? $info->name;
-
-        $defline = '>' . $header . '<br>';
-
-        if ($seq_string) {
-          $out .= $defline . $seq_string;
-        }
-      }
     }
+    $defline = '>' . $header . '<br>';
 
-    if ($out) {
+    $out = $defline . $seq;
+
+    if ($out && $seq) {
 
       $container_id = 'popover-controller-' . $info->feature_id;
       $id = 'popover-' . $info->feature_id;
@@ -536,8 +458,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       <a id="' . $container_id . '"data-target="' . $id . '" class="sequence-expand-trigger">Sequence</a>
       <div style="display: none;" class="tripal-sequence-popover" id ="' . $id . '"> ' . $out . '</div>';
     }
-
-    if (!$out) {
+    else {
       $out = 'Unavailable';
     }
 
