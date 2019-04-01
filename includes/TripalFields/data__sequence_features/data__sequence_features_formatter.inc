@@ -71,7 +71,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
     $child_draw = [];
 
-    $srcfeature_id = chado_query("select srcfeature_id from {featureloc} where feature_id = :target_feature_id", [':target_feature_id' => $entity->chado_record->feature_id])->execute()->fetchField();
+    $srcfeature_id = chado_query("select srcfeature_id from {featureloc} where feature_id = :target_feature_id", [':target_feature_id' => $entity->chado_record->feature_id])->fetchField();
 
     $sequences = chado_get_feature_sequences(['feature_id' => $srcfeature_id], []);
 
@@ -79,7 +79,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
     if (!$sequence) {
       // Fudge a sequence based on the length.
-      $length = chado_query("select seqlen from {feature} where feature_id = :feature_id", [':feature_id' => $srcfeature_id])->execute()->fetchField();
+      $length = chado_query("select seqlen from {feature} where feature_id = :feature_id", [':feature_id' => $srcfeature_id])->fetchField();
 
 
       if (!$length) {
