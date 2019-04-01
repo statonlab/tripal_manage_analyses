@@ -46,7 +46,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
   private $masterGlyphData;
 
-
   /**
    * @see ChadoFieldFormatter::settingsForm()
    **/
@@ -122,7 +121,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       'zoomMax' => 3,
     ];
 
-
     foreach ($entity->{'data__sequence_features'}['und'] as $i => $data) {
       $child = $data['value'];
 
@@ -134,7 +132,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
         '#prefix' => '<div id="tripal_manage_expression_featureloc_gene">',
         '#suffix' => '</div>',
       ];
-
 
       $element[$i]['fs'] = [
         '#type' => 'fieldset',
@@ -156,17 +153,14 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
       $element[$i]['fs']['drawing'] = [
         '#type' => 'item',
-        '#title' => t('Drawing'),
         '#prefix' => '<div id="tripal_manage_expression_featureloc_viewer_' . $i . '">',
         '#suffix' => '</div>',
       ];
 
-
-      //  We assume the primary child feature is mRNA.
+      // We assume the primary child feature is mRNA.
       $mrna = $child['info'];
 
-
-      //Create base mRNA drawing.
+      // Create base mRNA drawing.
       $this->featureviewerData[$i]['mRNA'] = [
         'name' => 'mRNA',
         'color' => '#FF0000',
@@ -175,10 +169,10 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
       $color = '#' . substr(str_shuffle('ABCDEF0123456789'), 0, 6);
 
-      //Add this mRNA to mqster drawing.
+      // Add this mRNA to mqster drawing.
       $this->masterGlyphData[$i] = [
         'name' => $mrna->uniquename,
-        //Color is going to be different for each mRNA!
+        // Color is going to be different for each mRNA!
         'color' => $color,
         'type' => 'rect',
       ];
@@ -194,8 +188,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
         'Locations' => $location,
       ];
 
-      //Build the table of all child features. use CDS and exon subfeatures for the glyphs.
-
+      // Build the table of all child features. use CDS and exon subfeatures for the glyphs.
       $rows = array_merge($rows, $this->buildChildTable($child, $i));
 
       if (empty($rows)) {
@@ -232,7 +225,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
   }
 
-
   /**
    * Builds featureloc string for display to user.
    *
@@ -258,7 +250,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
     return $out;
   }
-
 
   /**
    * A color lookup to pass different colors to different feature subtypes.
@@ -294,11 +285,11 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
    * Builds table of sub-feature info, extract CDS/exon info for glyphs.
    *
    * @param $child
-   * Full child info.
+   *   Full child info.
    * @param $i
    *
    * @return array
-   * Returns array of rows.
+   *   Returns array of rows.
    */
   private function buildChildTable($child, $i) {
 
@@ -319,12 +310,11 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
         'Locations' => $location,
       ];
 
-
       switch ($info->type_id->name) {
 
         case 'CDS':
 
-          //Get locations.  We assume the single CDS feature has multiple featurelocs, which is anti-Chado but what must be done, see:
+          // Get locations.  We assume the single CDS feature has multiple featurelocs, which is anti-Chado but what must be done, see:
           // @ticket https://github.com/tripal/tripal/issues/52
           $locs = db_select('chado.featureloc', 'fl')
             ->condition('fl.feature_id', $info->feature_id)
@@ -346,16 +336,14 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
             $this->featureviewerData[$i]['CDS']['data'][] = [
               'x' => $loc->fmin,
               'y' => $loc->fmax,
-              'description' => '$info->uniquename',
+              'description' => $info->uniquename,
             ];
           }
           break;
 
-
         case 'exon':
 
-          //exon locations go into the glyph for the mRNA.
-
+          // Exon locations go into the glyph for the mRNA.
           $loc = $info->featureloc->feature_id;
 
           $feature_viewer_array = [
@@ -373,14 +361,12 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
         case 'polypeptide':
         case 'five_prime_UTR':
         case 'three_prime_UTR':
-          //Dont draw
+          // Dont draw.
           break;
 
         default:
-          //draw in specific glyph
-
-
-          //generate a random color
+          // Draw in specific glyph
+          // generate a random color.
           $color = '#' . substr(str_shuffle('ABCDEF0123456789'), 0, 6);
 
           $this->featureviewerData[$i][$info->type_id->name] = [
@@ -402,9 +388,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
       }
 
-
     }
-
 
     if (isset($gchild['children'])) {
       $ggchild = $this->buildChildTable($gchild, $i);
@@ -457,11 +441,10 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
     if (!$returned[0]['residues']) {
 
-
       switch ($type) {
 
         case 'mRNA':
-          //Build from child exons
+          // Build from child exons.
           $options['aggregate'] = 1;
           $options['sub_feature_types'] = ['exon'];
           $returned = chado_get_feature_sequences(['feature_id' => $info->feature_id], $options);
@@ -508,6 +491,5 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     return $out;
 
   }
-
 
 }
