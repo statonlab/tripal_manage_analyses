@@ -107,9 +107,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
     $draw_parent_glyph = $settings['draw_parent_glyph'] ?? 1;
     $draw_child_glyphs = $settings['draw_child_glyphs'] ?? 1;
-
-    dpm($settings);
-
+    
     drupal_add_js("https://cdn.rawgit.com/calipho-sib/feature-viewer/v1.0.4/dist/feature-viewer.bundle.js", [
       'type' => 'external',
       'scope' => 'header',
@@ -230,8 +228,17 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       $location = isset($mrna->featureloc) ? $this->buildFeatureString($mrna->featureloc) : 'Not available';
       $rows = [];
 
+      $uname = $mrna->uniquename;
+
+      $entity_id = $mrna->entity_id;
+
+      if ($entity_id) {
+
+        $uname = l($uname, 'bio_data/' . $entity_id);
+      }
+
       $rows[] = [
-        'Name' => $mrna->uniquename,
+        'Name' => $uname,
         'Type' => $mrna->type_id->name,
         'Sequence' => $sequence,
         'Locations' => $location,
@@ -270,8 +277,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     if ($draw_parent_glyph) {
       $child_draw['master'] = $this->masterGlyphData;
     }
-
-    dpm($child_draw);
 
     // Pass in the needed JS info.
     drupal_add_js([
@@ -363,8 +368,16 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
       $location = isset($info->featureloc) ? $this->buildFeatureString($info->featureloc) : 'Not available';
       $sequence = $this->buildSequence($info);
 
+      $uname = $info->uniquename;
+
+      $entity_id = $info->entity_id;
+
+      if ($entity_id) {
+
+        $uname = l($uname, 'bio_data/' . $entity_id);
+      }
       $rows[] = [
-        'Name' => $info->uniquename,
+        'Name' => $uname,
         'Type' => $info->type_id->name,
         'Sequence' => $sequence,
         'Locations' => $location,

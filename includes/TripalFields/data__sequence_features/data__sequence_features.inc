@@ -207,6 +207,11 @@ class data__sequence_features extends ChadoField {
       $feature = chado_expand_var($feature, 'table', 'featureprop');
       $feature = chado_expand_var($feature, 'table', 'feature_cvterm');
 
+
+      $entity_id = chado_get_record_entity_by_table('feature', $child->subject_id);
+      $feature->entity_id = $entity_id;
+
+
       $this_children[$child_id]['info'] = $feature;
 
       $grand_children = $this->findChildFeatures($child->subject_id);
