@@ -78,6 +78,13 @@ These fields only attach to entities in mapping to the **feature** table whose t
 
 ![example gene field usage](/docs/example_gene_field.png)
 
+
+#### Disabling the glyphs
+
+Both the parent glyph and the  child glyphs can be disabled.  Go to structure -> Gene -> Manage Display and click on the gear next to the `data__sequence_features` field.
+
+
+
 # Usage
 
 The display fields provide no widgets: once they are enabled, they will display entities only.
