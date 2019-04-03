@@ -122,8 +122,15 @@ class local__child_annotations_formatter extends ChadoFieldFormatter {
             $annotation_name = "is not " . $annotation_name;
           }
 
+          $uname = $info->uniquename;
+          $entity_id = $info->entity_id;
+
+          if ($entity_id) {
+            $uname = l($uname, 'bio_data/' . $entity_id);
+          }
+
           $rows[] = [
-            $info->uniquename,
+            $uname,
             $info->type_id->name,
             $annotation_name,
           ];
@@ -131,12 +138,20 @@ class local__child_annotations_formatter extends ChadoFieldFormatter {
       }
       else {
         $annotation_name = $annotations->cvterm_id->name;
+
+        $uname = $info->uniquename;
+        $entity_id = $info->entity_id;
+
+        if ($entity_id) {
+          $uname = l($uname, 'bio_data/' . $entity_id);
+        }
+
         if ($annotations->is_not) {
           $annotation_name = "is not " . $annotation_name;
         }
 
         $rows[] = [
-          $info->uniquename,
+          $uname,
           $info->type_id->name,
           $annotation_name,
         ];

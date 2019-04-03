@@ -42,7 +42,7 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
     $settings = $display['settings'];
 
     // For now, values come from the data__sequence_features field.
-     $data = $entity->data__sequence_features['und'];
+    $data = $entity->data__sequence_features['und'];
 
     if (!$data) {
       return;
@@ -87,7 +87,7 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
 
       if (empty($rows)) {
         $element[0][$i]['prop_table'] = [
-          '#markup' => 'No properties associated with ' . $info->uniquename
+          '#markup' => 'No properties associated with ' . $info->uniquename,
         ];
         continue;
       }
@@ -120,8 +120,17 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
       // If there is only one property, it will be an object not an array.
       if (is_array($props)) {
         foreach ($props as $prop) {
+
+          $uname = $info->uniquename;
+          $entity_id = $info->entity_id;
+
+          if ($entity_id) {
+            $uname = l($uname, 'bio_data/' . $entity_id);
+          }
+
+
           $rows[] = [
-            $info->uniquename,
+            $uname,
             $info->type_id->name,
             $prop->type_id->name,
             $prop->value,
@@ -129,8 +138,16 @@ class local__child_properties_formatter extends ChadoFieldFormatter {
         }
       }
       else {
+
+        $uname = $info->uniquename;
+        $entity_id = $info->entity_id;
+
+        if ($entity_id) {
+          $uname = l($uname, 'bio_data/' . $entity_id);
+        }
+
         $rows[] = [
-          $info->uniquename,
+          $uname,
           $info->type_id->name,
           $props->type_id->name,
           $props->value,
