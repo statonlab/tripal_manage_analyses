@@ -23,7 +23,9 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
    * The list of default settings for this formatter.
    */
   public static $default_settings = [
-    'setting1' => 'default_value',
+    'draw_parent_glyph' => 1,
+    'draw_child_glyphs' => 1,
+
   ];
 
   /**
@@ -51,6 +53,48 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
    **/
   public function settingsForm($view_mode, $form, &$form_state) {
 
+    $display = $this->instance['display'][$view_mode];
+    $settings = $display['settings'];
+
+    $element['glyphs'] = [
+      '#markup' => '<p>Glyphs are drawn using the <a href ="https://github.com/calipho-sib/feature-viewer"> FeatureViewer</a> library.  This is the library used by the Tripal Analysis Blast and Tripal Analysis Interpro modules.</p>',
+    ];
+    $element['draw_parent_glyph'] = [
+      '#type' => 'checkbox',
+      '#title' => "Draw Parent-Level Glyph",
+      '#description' => t("Whether or not the field should draw the parent-level glyph.  On a gene page, this means that each child mRNA will be drawn on a single glyph."),
+      '#default_value' => array_key_exists('draw_parent_glyph', $settings) ? $settings['draw_parent_glyph'] : 1,
+    ];
+
+    $element['draw_child_glyphs'] = [
+      '#type' => 'checkbox',
+      '#title' => "Draw Child-Level Glyphs",
+      '#description' => t("Whether or not the field should draw the child-level glyphs.  On a gene page, this means that each child mRNA will be drawn as its own glyph above its summary table."),
+      '#default_value' => array_key_exists('draw_child_glyphs', $settings) ? $settings['draw_child_glyphs'] : 1,
+    ];
+
+    $element['reminder'] = [
+      '#markup' => '<p>Friendly reminder: you need to press the Update button below and the <b>Save</b> button at the bottom of the page to change these settings.</p>',
+    ];
+    return $element;
+  }
+
+
+  /**
+   * @see ChadoFieldFormatter::settingsSummary()
+   **/
+  public function settingsSummary($view_mode) {
+    $display = $this->instance['display'][$view_mode];
+    $settings = $display['settings'];
+
+    $summary = t('Draw Parent-Level Glyph: @draw_parent_glyph<br>Draw Child-Level Glyphs: @draw_child_glyphs',
+      [
+        '@draw_parent_glyph' => $settings['draw_parent_glyph'],
+        '@draw_child_glyphs' => $settings['draw_child_glyphs'],
+      ]
+    );
+
+    return $summary;
   }
 
   /**
@@ -60,6 +104,11 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
     // Get the settings.
     $settings = $display['settings'];
+
+    $draw_parent_glyph = $settings['draw_parent_glyph'] ?? 1;
+    $draw_child_glyphs = $settings['draw_child_glyphs'] ?? 1;
+
+    dpm($settings);
 
     drupal_add_js("https://cdn.rawgit.com/calipho-sib/feature-viewer/v1.0.4/dist/feature-viewer.bundle.js", [
       'type' => 'external',
@@ -211,8 +260,19 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     // Un-collapse the first fieldset.
     $element[0]['fs']['#attributes']['class'] = ['collapsible'];
 
-    $child_draw['children'] = $this->featureviewerData;
-    $child_draw['master'] = $this->masterGlyphData;
+    $child_draw['children']  = [];
+    $child_draw['master'] = [];
+
+    if ($draw_child_glyphs) {
+      $child_draw['children'] = $this->featureviewerData;
+    }
+
+    if ($draw_parent_glyph) {
+      $child_draw['master'] = $this->masterGlyphData;
+    }
+
+    dpm($child_draw);
+
     // Pass in the needed JS info.
     drupal_add_js([
       'children_draw_info' => $child_draw,
@@ -399,12 +459,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
   }
 
-  /**
-   * @see ChadoFieldFormatter::settingsSummary()
-   **/
-  public function settingsSummary($view_mode) {
-    return '';
-  }
 
   /**
    * Build and display sequence for select feature types.
