@@ -264,7 +264,10 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
         'default' => [
           'label' => 'hidden',
           'type' => 'data__sequence_features_formatter',
-          'settings' => [],
+          'settings' => [
+            'draw_parent_glyph' => 1,
+            'draw_child_glyphs' => 1
+          ],
         ],
       ],
     ];

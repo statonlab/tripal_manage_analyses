@@ -31,6 +31,7 @@
     function tripal_manage_analyses_feature_viewers(features) {
 
         var mRNAInfo= [];
+        console.log(features)
 
         var residues = features.residues
         var parameters = features.parameters
@@ -62,15 +63,21 @@
             })
         })
 
-        //  Now add master glyph
+        //  Now add master glyph, if we were passed data
 
-        var fv = new FeatureViewer(residues, "#tripal_manage_expression_featureloc_gene", options);
         var subFeatures = features.master
+        console.log(features)
 
-        Object.keys(subFeatures).forEach(function (sfKey, sfIndex) {
-            var subFeature = subFeatures[sfKey]
-            fv.addFeature(subFeature)
-        })
+        if (subFeatures.length > 0) {
+            var fv = new FeatureViewer(residues, "#tripal_manage_expression_featureloc_gene", options);
+
+            Object.keys(subFeatures).forEach(function (sfKey, sfIndex) {
+                var subFeature = subFeatures[sfKey]
+                fv.addFeature(subFeature)
+            })
+        }
+
+
 
 
 
