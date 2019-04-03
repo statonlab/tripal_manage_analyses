@@ -107,7 +107,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
     $draw_parent_glyph = $settings['draw_parent_glyph'] ?? 1;
     $draw_child_glyphs = $settings['draw_child_glyphs'] ?? 1;
-    
+
     drupal_add_js("https://cdn.rawgit.com/calipho-sib/feature-viewer/v1.0.4/dist/feature-viewer.bundle.js", [
       'type' => 'external',
       'scope' => 'header',
