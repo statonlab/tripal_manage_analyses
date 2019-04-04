@@ -11,7 +11,7 @@ class data__sequence_features_generic_formatter extends ChadoFieldFormatter {
   /**
    * The default label for this field.
    */
-  public static $default_label = 'Transcript Information';
+  public static $default_label = 'Generic Transcript Information';
   /**
    * The list of field types for which this formatter is appropriate.
    */

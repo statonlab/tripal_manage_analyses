@@ -12,7 +12,7 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
   /**
    * The default label for this field.
    */
-  public static $default_label = 'Transcript Information With Properties and Annotations';
+  public static $default_label = 'Transcript Information';
 
   /**
    * The list of field types for which this formatter is appropriate.
@@ -102,7 +102,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
    **/
   public function view(&$element, $entity_type, $entity, $langcode, $items, $display) {
 
-    dpm("hey man!");
     // Get the settings.
     $settings = $display['settings'];
 
@@ -257,43 +256,12 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
       unset($rows);
 
-      $rows = $this->getPropRows($child);
-
-      if (!empty($rows)) {
-        $output = '<h3>Properties</h3>';
-        $output .= theme('table', ['header' => $header, 'rows' => $rows]);
-        $element[$i]['fs'][$i . 'props'] = ['#markup' => $output];
-
-      }
-      else {
-
-        $element[$i]['fs'][$i . 'props'] = ['#markup' => '<h3>Properties</h3><p>There are no properties to display.</p>'];
-
-
-      }
-      unset($rows);
-
-      $rows = $this->getAnnotationRows($child);
-
-      if (!empty($rows)) {
-        $output = '<h3>Annotations</h3>';
-        $output .= theme('table', ['header' => $header, 'rows' => $rows]);
-        $element[$i]['fs'][$i . 'annotations'] = ['#markup' => $output];
-
-      }
-      else {
-        $element[$i]['fs'][$i . 'annotations'] = ['#markup' => '<h3>Annotations</h3><p>There are no annotations to display.</p>'];
-
-      }
-
-      unset($rows);
-
     }
 
     // Un-collapse the first fieldset.
     $element[0]['fs']['#attributes']['class'] = ['collapsible'];
 
-    $child_draw['children'] = [];
+    $child_draw['children']  = [];
     $child_draw['master'] = [];
 
     if ($draw_child_glyphs) {
@@ -313,11 +281,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
     // Add JS that makes the sequence hideable.
     drupal_add_js(drupal_get_path('module', 'tripal_manage_analyses') . "/theme/js/hide_show_sequence.js");
-
-    dpm($element);
-
-    //Now add in rows for the property and annotations.
-
 
   }
 
@@ -590,135 +553,4 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
   }
 
-  public function getPropRows($data) {
-
-    $rows = [];
-
-    $info = $data['info'];
-
-    $children = $data['children'] ?? NULL;
-
-    $props = $info->featureprop;
-
-    if ($props) {
-
-      // If there is only one property, it will be an object not an array.
-      if (is_array($props)) {
-        foreach ($props as $prop) {
-
-          $uname = $info->uniquename;
-          $entity_id = $info->entity_id;
-
-          if ($entity_id) {
-            $uname = l($uname, 'bio_data/' . $entity_id);
-          }
-
-
-          $rows[] = [
-            $uname,
-            $info->type_id->name,
-            $prop->type_id->name,
-            $prop->value,
-          ];
-        }
-      }
-      else {
-
-        $uname = $info->uniquename;
-        $entity_id = $info->entity_id;
-
-        if ($entity_id) {
-          $uname = l($uname, 'bio_data/' . $entity_id);
-        }
-
-        $rows[] = [
-          $uname,
-          $info->type_id->name,
-          $props->type_id->name,
-          $props->value,
-        ];
-
-      }
-
-    }
-
-    if ($children && !empty($children)) {
-
-      foreach ($children as $child) {
-        $result = array_merge($this->getPropRows($child), $rows);
-
-        $rows = $result;
-      }
-    }
-    return $rows;
-  }
-
-
-  public function getAnnotationRows($data) {
-
-    $rows = [];
-
-    $info = $data['info'];
-
-    $children = $data['children'] ?? NULL;
-
-    $annotations = $info->feature_cvterm;
-
-    if ($annotations) {
-
-      if (is_array($annotations)) {
-        foreach ($annotations as $ann) {
-
-          $annotation_name = $ann->cvterm_id->name;
-          if ($ann->is_not) {
-            $annotation_name = "is not " . $annotation_name;
-          }
-
-          $uname = $info->uniquename;
-          $entity_id = $info->entity_id;
-
-          if ($entity_id) {
-            $uname = l($uname, 'bio_data/' . $entity_id);
-          }
-
-          $rows[] = [
-            $uname,
-            $info->type_id->name,
-            $annotation_name,
-          ];
-        }
-      }
-      else {
-        $annotation_name = $annotations->cvterm_id->name;
-
-        $uname = $info->uniquename;
-        $entity_id = $info->entity_id;
-
-        if ($entity_id) {
-          $uname = l($uname, 'bio_data/' . $entity_id);
-        }
-
-        if ($annotations->is_not) {
-          $annotation_name = "is not " . $annotation_name;
-        }
-
-        $rows[] = [
-          $uname,
-          $info->type_id->name,
-          $annotation_name,
-        ];
-
-      }
-
-    }
-
-    if ($children && !empty($children)) {
-
-      foreach ($children as $child) {
-        $rows = array_merge($this->getAnnotationRows($child), $rows);
-      }
-    }
-    return $rows;
-
-  }
 }
