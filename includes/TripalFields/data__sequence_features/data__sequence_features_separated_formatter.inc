@@ -7,7 +7,7 @@
  * Display:
  * Configuration:
  */
-class data__sequence_features_formatter extends ChadoFieldFormatter {
+class data__sequence_features_separated_formatter extends ChadoFieldFormatter {
 
   /**
    * The default label for this field.
