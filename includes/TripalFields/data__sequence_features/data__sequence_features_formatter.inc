@@ -101,8 +101,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
    * @see ChadoFieldFormatter::View()
    **/
   public function view(&$element, $entity_type, $entity, $langcode, $items, $display) {
-
-    dpm("hey man!");
     // Get the settings.
     $settings = $display['settings'];
 
@@ -313,11 +311,6 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
     // Add JS that makes the sequence hideable.
     drupal_add_js(drupal_get_path('module', 'tripal_manage_analyses') . "/theme/js/hide_show_sequence.js");
-
-    dpm($element);
-
-    //Now add in rows for the property and annotations.
-
 
   }
 
@@ -590,6 +583,14 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
   }
 
+  /**
+   * Extract properties from children recursively and return rows for
+   * theme_table().
+   *
+   * @param $data
+   *
+   * @return array
+   */
   public function getPropRows($data) {
 
     $rows = [];
@@ -653,6 +654,13 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
     return $rows;
   }
 
+  /**
+   * Exract the annotations from all children and return rows for table.
+   *
+   * @param $data
+   *
+   * @return array
+   */
 
   public function getAnnotationRows($data) {
 
