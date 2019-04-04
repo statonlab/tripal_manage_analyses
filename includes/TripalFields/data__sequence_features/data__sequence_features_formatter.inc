@@ -259,6 +259,13 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
       if (!empty($rows)) {
         $output = '<h3>Properties</h3>';
+        $header = [
+          'Name',
+          'Type',
+          'Property',
+          'Value',
+        ];
+
         $output .= theme('table', ['header' => $header, 'rows' => $rows]);
         $element[$i]['fs'][$i . 'props'] = ['#markup' => $output];
 
@@ -275,6 +282,11 @@ class data__sequence_features_formatter extends ChadoFieldFormatter {
 
       if (!empty($rows)) {
         $output = '<h3>Annotations</h3>';
+        $header = [
+          'Name',
+          'Type',
+          'Annotation',
+        ];
         $output .= theme('table', ['header' => $header, 'rows' => $rows]);
         $element[$i]['fs'][$i . 'annotations'] = ['#markup' => $output];
 
