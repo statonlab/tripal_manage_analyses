@@ -66,6 +66,7 @@ class local__analysis_browser extends ChadoField {
    * Load field.
    *
    * @see ChadoField::load()
+   * @throws \Exception
    */
   public function load($entity) {
     parent::load($entity);

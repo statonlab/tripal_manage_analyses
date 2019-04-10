@@ -89,7 +89,6 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
         'type' => 'field_chado_storage',
       ],
     ];
-
   }
 
   // Organism linker on analysis.
@@ -205,7 +204,29 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
         'type' => 'field_chado_storage',
       ],
     ];
+  }
 
+  if (isset($bundle->data_table) AND ($bundle->data_table == 'feature')) {
+    // First add my term.
+    tripal_insert_cvterm([
+      'id' => 'local:feature_analysis',
+      'name' => 'feature_analysis',
+      'cv_name' => 'local',
+      'definition' => 'Adds a link to the analysis from the feature page',
+    ]);
+
+    // Then describe the field defined by that term.
+    $field_name = 'local__feature_analysis';
+    $field_type = 'local__feature_analysis';
+    $fields[$field_name] = [
+      'field_name' => $field_name,
+      'type' => $field_type,
+      'cardinality' => 1,
+      'locked' => FALSE,
+      'storage' => [
+        'type' => 'field_chado_storage',
+      ],
+    ];
   }
 
   return $fields;
@@ -266,7 +287,7 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
           'type' => 'data__sequence_features_formatter',
           'settings' => [
             'draw_parent_glyph' => 1,
-            'draw_child_glyphs' => 1
+            'draw_child_glyphs' => 1,
           ],
         ],
       ],
@@ -537,7 +558,39 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
         ],
       ],
     ];
+  }
 
+  if (isset($bundle->data_table) AND ($bundle->data_table == 'feature')) {
+    $field_name = 'local__feature_analysis';
+    $field_type = 'local__feature_analysis';
+    $instances[$field_name] = [
+      'field_name' => $field_name,
+      'entity_type' => $entity_type,
+      'bundle' => $bundle->name,
+      'label' => 'Analyses',
+      'description' => 'Adds a link to the analysis from the feature page',
+      'required' => FALSE,
+      'settings' => [
+        'term_vocabulary' => 'local',
+        'term_name' => 'feature_analysis',
+        'term_accession' => 'feature_analysis',
+        'auto_attach' => FALSE,
+        'chado_table' => $bundle->data_table,
+        'chado_column' => 'organism_id',
+        'base_table' => $bundle->data_table,
+      ],
+      'widget' => [
+        'type' => 'local__feature_analysis_widget',
+        'settings' => [],
+      ],
+      'display' => [
+        'default' => [
+          'label' => 'hidden',
+          'type' => 'local__feature_analysis_formatter',
+          'settings' => [],
+        ],
+      ],
+    ];
   }
 
   return $instances;
