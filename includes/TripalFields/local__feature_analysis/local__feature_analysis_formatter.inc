@@ -36,7 +36,6 @@ class local__feature_analysis_formatter extends ChadoFieldFormatter {
 
   public function view(&$element, $entity_type, $entity, $langcode, $items, $display) {
     foreach ($items as $item) {
-      dpm($item);
       if (!$item['value']['entity_id']) {
         continue;
       }
