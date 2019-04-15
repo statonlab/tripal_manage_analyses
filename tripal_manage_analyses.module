@@ -12,9 +12,11 @@ require_once "includes/tripal_manage_analyses.fields.inc";
  *
  * @param $entity
  */
-function tripal_manage_analyses_entity_delete($entity) {
-  if ($entity->chado_table == 'analysis') {
-    db_query('DELETE FROM {chado.organism_analysis} oa WHERE analysis_id = :id',
+function tripal_manage_analyses_entity_delete($entity, $type = '') {
+  if (is_object($entity) && property_exists($entity, 'chado_table')) {
+    if ($entity->chado_table == 'analysis') {
+      db_query('DELETE FROM {chado.organism_analysis} oa WHERE analysis_id = :id',
         [':id' => $entity->chado_record_id]);
+    }
   }
 }
