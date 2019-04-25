@@ -74,11 +74,7 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
   public function form(&$widget, &$form, &$form_state, $langcode, $items, $delta, $element) {
     parent::form($widget, $form, $form_state, $langcode, $items, $delta, $element);
 
-    $settings = $this->field['settings'];
-    $field_name = $this->field['field_name'];
-    $field_type = $this->field['type'];
     $field_table = $this->instance['settings']['chado_table'];
-    $field_column = $this->instance['settings']['chado_column'];
     $base_table = $this->instance['settings']['base_table'];
 
     // Get information about this organism linker table.
@@ -88,13 +84,7 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
     }
     // Ie featuremap_organism_id.
     $pkey = $schema['primary key'][0];
-    $lfkey_field = key($schema['foreign keys'][$base_table]['columns']);
-
-    $linker_field = 'chado-' . $field_table . '__organism_id';
-
     $fkey_lcolumn = key($schema['foreign keys'][$base_table]['columns']);
-    // $fkey_lcolumn = key($schema['foreign keys']['protocol']['columns']);.
-    $fkey_rcolumn = $schema['foreign keys'][$base_table]['columns'][$fkey_lcolumn];
 
     $record_id = '';
 
@@ -105,7 +95,6 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
     // If the field already has a value then it will come through the $items
     // array.  This happens when editing an existing record.
     if (count($items) > 0 and array_key_exists($delta, $items)) {
-
       // Ie analysis_id.
       $fk_value = tripal_get_field_item_keyval($items, $delta, 'chado-' . $field_table . '__' . $fkey_lcolumn, $fk_value);
       $record_id = tripal_get_field_item_keyval($items, $delta, 'chado-' . $field_table . '__' . $pkey, $record_id);
@@ -120,18 +109,18 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
     ];
     $options = chado_get_organism_select_options(FALSE);
 
-    $widget['chado-' . $field_table . '__' . $pkey] = array(
+    $widget['chado-' . $field_table . '__' . $pkey] = [
       '#type' => 'value',
       '#default_value' => $record_id,
-    );
-    $widget['chado-' . $field_table . '__' . $fkey_lcolumn] = array(
+    ];
+    $widget['chado-' . $field_table . '__' . $fkey_lcolumn] = [
       '#type' => 'value',
       '#default_value' => $fk_value,
-    );
-    $widget['chado-' . $field_table . '__organism_id'] = array(
+    ];
+    $widget['chado-' . $field_table . '__organism_id'] = [
       '#type' => 'value',
       '#default_value' => $organism_id,
-    );
+    ];
 
     $widget['value'] = [
       '#type' => 'select',
@@ -141,10 +130,9 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
       '#default_value' => $organism_id,
       '#required' => $element['#required'],
       '#weight' => isset($element['#weight']) ? $element['#weight'] : 0,
-    // Delta is its order in an array of subelements.
+      // Delta is its order in an array of subelements.
       '#delta' => $delta,
     ];
-
   }
 
   /**
@@ -158,15 +146,12 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
    */
   public function validate($element, $form, &$form_state, $langcode, $delta) {
     $field_name = $this->field['field_name'];
-    $field_type = $this->field['type'];
     $base_table = $this->instance['settings']['base_table'];
     $field_table = $this->instance['settings']['chado_table'];
-    $chado_column = $this->instance['settings']['chado_column'];
 
     // Get information about this organism linker table.
     $schema = chado_get_schema($field_table);
     // Ie featuremap_organism_id.
-    $pkey = $schema['primary key'][0];
     $lfkey_field = key($schema['foreign keys'][$base_table]['columns']);
 
     // Get the organism_id from the form state.
@@ -181,6 +166,7 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
       $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__organism_id'] = '';
       $form_state['values'][$field_name]['und'][$delta]['value'] = 'delete me';
       $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__' . $lfkey_field] = '';
+//      unset($form_state['values'][$field_name]);
     }
   }
 
