@@ -146,12 +146,14 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
    */
   public function validate($element, $form, &$form_state, $langcode, $delta) {
     $field_name = $this->field['field_name'];
-    $base_table = $this->instance['settings']['base_table'];
-    $field_table = $this->instance['settings']['chado_table'];
+    $settings = $this->instance['settings'];
+    $base_table = $settings['base_table'];
+    $field_table = $settings['chado_table'];
 
     // Get information about this organism linker table.
     $schema = chado_get_schema($field_table);
-    // Ie featuremap_organism_id.
+
+    // IE analysis_id.
     $lfkey_field = key($schema['foreign keys'][$base_table]['columns']);
 
     // Get the organism_id from the form state.
@@ -166,7 +168,7 @@ class obi__organism_linker_widget extends ChadoFieldWidget {
       $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__organism_id'] = '';
       $form_state['values'][$field_name]['und'][$delta]['value'] = 'delete me';
       $form_state['values'][$field_name]['und'][$delta]['chado-' . $field_table . '__' . $lfkey_field] = '';
-//      unset($form_state['values'][$field_name]);
+      // unset($form_state['values'][$field_name]);
     }
   }
 

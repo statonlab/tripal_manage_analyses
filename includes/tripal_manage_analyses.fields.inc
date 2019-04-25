@@ -377,7 +377,7 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
         'auto_attach' => FALSE,
         'chado_table' => 'organism_analysis',
         'chado_column' => 'analysis_id',
-        'base_table' => 'analysis',
+        'base_table' => 'organism_analysis',
       ],
       'widget' => [
         'type' => 'obi__organism_linker_widget',
