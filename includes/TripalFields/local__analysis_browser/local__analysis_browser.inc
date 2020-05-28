@@ -48,13 +48,11 @@ class local__analysis_browser extends ChadoField {
 
     'auto_attach' => FALSE,
     // The table in Chado that the instance maps to.
-    'chado_table' => 'organism',
-    // The column of the table in Chado where the value of the field comes from.
-    'chado_column' => 'organism_id',
-    /**
- * The base table.
- */
-    'base_table' => 'organism',
+    //'chado_table' => 'organism',
+    //// The column of the table in Chado where the value of the field comes from.
+    //'chado_column' => 'organism_id',
+    //// The base table.
+    //'base_table' => 'organism',
   ];
 
   public static $no_ui = FALSE;

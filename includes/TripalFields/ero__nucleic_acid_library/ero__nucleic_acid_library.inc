@@ -46,13 +46,11 @@ class ero__nucleic_acid_library extends ChadoField {
     // Set to TRUE if the site admin is not allowed to change the term
     // type, otherwise the admin can change the term mapped to a field.
     'term_fixed' => FALSE,
-    'chado_table' => 'library',
-    // The column of the table in Chado where the value of the field comes from.
-    'chado_column' => 'library_id',
-    /**
- * The base table.
- */
-    'base_table' => 'library',
+    //'chado_table' => 'library',
+    //// The column of the table in Chado where the value of the field comes from.
+    //'chado_column' => 'library_id',
+    //// The base table.
+    //'base_table' => 'library',
   ];
 
   public static $no_ui = FALSE;

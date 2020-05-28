@@ -85,11 +85,11 @@ class local__transcriptome_viewer extends ChadoField {
     // attached asynchronously.
     'auto_attach' => FALSE,
     // The table in Chado that the instance maps to.
-    'chado_table' => 'organism',
-    // The column of the table in Chado where the value of the field comes from.
-    'chado_column' => 'organism_id',
-    // The base table.
-    'base_table' => 'organism',
+    //'chado_table' => 'organism',
+    //// The column of the table in Chado where the value of the field comes from.
+    //'chado_column' => 'organism_id',
+    //// The base table.
+    //'base_table' => 'organism',
   ];
 
   // A boolean specifying that users should not be allowed to create
