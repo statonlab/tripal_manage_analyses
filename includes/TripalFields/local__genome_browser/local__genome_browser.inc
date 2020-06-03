@@ -129,7 +129,7 @@ class local__genome_browser extends ChadoField {
 
     $genome_term = tripal_load_term_entity([
       'vocabulary' => 'operation',
-      'accession' => '0314',
+      'accession' => '0525',
     ]);
     $genome_bundle = tripal_load_bundle_entity(['term_id' => $genome_term->id]);
 
