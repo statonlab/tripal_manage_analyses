@@ -105,61 +105,51 @@ class fbcv__gene_expression_profile extends ChadoField {
     **/
 
   public function load($entity) {
+    parent::load($entity);
+    $field = get_class($this);
 
-    // ChadoFields automatically load the chado column specified in the
-    // default settings above. If that is all you need then you don't even
-    // need to implement this function. However, if you need to add any
-    // additional data to be used in the display, you should add it here.
-    $field = 'local__feature_analysis';
+    $sql = "SELECT  A.analysis_id, A.name, A.program, A.timeexecuted
+      FROM {analysis} A
+      JOIN {organism_analysis} AO ON A.analysis_id = AO.analysis_id
+      WHERE AO.organism_id = :organism_id";
 
-    // Get the analyses
-    $analyses = $this->getAnalyses($entity->chado_record) ?: [];
+    $results = chado_query($sql, [
+      ':organism_id' => $entity->chado_record->organism_id,
+    ]);
+    $entity->{$field}['und'][0]['value'] = '';
 
-    $entity->{$field}['und'] = $this->orderAnalyses($analyses);
-  }
-
-  /**
-   * Get analyses.
-   *
-   * @param object $feature
-   *    The feature in question.
-   *
-   * @return array
-   * @throws \Exception
-   */
-  public function getAnalyses($feature) {
-    $id = $feature->feature_id;
-
-    return chado_query('SELECT * FROM {analysisfeature}
-                        WHERE feature_id = :id', [
-      ':id' => $id,
-    ])->fetchAll();
-  }
-
-  /**
-   * Put the analyses in an order tripal likes.
-   *
-   * @param array $analyses
-   *
-   * @return array
-   * @throws \Exception
-   */
-  public function orderAnalyses(array $analyses) {
-    $ordered = [];
-
-    foreach ($analyses as $analysis) {
-      $entity_id = chado_get_record_entity_by_table('analysis', $analysis->analysis_id);
-      $ordered[] = [
-        'value' => [
-          'analysis' => $analysis,
-          'entity_id' => $entity_id,
-          'title' => db_query('SELECT title FROM {tripal_entity} WHERE id=:id', [':id' => $entity_id])->fetchField(),
-        ],
-      ];
+    if (!$results) {
+      return;
     }
 
-    return $ordered;
+    $analyses = [];
+    foreach ($results as $analysis) {
+      $analysis->entity_id = chado_get_record_entity_by_table('analysis', $analysis->analysis_id);
+      $analysis->title = db_query('SELECT title FROM {tripal_entity} WHERE id = :id', [
+        ':id' => $analysis->entity_id,
+      ])->fetchField();
+      $analyses[$analysis->analysis_id] = $analysis;
+    }
+
+    // Push any entries containing the word archived to the back of the array.
+    foreach ($analyses as $key => $analysis) {
+      if (stripos($analysis->name, 'archived') !== FALSE) {
+        // Store the analysis.
+        $value = $analysis;
+        // Remove the entry from the array.
+        unset($analyses[$key]);
+        // Add the stored analysis to the back of the array.
+        $analyses[] = $value;
+      }
+    }
+
+    $i = 0;
+    foreach ($analyses as $analysis){
+      $entity->{$field}['und'][$i]['value'] = $analysis;
+      $i++;
+    }
   }
+
 
 
     /**

@@ -34,18 +34,51 @@ class fbcv__gene_expression_profile_formatter extends ChadoFieldFormatter {
     **/
 
   public function view(&$element, $entity_type, $entity, $langcode, $items, $display) {
-    foreach ($items as $item) {
-      if (!$item['value']['entity_id']) {
-        continue;
+    // Get the settings.
+    $settings = $display['settings'];
+    $field = 'local__analysis_browser';
+
+    if (!($entity->{$field}['und'][0]['value'])) {
+
+      $output  = 'There are no analyses associated with this organism.';
+      $element[] = [
+        '#type' => 'markup',
+        '#markup' => $output,
+      ];
+      return;
+    }
+
+
+    $rows = [];
+
+    foreach ($items as $analysis) {
+
+      $info = $analysis['value'];
+
+      $date = new DateTime($info->timeexecuted);
+      $date_formatted = $date->format('M jS, Y');
+      if ($date_formatted === "Jan 1st, 1900") {
+        $date_formatted = "Unknown";
       }
 
-      $element[] = [
-        '#type' => 'item',
-        '#markup' => l($item['value']['title'], 'bio_data/' . $item['value']['entity_id']),
+
+      $rows[] =  [
+        l($info->name, "bio_data/{$info->entity_id}"),
+        $info->program,
+        $date_formatted,
       ];
     }
-    // Get the settings
-    $settings = $display['settings'];
+
+
+    $output = theme('table', [
+      'header' => ['Name', 'Program', 'Date Constructed'],
+      'rows' => $rows,
+    ]);
+
+    $element[] = [
+      '#type' => 'markup',
+      '#markup' => $output,
+    ];
   }
 
     /**
