@@ -34,51 +34,35 @@ class fbcv__gene_expression_profile_formatter extends ChadoFieldFormatter {
     **/
 
   public function view(&$element, $entity_type, $entity, $langcode, $items, $display) {
+
     // Get the settings.
     $settings = $display['settings'];
-    $field = 'local__analysis_browser';
 
-    if (!($entity->{$field}['und'][0]['value'])) {
+    $field = 'fbcv__gene_expression_profile';
 
-      $output  = 'There are no analyses associated with this organism.';
+    if (empty($entity->{$field}['und'][0]['value'])) {
+      return;
+    }
+    if (is_array($entity->{$field}['und'][0]['value'])) {
+      $rows = array_map(function ($analysis) {
+        $date = new DateTime($analysis->timeexecuted);
+        return [
+          l($analysis->name, "bio_data/{$analysis->entity_id}"),
+          $analysis->program,
+          $date->format('M jS, Y'),
+        ];
+      }, $entity->{$field}['und'][0]['value']);
+
+      $output = theme('table', [
+        'header' => ['Name', 'Program', 'Date Constructed'],
+        'rows' => $rows,
+      ]);
+
       $element[] = [
         '#type' => 'markup',
         '#markup' => $output,
       ];
-      return;
     }
-
-
-    $rows = [];
-
-    foreach ($items as $analysis) {
-
-      $info = $analysis['value'];
-
-      $date = new DateTime($info->timeexecuted);
-      $date_formatted = $date->format('M jS, Y');
-      if ($date_formatted === "Jan 1st, 1900") {
-        $date_formatted = "Unknown";
-      }
-
-
-      $rows[] =  [
-        l($info->name, "bio_data/{$info->entity_id}"),
-        $info->program,
-        $date_formatted,
-      ];
-    }
-
-
-    $output = theme('table', [
-      'header' => ['Name', 'Program', 'Date Constructed'],
-      'rows' => $rows,
-    ]);
-
-    $element[] = [
-      '#type' => 'markup',
-      '#markup' => $output,
-    ];
   }
 
     /**

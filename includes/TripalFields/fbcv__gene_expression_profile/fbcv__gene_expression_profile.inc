@@ -105,26 +105,42 @@ class fbcv__gene_expression_profile extends ChadoField {
     **/
 
   public function load($entity) {
+
+    // ChadoFields automatically load the chado column specified in the
+    // default settings above. If that is all you need then you don't even
+    // need to implement this function. However, if you need to add any
+    // additional data to be used in the display, you should add it here.
     parent::load($entity);
     $field = get_class($this);
+    $entity->{$field}['und'][0]['value'] = NULL;
 
-    $sql = "SELECT  A.analysis_id, A.name, A.program, A.timeexecuted
-      FROM {analysis} A
-      JOIN {organism_analysis} AO ON A.analysis_id = AO.analysis_id
-      WHERE AO.organism_id = :organism_id";
-
-    $results = chado_query($sql, [
-      ':organism_id' => $entity->chado_record->organism_id,
-    ]);
-    $entity->{$field}['und'][0]['value'] = '';
-
-    if (!$results) {
+    if ($entity->chado_table != 'organism') {
       return;
     }
 
+    $genome_term = tripal_load_term_entity([
+      'vocabulary' => 'operation',
+      'accession' => '0314',
+    ]);
+    $genome_bundle = tripal_load_bundle_entity(['term_id' => $genome_term->id]);
+
+    if (!$genome_bundle) {
+      return;
+    }
+    $genome_table = 'public.chado_' . $genome_bundle->name;
+
+    $sql = "SELECT  A.analysis_id, A.name, A.program, A.timeexecuted, GT.entity_id
+      FROM {chado.analysis} A
+      JOIN {chado.organism_analysis} AO ON A.analysis_id = AO.analysis_id
+      INNER JOIN {" . db_escape_table($genome_table) . "} GT ON A.analysis_id = GT.record_id
+      WHERE AO.organism_id = :organism_id";
+
+    $results = db_query($sql, [
+      ':organism_id' => $entity->chado_record->organism_id,
+    ]);
+
     $analyses = [];
     foreach ($results as $analysis) {
-      $analysis->entity_id = chado_get_record_entity_by_table('analysis', $analysis->analysis_id);
       $analysis->title = db_query('SELECT title FROM {tripal_entity} WHERE id = :id', [
         ':id' => $analysis->entity_id,
       ])->fetchField();
@@ -143,11 +159,7 @@ class fbcv__gene_expression_profile extends ChadoField {
       }
     }
 
-    $i = 0;
-    foreach ($analyses as $analysis){
-      $entity->{$field}['und'][$i]['value'] = $analysis;
-      $i++;
-    }
+    $entity->{$field}['und'][0]['value'] = $analyses;
   }
 
 
