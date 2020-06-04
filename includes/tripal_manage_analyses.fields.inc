@@ -25,7 +25,8 @@
  *   it doesn't already exist. To trigger create of fields when developing call
  *   tripal_refresh_bundle_fields() for the specific bundle.
  */
-function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
+function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle)
+{
   $fields = [];
 
   if (isset($bundle->data_table) and ($bundle->data_table == 'feature') and $bundle->term->name == 'gene') {
@@ -204,7 +205,28 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
         'type' => 'field_chado_storage',
       ],
     ];
+
+    tripal_insert_cvterm(array(
+      'id' => 'FBcv:0003088',
+      'name' => 'gene expression profile',
+      'cv_name' => 'FBcv',
+      'definition' => 'The gene expression profile of an organism.',
+    ));
+
+    // Then describe the field defined by that term.
+    $field_name = 'fbcv__gene_expression_profile';
+    $field_type = 'fbcv__gene_expression_profile';
+    $fields[$field_name] = array(
+      'field_name' => $field_name,
+      'type' => $field_type,
+      'cardinality' => 1,
+      'locked' => FALSE,
+      'storage' => array(
+        'type' => 'field_chado_storage',
+      ),
+    );
   }
+
 
   if (isset($bundle->data_table) AND ($bundle->data_table == 'feature')) {
     // First add my term.
@@ -229,6 +251,8 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
     ];
   }
 
+  #if (isset($bundle->data_table) AND ($bundle->data_table == 'organism')) {
+  #  // First add my term.
   return $fields;
 }
 
@@ -256,7 +280,8 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle) {
  *   defaults for any settings you use in your field. Each entry in this array
  *   will be used to create an instance of an already existing field.
  */
-function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
+function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle)
+{
   $instances = [];
 
   if (isset($bundle->data_table) and ($bundle->data_table == 'feature') and $bundle->term->name == 'gene') {
@@ -558,6 +583,37 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
         ],
       ],
     ];
+
+    $field_name = 'fbcv__gene_expression_profile';
+    $field_type = 'fbcv__gene_expression_profile';
+    $instances[$field_name] = array(
+      'field_name' => $field_name,
+      'entity_type' => $entity_type,
+      'bundle' => $bundle->name,
+      'label' => 'Expression Profile',
+      'description' => 'The gene expression profile of an organism.',
+      'required' => FALSE,
+      'settings' => array(
+        'term_vocabulary' => 'FBcv',
+        'term_name' => 'gene expression profile',
+        'term_accession' => '0003088',
+        'auto_attach' => FALSE,
+        'chado_table' => $bundle->data_table,
+        'chado_column' => 'organism_id',
+        'base_table' => $bundle->data_table,
+      ),
+      'widget' => array(
+        'type' => 'fbcv__gene_expression_profile_widget',
+        'settings' => array(),
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'fbcv__gene_expression_profile_formatter',
+          'settings' => array(),
+        ),
+      ),
+    );
   }
 
   if (isset($bundle->data_table) AND ($bundle->data_table == 'feature')) {
@@ -593,5 +649,7 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle) {
     ];
   }
 
+  #if (isset($bundle->data_table) AND ($bundle->data_table == 'organism')) {
+  #}
   return $instances;
 }
