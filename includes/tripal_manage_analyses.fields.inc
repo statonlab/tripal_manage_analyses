@@ -251,6 +251,28 @@ function tripal_manage_analyses_bundle_fields_info($entity_type, $bundle)
     ];
   }
 
+  if (isset($bundle->data_table) AND ($bundle->data_table == 'feature')) {
+    // First add my term.
+    tripal_insert_cvterm(array(
+      'id' => 'local:phylotree_link',
+      'name' => 'phylotree_link',
+      'cv_name' => 'local',
+      'definition' => 'Link from feature page to associated phylotree.',
+    ));
+
+    // Then describe the field defined by that term.
+    $field_name = 'local__phylotree_link';
+    $field_type = 'local__phylotree_link';
+    $fields[$field_name] = array(
+      'field_name' => $field_name,
+      'type' => $field_type,
+      'cardinality' => 1,
+      'locked' => FALSE,
+      'storage' => array(
+        'type' => 'field_chado_storage',
+      ),
+    );
+  }
   #if (isset($bundle->data_table) AND ($bundle->data_table == 'organism')) {
   #  // First add my term.
   return $fields;
@@ -647,6 +669,40 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle)
         ],
       ],
     ];
+  }
+
+  if (isset($bundle->data_table) AND ($bundle->data_table == 'feature')) {
+    $field_name = 'local__phylotree_link';
+    $field_type = 'local__phylotree_link';
+    $instances[$field_name] =  array(
+      'field_name' => $field_name,
+      'entity_type' => $entity_type,
+      'bundle' => $bundle->name,
+      'label' => 'Phylotree Link',
+      'description' => 'Link from feature page to associated phylotree.',
+      'required' => FALSE,
+      'settings' => array(
+        'term_vocabulary' => 'local',
+        'term_name' => 'phylotree_link',
+        'term_accession' => 'phylotree_link',
+        'auto_attach' => FALSE,
+        'chado_table' => $bundle->data_table,
+        'chado_column' => 'organism_id',
+        'base_table' => $bundle->data_table,
+      ),
+      'widget' => array(
+        'type' => 'local__phylotree_link_widget',
+        'settings' => array(),
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'local__phylotree_link_formatter',
+          'settings' => array(),
+        ),
+      ),
+    );
+
   }
 
   #if (isset($bundle->data_table) AND ($bundle->data_table == 'organism')) {
