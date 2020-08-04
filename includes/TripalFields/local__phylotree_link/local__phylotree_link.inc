@@ -109,7 +109,7 @@ class local__phylotree_link extends ChadoField {
     // default settings above. If that is all you need then you don't even
     // need to implement this function. However, if you need to add any
     // additional data to be used in the display, you should add it here.
-    $entity->local__expression_features['und'][0] = ['value' => [true]];
+    $entity->local__phylotree_link['und'][0] = ['value' => [true]];
   }
 
 
