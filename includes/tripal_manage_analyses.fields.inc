@@ -687,8 +687,8 @@ function tripal_manage_analyses_bundle_instances_info($entity_type, $bundle)
         'term_accession' => 'phylotree_link',
         'auto_attach' => FALSE,
         'chado_table' => $bundle->data_table,
-        'chado_column' => 'organism_id',
-        'base_table' => $bundle->data_table,
+        'chado_column' => null,
+        'base_table' => null,
       ),
       'widget' => array(
         'type' => 'local__phylotree_link_widget',
