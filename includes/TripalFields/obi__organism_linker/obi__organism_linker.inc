@@ -101,7 +101,7 @@ class obi__organism_linker extends ChadoField {
 
     $record_id = $entity_record->$key;
     $sql = db_select('chado . organism', 'CO');
-    $sql->fields('CO', ['organism_id', 'common_name', 'abbreviation']);
+    $sql->fields('CO', ['organism_id', 'common_name', 'abbreviation', 'genus', 'species']);
     $sql->join($linker, 'CL', 'CL.organism_id = CO.organism_id');
     $sql->fields('CL', [$linker_key]);
     $sql->condition('CL.' . $field_column, $record_id);
@@ -113,6 +113,8 @@ class obi__organism_linker extends ChadoField {
     foreach ($results as $result) {
       $organism_abbreviation = $result->abbreviation;
       $organism_common_name = $result->common_name;
+      $organism_genus = $result->genus;
+      $organism_species = $result->species;
       $organism_record_id = $result->organism_id;
       $linker_record_id = $result->$linker_key;
 
@@ -124,6 +126,8 @@ class obi__organism_linker extends ChadoField {
             'entity_id' => $organism_entity_id,
             'common_name' => $organism_common_name,
             'abbreviation' => $organism_abbreviation,
+            'genus' => $organism_genus,
+            'species' => $organism_species,
             'organism_id' => $organism_record_id,
             'linker_record_id' => $linker_record_id,
           ],
