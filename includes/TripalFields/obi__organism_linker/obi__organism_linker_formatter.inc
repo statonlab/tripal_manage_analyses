@@ -92,7 +92,20 @@ class obi__organism_linker_formatter extends ChadoFieldFormatter {
       if (!isset($organism["entity_id"])) {
         continue;
       }
-      $output = l("{$organism["abbreviation"]} ({$organism["common_name"]})", "bio_data/{$organism["entity_id"]}");
+      $displayname = $organism["abbreviation"];
+      if (!$displayname) {
+        if (function_exists('chado_get_organism_scientific_name')) {
+          $displayname = chado_get_organism_scientific_name(chado_get_organism(['organism_id' => $organism["organism_id"]], []));
+        }
+        else {
+          $displayname = $organism["genus"] . " " . $organism[$species];
+        }
+      }
+      if ($organism["common_name"]) {
+        $displayname .= " (${organism["common_name"]})";
+      }
+      $output = l($displayname, "bio_data/{$organism["entity_id"]}");
+      //$output = l("{$organism["abbreviation"]} ({$organism["common_name"]})", "bio_data/{$organism["entity_id"]}");
       $element[] = [
         '#type' => 'markup',
         '#markup' => $output,
