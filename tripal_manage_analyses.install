@@ -13,15 +13,22 @@ function tripal_manage_analyses_install() {
   // Insert terms.
   tripal_insert_cvterm([
     'name' => 'Transcriptome Assembly',
-    'def' => '',
+    'def' => 'Infer a transcriptome sequence by analysis of short sequence reads.',
     'accession' => '3258',
     'cv_name' => 'operation',
     'db_name' => 'EDAM',
   ]);
   tripal_insert_cvterm([
     'name' => 'Genome Assembly',
-    'def' => '',
+    'def' => 'The process of assembling many short DNA sequences together such thay they represent the original chromosomes from which the DNA originated.',
     'accession' => '0525',
+    'cv_name' => 'operation',
+    'db_name' => 'EDAM',
+  ]);
+  tripal_insert_cvterm([
+    'name' => 'Gene expression profiling',
+    'def' => 'The measurement of the activity (expression) of multiple genes in a cell, tissue, sample etc., in order to get an impression of biological function. Gene expression profiling generates some sort of gene expression profile, for example from microarray data.',
+    'accession' => '0314',
     'cv_name' => 'operation',
     'db_name' => 'EDAM',
   ]);
