@@ -88,8 +88,8 @@ class obi__organism_linker extends ChadoField {
     }
     $pkey = $schema['primary key'][0];
 
-    $linker = 'chado.' . $base_table . '_organism';
-    $linker_key = $base_table . '_organism_id';
+    $linker = 'chado.' . $field_table;
+    $linker_key = $field_table . '_id';
     $fkey_lcolumn = key($schema['foreign keys'][$base_table]['columns']);
     $fkey_rcolumn = $schema['foreign keys'][$base_table]['columns'][$fkey_lcolumn];
 
