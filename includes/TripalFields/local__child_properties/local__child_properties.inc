@@ -133,7 +133,7 @@ class local__child_properties extends ChadoField {
 
     //  We should load in the data here.
     //  As a stopgap, we simply use the data loaded by the parent field in the formatter instead.
-    $entity->local__child_properties['und'][0]['value'] = [];
+    $entity->local__child_properties['und'][0]['value'] = [TRUE];
 
   }
 
