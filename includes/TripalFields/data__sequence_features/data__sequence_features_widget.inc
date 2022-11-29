@@ -24,7 +24,7 @@ class data__sequence_features_widget extends ChadoFieldWidget {
    * @see ChadoFieldWidget::form()
    **/
   public function form(&$widget, &$form, &$form_state, $langcode, $items, $delta, $element) {
-    parent::form($widget, $form, $form_state, $langcode, $items, $delta, $element);
+    // widget is not functional parent::form($widget, $form, $form_state, $langcode, $items, $delta, $element);
   }
 
   /**

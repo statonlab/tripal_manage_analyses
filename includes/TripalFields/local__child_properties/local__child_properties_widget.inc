@@ -22,7 +22,6 @@ class local__child_properties_widget extends ChadoFieldWidget {
   **/
 
   public function form(&$widget, &$form, &$form_state, $langcode, $items, $delta, $element) {
-    parent::form($widget, $form, $form_state, $langcode, $items, $delta, $element);
   }
 
   /**
