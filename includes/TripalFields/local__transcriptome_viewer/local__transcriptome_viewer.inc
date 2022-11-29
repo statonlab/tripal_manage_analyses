@@ -115,7 +115,7 @@ class local__transcriptome_viewer extends ChadoField {
    */
   public function load($entity) {
     $field = get_class($this);
-    $entity->{$field}['und'][0]['value'] = NULL;
+    $entity->{$field}['und'][0]['value'] = [];
     if ($entity->chado_table != 'organism') {
       return;
     }

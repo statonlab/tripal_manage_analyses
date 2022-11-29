@@ -84,7 +84,7 @@ class ero__nucleic_acid_library extends ChadoField {
 
       // Go through the results and lookup the entity id of each.
       $output = [];
-      $entity->{$field_name}['und'][0]['value'] = NULL;
+      $entity->{$field_name}['und'][0]['value'] = [];
       $i = 0;
 
       foreach ($results as $result) {
