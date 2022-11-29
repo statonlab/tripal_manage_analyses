@@ -56,7 +56,7 @@ class local__child_annotations extends ChadoField {
     parent::load($entity);
     //  We should load in the data here.
     //  As a stopgap, we simply use the data loaded by the parent field in the formatter instead.
-    $entity->local__child_annotations['und'][0]['value'] = TRUE;
+    $entity->local__child_annotations['und'][0]['value'] = [];
 
   }
 

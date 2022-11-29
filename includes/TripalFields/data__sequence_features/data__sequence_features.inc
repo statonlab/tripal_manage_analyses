@@ -135,6 +135,10 @@ class data__sequence_features extends ChadoField {
 
     $field = get_class($this);
 
+    // Set some defaults for the empty record.
+    $field_name = $this->field['field_name'];
+    $entity->{$field_name}['und'][0]['value'] = [];
+
     $parent = $entity->chado_record ? $entity->chado_record->feature_id : '';
 
     $children = $this->findChildFeatures($parent);
