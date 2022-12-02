@@ -80,7 +80,7 @@ class local__analysis_browser extends ChadoField {
     $results = chado_query($sql, [
       ':organism_id' => $entity->chado_record->organism_id,
     ]);
-    $entity->{$field}['und'][0]['value'] = '';
+    $entity->{$field}['und'][0]['value'] = [];
 
     if (!$results) {
       return;

@@ -66,6 +66,10 @@ class ero__nucleic_acid_library extends ChadoField {
    */
   public function load($entity) {
 
+    // Set some defaults for the empty record.
+    $field_name = $this->field['field_name'];
+    $entity->{$field_name}['und'][0]['value'] = [];
+
     if ($entity->chado_table == 'organism') {
       // If its an organism, we dont have an organism_library linker table but an organism_id column in library.
       $field_name = $this->field['field_name'];
@@ -84,7 +88,7 @@ class ero__nucleic_acid_library extends ChadoField {
 
       // Go through the results and lookup the entity id of each.
       $output = [];
-      $entity->{$field_name}['und'][0]['value'] = NULL;
+      $entity->{$field_name}['und'][0]['value'] = [];
       $i = 0;
 
       foreach ($results as $result) {

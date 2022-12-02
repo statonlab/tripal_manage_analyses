@@ -22,7 +22,7 @@ class local__feature_analysis_widget extends ChadoFieldWidget {
   **/
 
   public function form(&$widget, &$form, &$form_state, $langcode, $items, $delta, $element) {
-    parent::form($widget, $form, $form_state, $langcode, $items, $delta, $element);
+    // Widget is not functional parent::form($widget, $form, $form_state, $langcode, $items, $delta, $element);
   }
 
   /**

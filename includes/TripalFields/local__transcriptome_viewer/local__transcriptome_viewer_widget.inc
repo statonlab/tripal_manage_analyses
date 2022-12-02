@@ -76,7 +76,7 @@ class local__transcriptome_viewer_widget extends ChadoFieldWidget {
    *    $delta above
    */
   public function form(&$widget, &$form, &$form_state, $langcode, $items, $delta, $element) {
-    parent::form($widget, $form, $form_state, $langcode, $items, $delta, $element);
+    // Widget is not functional parent::form($widget, $form, $form_state, $langcode, $items, $delta, $element);
   }
 
   /**
